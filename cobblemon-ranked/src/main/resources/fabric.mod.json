@@ -1,0 +1,23 @@
+{
+    "schemaVersion": 1,
+    "id": "cobblemon-ranked",
+    "version": "${version}",
+    "name": "Cobblemon Ranked",
+    "description": "ELO-rated ranked PvP battles for Cobblemon",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            {
+                "adapter": "kotlin",
+                "value": "com.cobblemonranked.CobblemonRanked"
+            }
+        ]
+    },
+    "depends": {
+        "fabricloader": ">=0.16.5",
+        "minecraft": "~1.21.1",
+        "fabric-api": "*",
+        "fabric-language-kotlin": ">=1.12.3+kotlin.2.0.21",
+        "cobblemon": ">=1.7.1"
+    }
+}
