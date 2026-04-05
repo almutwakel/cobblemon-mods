@@ -123,10 +123,9 @@ object RankedBattleManager {
                 "[Ranked] Battle started: ${player1.name.string} vs ${player2.name.string}!")
         }
 
-        result.ifErrored { errors ->
-            val errorMsg = errors.joinToString()
-            player1.sendSystemMessage(Component.literal("[Ranked] Failed to start battle: $errorMsg"))
-            player2.sendSystemMessage(Component.literal("[Ranked] Failed to start battle: $errorMsg"))
+        result.ifErrored {
+            player1.sendSystemMessage(Component.literal("[Ranked] Failed to start battle."))
+            player2.sendSystemMessage(Component.literal("[Ranked] Failed to start battle."))
         }
 
         cleanup(player1.uuid, player2.uuid)

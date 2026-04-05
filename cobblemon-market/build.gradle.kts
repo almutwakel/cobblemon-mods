@@ -1,49 +1,77 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
-    id("fabric-loom") version "1.7-SNAPSHOT"
-    kotlin("jvm") version "2.0.21"
+    id("java")
+    id("dev.architectury.loom") version "1.11-SNAPSHOT"
+    id("architectury-plugin") version "3.4-SNAPSHOT"
+    kotlin("jvm") version "2.2.20"
 }
 
 version = project.property("mod_version") as String
 group = project.property("maven_group") as String
 
+architectury {
+    platformSetupLoomIde()
+    fabric()
+}
+
+loom {
+    silentMojangMappingsLicense()
+}
+
 repositories {
-    maven("https://api.modrinth.com/maven")
     maven("https://maven.nucleoid.xyz")
+    maven("https://artefacts.cobblemon.com/releases")
     mavenCentral()
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
+    minecraft("net.minecraft:minecraft:${project.property("minecraft_version")}")
     mappings(loom.officialMojangMappings())
     modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
-    modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.12.3+kotlin.2.0.21")
 
-    modImplementation("maven.modrinth:cobblemon:1.7.3")
-    modImplementation("maven.modrinth:cobblemon-economy:0.0.17")
+    modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+    modImplementation(fabricApi.module("fabric-command-api-v2", project.property("fabric_version") as String))
+    modImplementation(fabricApi.module("fabric-lifecycle-events-v1", project.property("fabric_version") as String))
+    modImplementation(fabricApi.module("fabric-events-interaction-v0", project.property("fabric_version") as String))
 
-    modImplementation(include("eu.pb4:sgui:2.0.0+26.1")!!)
+    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.6+kotlin.2.2.20")
+
+    modImplementation("com.cobblemon:mod:1.7.3+1.21.1") { isTransitive = false }
+    modImplementation("com.cobblemon:fabric:1.7.3+1.21.1")
+    // Cobblemon Economy is a soft/runtime dependency — accessed via reflection
+
+    modImplementation(include("eu.pb4:sgui:1.6.1+1.21.1")!!)
 
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
+tasks {
+    test {
+        useJUnitPlatform()
+    }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
+    processResources {
+        inputs.property("version", project.version)
+        filesMatching("fabric.mod.json") {
+            expand(project.properties)
+        }
+    }
 
-kotlin {
-    jvmToolchain(21)
-}
+    java {
+        withSourcesJar()
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
 
-tasks.processResources {
-    inputs.property("version", project.version)
-    filesMatching("fabric.mod.json") {
-        expand("version" to project.version)
+    compileJava {
+        options.release = 21
+    }
+
+    compileKotlin {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
     }
 }

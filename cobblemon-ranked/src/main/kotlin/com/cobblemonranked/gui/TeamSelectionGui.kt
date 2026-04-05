@@ -75,7 +75,7 @@ class TeamSelectionGui(
 
         // Row 4 (slots 27-35): Party Pokemon
         for (i in 0 until 6) {
-            val pokemon = party[i]
+            val pokemon = party.get(i)
             if (pokemon != null) {
                 gui.setSlot(27 + i, pokemonElement(pokemon, pokemon in selected) {
                     toggleSelection(pokemon)
@@ -150,7 +150,7 @@ class TeamSelectionGui(
         pokemon: Pokemon,
         isSelected: Boolean,
         onClick: Runnable
-    ): net.minecraft.world.item.ItemStack {
+    ): eu.pb4.sgui.api.elements.GuiElement {
         val item = if (isSelected) Items.LIME_STAINED_GLASS_PANE else Items.WHITE_STAINED_GLASS_PANE
         val legendaryTag = if (pokemon.isLegendary()) " [LEGENDARY]" else ""
         return GuiElementBuilder(item)
@@ -166,7 +166,7 @@ class TeamSelectionGui(
             .build()
     }
 
-    private fun filler(item: net.minecraft.world.item.Item): net.minecraft.world.item.ItemStack {
+    private fun filler(item: net.minecraft.world.item.Item): eu.pb4.sgui.api.elements.GuiElement {
         return GuiElementBuilder(item)
             .setName(Component.literal(" "))
             .build()

@@ -292,7 +292,7 @@ class TransactionGui(
         }
     }
 
-    private fun filler(): ItemStack {
+    private fun filler(): eu.pb4.sgui.api.elements.GuiElement {
         return GuiElementBuilder(Items.BLACK_STAINED_GLASS_PANE)
             .setName(Component.literal(" "))
             .build()
