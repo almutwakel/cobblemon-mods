@@ -1,0 +1,30 @@
+{
+    "schemaVersion": 1,
+    "id": "cobblemon-showcase",
+    "version": "${version}",
+    "name": "Cobblemon Showcase",
+    "description": "Player profile showcase with badges, teams, and stats",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            {
+                "adapter": "kotlin",
+                "value": "com.cobblemonshowcase.CobblemonShowcase"
+            }
+        ]
+    },
+    "mixins": [
+        "cobblemon-showcase.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=0.16.5",
+        "minecraft": "~1.21.1",
+        "fabric-api": "*",
+        "fabric-language-kotlin": ">=1.12.3+kotlin.2.0.21"
+    },
+    "suggests": {
+        "cobblemon-ranked": "*",
+        "cobblemon-market": "*",
+        "cobblemon-economy": "*"
+    }
+}
