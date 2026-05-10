@@ -9,11 +9,19 @@ import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
-data class ArenaCoords(
+/**
+ * A single teleport point for a ranked-match arena.
+ *
+ * `world` is a namespaced dimension id (`minecraft:overworld`, `minecraft:the_nether`, etc.).
+ * `yaw`/`pitch` set the player's facing on arrival — typically each player faces the other.
+ */
+data class ArenaPos(
     val x: Double = 0.0,
     val y: Double = 64.0,
     val z: Double = 0.0,
-    val world: String = "minecraft:overworld"
+    val world: String = "minecraft:overworld",
+    val yaw: Float = 0.0f,
+    val pitch: Float = 0.0f
 )
 
 data class RankedConfig(
@@ -25,8 +33,15 @@ data class RankedConfig(
     val forcesPerDayPerPair: Int = 1,
     val decayEnabled: Boolean = true,
     val leaderboardSize: Int = 10,
-    val arenaCoords: ArenaCoords? = null
+    /**
+     * Optional arena positions. When **both** are non-null, players are teleported there
+     * at battle start and back to their original locations on victory/flee/cancel.
+     * Leave either null to disable arena teleport (battles run wherever players are).
+     */
+    val arenaPos1: ArenaPos? = null,
+    val arenaPos2: ArenaPos? = null
 ) {
+    fun isArenaConfigured(): Boolean = arenaPos1 != null && arenaPos2 != null
     companion object {
         private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
 

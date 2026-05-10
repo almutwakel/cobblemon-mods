@@ -6,7 +6,6 @@ import com.cobblemonmarket.config.ItemEntry
 import com.cobblemonmarket.config.MarketConfig
 import com.cobblemonmarket.data.MarketStore
 import com.cobblemonmarket.data.PlayerSpendStore
-import com.cobblemonmarket.gui.MenuRegistry
 import com.cobblemonmarket.pricing.PricingEngine
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.ModContainer
@@ -31,8 +30,6 @@ class CobblemonMarket(modBus: IEventBus, container: ModContainer) {
         marketStore.load()
         playerSpendStore = PlayerSpendStore(configDir)
         playerSpendStore.load()
-
-        MenuRegistry.MENUS.register(modBus)
 
         NeoForge.EVENT_BUS.addListener(::onRegisterCommands)
         NeoForge.EVENT_BUS.addListener(::onServerTickPost)

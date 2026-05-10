@@ -6,7 +6,6 @@ import com.cobblemonmarket.config.MarketConfig
 import com.cobblemonmarket.economy.EconomyBridge
 import com.cobblemonmarket.economy.TradeOps
 import com.cobblemonmarket.economy.TradeResult
-import com.cobblemonmarket.gui.ShopMenuProvider
 import com.cobblemonmarket.pricing.PricingEngine
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.DoubleArgumentType
@@ -50,7 +49,12 @@ object MarketCommands {
                 .then(Commands.literal("history")
                     .then(Commands.argument("item", StringArgumentType.greedyString())
                         .suggests { _, builder ->
-                            CobblemonMarket.items.keys.forEach { builder.suggest(it) }
+                            // Suggest short names so users don't have to type colons (which
+                            // Brigadier StringArgumentType.string() rejects unquoted).
+                            // resolveItemId() handles the short→full mapping bidirectionally.
+                            CobblemonMarket.items.keys.forEach {
+                                builder.suggest(it.substringAfterLast(':'))
+                            }
                             builder.buildFuture()
                         }
                         .executes { ctx ->
@@ -59,16 +63,15 @@ object MarketCommands {
                         }
                     )
                 )
-                .then(Commands.literal("open")
-                    .executes { ctx ->
-                        ShopMenuProvider.open(ctx.source.playerOrException)
-                        1
-                    }
-                )
                 .then(Commands.literal("buy")
                     .then(Commands.argument("item", StringArgumentType.string())
                         .suggests { _, builder ->
-                            CobblemonMarket.items.keys.forEach { builder.suggest(it) }
+                            // Suggest short names so users don't have to type colons (which
+                            // Brigadier StringArgumentType.string() rejects unquoted).
+                            // resolveItemId() handles the short→full mapping bidirectionally.
+                            CobblemonMarket.items.keys.forEach {
+                                builder.suggest(it.substringAfterLast(':'))
+                            }
                             builder.buildFuture()
                         }
                         .then(Commands.argument("qty", IntegerArgumentType.integer(1, 1024))
@@ -88,7 +91,12 @@ object MarketCommands {
                 .then(Commands.literal("sell")
                     .then(Commands.argument("item", StringArgumentType.string())
                         .suggests { _, builder ->
-                            CobblemonMarket.items.keys.forEach { builder.suggest(it) }
+                            // Suggest short names so users don't have to type colons (which
+                            // Brigadier StringArgumentType.string() rejects unquoted).
+                            // resolveItemId() handles the short→full mapping bidirectionally.
+                            CobblemonMarket.items.keys.forEach {
+                                builder.suggest(it.substringAfterLast(':'))
+                            }
                             builder.buildFuture()
                         }
                         .then(Commands.argument("qty", IntegerArgumentType.integer(1, 1024))
@@ -202,15 +210,27 @@ object MarketCommands {
         }
     }
 
+    /**
+     * Resolves a user-typed item identifier to its full namespaced form.
+     *
+     * Accepts (case-insensitive, underscores/hyphens optional):
+     *   "cobblemon:rare_candy", "rare_candy", "rarecandy", "RareCandy", "RARE_CANDY"  →  "cobblemon:rare_candy"
+     *
+     * Brigadier's StringArgumentType.string() rejects unquoted colons, so the typical
+     * command path is short-form (no colon) anyway — the namespaced form still works
+     * if quoted: /market buy "cobblemon:rare_candy" 5.
+     */
     private fun resolveItemId(input: String): String? {
-        if (input in CobblemonMarket.items) return input
-        // Try adding common namespaces
-        for (ns in listOf("cobblemon", "minecraft")) {
-            val full = "$ns:$input"
-            if (full in CobblemonMarket.items) return full
+        val items = CobblemonMarket.items.keys
+        if (input in items) return input
+        val normalized = normalizeItemKey(input)
+        return items.firstOrNull { id ->
+            normalizeItemKey(id) == normalized || normalizeItemKey(id.substringAfterLast(':')) == normalized
         }
-        return null
     }
+
+    private fun normalizeItemKey(s: String): String =
+        s.lowercase().replace("_", "").replace("-", "").replace(" ", "")
 
     private fun showHistory(source: CommandSourceStack, itemId: String) {
         val resolved = resolveItemId(itemId)

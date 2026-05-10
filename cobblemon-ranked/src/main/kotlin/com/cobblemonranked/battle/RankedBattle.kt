@@ -9,20 +9,40 @@ import com.cobblemon.mod.common.battles.BattleFormat
 import com.cobblemon.mod.common.battles.actor.PlayerBattleActor
 import com.cobblemon.mod.common.pokemon.Pokemon
 import com.cobblemonranked.CobblemonRanked
+import com.cobblemonranked.config.ArenaPos
 import com.cobblemonranked.decay.DecayManager
 import com.cobblemonranked.elo.EloCalculator
 import com.cobblemonranked.gui.TeamSelectionGui
+import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.world.level.Level
 import java.time.LocalDate
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
+/**
+ * Snapshot of a player's location captured before arena teleport, so we can put them back.
+ */
+data class OriginalLocation(
+    val worldId: String,
+    val x: Double,
+    val y: Double,
+    val z: Double,
+    val yaw: Float,
+    val pitch: Float,
+)
+
 data class ActiveRankedMatch(
     val player1Uuid: UUID,
     val player2Uuid: UUID,
-    val battleId: UUID? = null
+    val battleId: UUID? = null,
+    /** Original locations keyed by player UUID; empty when arena teleport is disabled. */
+    val originalLocations: Map<UUID, OriginalLocation> = emptyMap(),
 )
 
 object RankedBattleManager {
@@ -104,6 +124,19 @@ object RankedBattleManager {
         CobblemonRanked.teamStore.saveTeam(player1.uuid, team1)
         CobblemonRanked.teamStore.saveTeam(player2.uuid, team2)
 
+        // Capture original locations and teleport to arena if configured.
+        val originals: Map<UUID, OriginalLocation> = if (config.isArenaConfigured()) {
+            val map = mapOf(
+                player1.uuid to captureLocation(player1),
+                player2.uuid to captureLocation(player2),
+            )
+            teleport(player1, config.arenaPos1!!)
+            teleport(player2, config.arenaPos2!!)
+            map
+        } else {
+            emptyMap()
+        }
+
         // Build temporary party stores with selected teams
         val tempParty1 = buildTempParty(player1.uuid, team1)
         val tempParty2 = buildTempParty(player2.uuid, team2)
@@ -121,7 +154,7 @@ object RankedBattleManager {
         )
 
         result.ifSuccessful { battle ->
-            val match = ActiveRankedMatch(player1.uuid, player2.uuid, battle.battleId)
+            val match = ActiveRankedMatch(player1.uuid, player2.uuid, battle.battleId, originals)
             rankedBattles[battle.battleId] = match
             broadcast(player1.server,
                 "[Ranked] Battle started: ${player1.name.string} vs ${player2.name.string}!")
@@ -130,9 +163,57 @@ object RankedBattleManager {
         result.ifErrored {
             player1.sendSystemMessage(Component.literal("[Ranked] Failed to start battle."))
             player2.sendSystemMessage(Component.literal("[Ranked] Failed to start battle."))
+            // Battle never started — teleport back immediately if we already moved them.
+            originals[player1.uuid]?.let { restore(player1, it) }
+            originals[player2.uuid]?.let { restore(player2, it) }
         }
 
         cleanup(player1.uuid, player2.uuid)
+    }
+
+    private fun captureLocation(player: ServerPlayer): OriginalLocation {
+        val level = player.serverLevel()
+        return OriginalLocation(
+            worldId = level.dimension().location().toString(),
+            x = player.x, y = player.y, z = player.z,
+            yaw = player.yRot, pitch = player.xRot,
+        )
+    }
+
+    private fun teleport(player: ServerPlayer, pos: ArenaPos) {
+        val level = resolveLevel(player.server, pos.world) ?: run {
+            CobblemonRanked.logger.warn("Unknown arena dimension '{}' — skipping teleport for {}",
+                pos.world, player.name.string)
+            return
+        }
+        player.teleportTo(level, pos.x, pos.y, pos.z, pos.yaw, pos.pitch)
+    }
+
+    private fun restore(player: ServerPlayer, loc: OriginalLocation) {
+        val level = resolveLevel(player.server, loc.worldId) ?: run {
+            CobblemonRanked.logger.warn("Cannot restore {} — original dimension '{}' not loaded",
+                player.name.string, loc.worldId)
+            return
+        }
+        player.teleportTo(level, loc.x, loc.y, loc.z, loc.yaw, loc.pitch)
+    }
+
+    private fun resolveLevel(server: MinecraftServer, worldId: String): ServerLevel? {
+        val rl = ResourceLocation.tryParse(worldId) ?: return null
+        return server.getLevel(ResourceKey.create(Registries.DIMENSION, rl))
+    }
+
+    /**
+     * Teleports the two players in [match] back to their captured starting locations.
+     * No-op when the match has no captured locations (arena was disabled at start).
+     * Players who logged out are skipped — they'll wake up at the arena, a known limitation.
+     */
+    private fun teleportBack(server: MinecraftServer, match: ActiveRankedMatch) {
+        if (match.originalLocations.isEmpty()) return
+        for ((uuid, loc) in match.originalLocations) {
+            val player = server.playerList.getPlayer(uuid) ?: continue
+            restore(player, loc)
+        }
     }
 
     private fun buildTempParty(ownerUuid: UUID, team: List<Pokemon>): PlayerPartyStore {
@@ -156,6 +237,7 @@ object RankedBattleManager {
                 val loserPlayer = losers.first().entity
                 if (winnerPlayer != null && loserPlayer != null) {
                     resolveMatch(winnerPlayer, loserPlayer)
+                    teleportBack(winnerPlayer.server, match)
                 }
             }
         }
@@ -184,6 +266,7 @@ object RankedBattleManager {
                     }
                 }
             }
+            teleportBack(server, match)
         }
     }
 

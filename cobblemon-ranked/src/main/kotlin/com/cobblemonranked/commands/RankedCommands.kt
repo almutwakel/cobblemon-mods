@@ -2,6 +2,7 @@ package com.cobblemonranked.commands
 
 import com.cobblemonranked.CobblemonRanked
 import com.cobblemonranked.battle.RankedBattleManager
+import com.cobblemonranked.config.RankedConfig
 import com.cobblemonranked.decay.DecayManager
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.IntegerArgumentType
@@ -10,6 +11,7 @@ import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
+import net.neoforged.fml.loading.FMLPaths
 
 object RankedCommands {
 
@@ -88,6 +90,14 @@ object RankedCommands {
                                 }
                             )
                         )
+                    )
+                    .then(Commands.literal("reload")
+                        .executes { ctx ->
+                            CobblemonRanked.config = RankedConfig.load(FMLPaths.CONFIGDIR.get())
+                            val arena = if (CobblemonRanked.config.isArenaConfigured()) "configured" else "disabled"
+                            ctx.source.sendSystemMessage(Component.literal("[Ranked] Config reloaded. Arena: $arena."))
+                            1
+                        }
                     )
                 )
         )
