@@ -105,6 +105,27 @@ class PriceHistoryTest {
     }
 
     @Test
+    fun `direction flip splits same-player same-day ticks into separate candles`() {
+        // p1 buys, then p1 sells — should produce two candles so the chart shows the
+        // up-then-down motion instead of collapsing into one ambiguous candle.
+        val history = listOf(
+            tick(day0Noon + 1000, "p1", "buy", 100, 110, qty = 2),
+            tick(day0Noon + 2000, "p1", "buy", 110, 120, qty = 1),
+            tick(day0Noon + 3000, "p1", "sell", 120, 115, qty = 1),
+            tick(day0Noon + 4000, "p1", "sell", 115, 105, qty = 2),
+        )
+        val candles = PriceHistory.groupIntoCandles(history, UTC)
+        assertEquals(2, candles.size)
+        assertEquals("buy", history[0].type)
+        // First candle: the buy run — close > open (price rose)
+        assertTrue(candles[0].close > candles[0].open)
+        assertEquals(2, candles[0].tickCount)
+        // Second candle: the sell run — close < open (price fell)
+        assertTrue(candles[1].close < candles[1].open)
+        assertEquals(2, candles[1].tickCount)
+    }
+
+    @Test
     fun `legacy records without priceBefore or priceAfter fall back to pricePerUnit`() {
         val legacy = PriceTick(
             type = "buy", timestamp = day0Noon, pricePerUnit = 150, quantity = 3,
