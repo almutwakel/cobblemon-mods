@@ -6,3 +6,9 @@ build/
 *.iml
 run/
 out/
+test-server/
+cobblemon-server/
+*.mrpack
+*.zip
+.DS_Store
+
