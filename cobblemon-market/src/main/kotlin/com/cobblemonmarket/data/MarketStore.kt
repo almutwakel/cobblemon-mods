@@ -56,14 +56,28 @@ class MarketStore(private val configDir: Path) {
     /**
      * Records one batch-level price-history entry for the chart shown by `/market price`.
      * Bounded by [MarketConfig.priceHistorySize]; oldest entries are dropped when the cap is hit.
+     *
+     * `priceBefore`/`priceAfter` should be the per-unit one-trade price at the factor in
+     * effect immediately before and immediately after the batch — they drive the open/close
+     * of each candle in the candlestick chart. `playerUuid`/`playerName` identify the trader
+     * for the same-player same-day grouping logic.
      */
-    fun recordPriceTick(itemId: String, type: String, pricePerUnit: Int, quantity: Int) {
+    fun recordPriceTick(
+        itemId: String, type: String,
+        playerUuid: String, playerName: String,
+        pricePerUnit: Int, priceBefore: Int, priceAfter: Int,
+        quantity: Int,
+    ) {
         val state = getOrCreate(itemId)
         state.priceHistory.add(PriceTick(
             type = type,
             timestamp = System.currentTimeMillis(),
             pricePerUnit = pricePerUnit,
             quantity = quantity,
+            playerUuid = playerUuid,
+            playerName = playerName,
+            priceBefore = priceBefore,
+            priceAfter = priceAfter,
         ))
         val cap = CobblemonMarket.config.priceHistorySize
         while (state.priceHistory.size > cap) {

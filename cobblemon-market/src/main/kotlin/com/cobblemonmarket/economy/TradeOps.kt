@@ -48,15 +48,22 @@ object TradeOps {
             return TradeResult.EconomyFailed
         }
 
+        // Capture per-unit prices at start and end of the batch for the candle's open/close.
+        val priceBefore = PricingEngine.buyPrice(entry.baseSellPrice, state.priceFactor, cfg.spreadBase)
         repeat(qty) {
             state.priceFactor = PricingEngine.updateFactorOnBuy(state.priceFactor, cfg.buyGrowth, cfg.factorCeiling)
             CobblemonMarket.marketStore.addTransaction(itemId, "buy")
         }
+        val priceAfter = PricingEngine.buyPrice(entry.baseSellPrice, state.priceFactor, cfg.spreadBase)
         val item: Item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId))
         player.inventory.add(ItemStack(item, qty))
-        // Round-half-up batch average for the price-history chart.
         val avgPrice = (totalCost + qty / 2) / qty
-        CobblemonMarket.marketStore.recordPriceTick(itemId, "buy", avgPrice, qty)
+        CobblemonMarket.marketStore.recordPriceTick(
+            itemId = itemId, type = "buy",
+            playerUuid = player.uuid.toString(), playerName = player.name.string,
+            pricePerUnit = avgPrice, priceBefore = priceBefore, priceAfter = priceAfter,
+            quantity = qty,
+        )
         CobblemonMarket.marketStore.save()
 
         return TradeResult.Success(totalCost, state.priceFactor)
@@ -67,8 +74,8 @@ object TradeOps {
         val entry = CobblemonMarket.items[itemId] ?: return TradeResult.UnknownItem(itemId)
         val state = CobblemonMarket.marketStore.getOrCreate(itemId)
         val cfg = CobblemonMarket.config
-        val sells = state.transactions.count { it.type == "sell" }
-        val buys = state.transactions.count { it.type == "buy" }
+        val sellsBefore = state.transactions.count { it.type == "sell" }
+        val buysBefore = state.transactions.count { it.type == "buy" }
 
         val itemRef: Item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId))
         val have = countItems(player, itemRef)
@@ -76,18 +83,35 @@ object TradeOps {
 
         val result = PricingEngine.simulateBatchSell(
             entry.baseSellPrice, state.priceFactor, qty,
-            cfg.sellDecay, cfg.factorFloor, sells, buys, cfg.spreadBase, cfg.spreadExtra
+            cfg.sellDecay, cfg.factorFloor, sellsBefore, buysBefore, cfg.spreadBase, cfg.spreadExtra
         )
         val totalProceeds = result.totalPrice
 
+        // Capture per-unit prices at start and end. Sell-side spread depends on transaction
+        // counts so we compute the "before" price before any transactions change.
+        val priceBefore = PricingEngine.sellPrice(
+            entry.baseSellPrice, state.priceFactor, sellsBefore, buysBefore,
+            cfg.spreadBase, cfg.spreadExtra,
+        )
         removeItems(player, itemRef, qty)
         repeat(qty) {
             state.priceFactor = PricingEngine.updateFactorOnSell(state.priceFactor, cfg.sellDecay, cfg.factorFloor)
             CobblemonMarket.marketStore.addTransaction(itemId, "sell")
         }
+        val sellsAfter = state.transactions.count { it.type == "sell" }
+        val buysAfter = state.transactions.count { it.type == "buy" }
+        val priceAfter = PricingEngine.sellPrice(
+            entry.baseSellPrice, state.priceFactor, sellsAfter, buysAfter,
+            cfg.spreadBase, cfg.spreadExtra,
+        )
         EconomyBridge.deposit(player.uuid, totalProceeds)
         val avgPrice = (totalProceeds + qty / 2) / qty
-        CobblemonMarket.marketStore.recordPriceTick(itemId, "sell", avgPrice, qty)
+        CobblemonMarket.marketStore.recordPriceTick(
+            itemId = itemId, type = "sell",
+            playerUuid = player.uuid.toString(), playerName = player.name.string,
+            pricePerUnit = avgPrice, priceBefore = priceBefore, priceAfter = priceAfter,
+            quantity = qty,
+        )
         CobblemonMarket.marketStore.save()
 
         return TradeResult.Success(totalProceeds, state.priceFactor)

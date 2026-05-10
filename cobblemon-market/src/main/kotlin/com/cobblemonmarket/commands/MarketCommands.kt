@@ -4,6 +4,8 @@ import com.cobblemonmarket.CobblemonMarket
 import com.cobblemonmarket.config.ItemConfig
 import com.cobblemonmarket.config.MarketConfig
 import com.cobblemonmarket.economy.EconomyBridge
+import com.cobblemonmarket.data.Candle
+import com.cobblemonmarket.data.PriceHistory
 import com.cobblemonmarket.economy.TradeOps
 import com.cobblemonmarket.economy.TradeResult
 import com.cobblemonmarket.gui.ShopMenuProvider
@@ -23,8 +25,11 @@ import java.util.UUID
 
 object MarketCommands {
 
-    /** Max width of the chat sparkline; one character per recorded trade. */
-    private const val SPARKLINE_LENGTH = 50
+    /** Max number of candles shown in `/market price`; older candles are dropped from the head. */
+    private const val CANDLE_LIMIT = 30
+
+    /** Vertical resolution of the candlestick chart, in chat lines. */
+    private const val CANDLE_ROWS = 6
 
     fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
         dispatcher.register(
@@ -291,9 +296,15 @@ object MarketCommands {
         itemId.substringAfterLast(':').split('_').joinToString(" ") { it.replaceFirstChar(Char::uppercase) }
 
     /**
-     * Renders an ASCII sparkline of the per-batch price history for one item. Buys are
-     * coloured green, sells red. Price levels mapped onto eighths-block characters
-     * `▁▂▃▄▅▆▇█` so users can eyeball trend at a glance.
+     * Renders a multi-line candlestick chart of the price history for one item.
+     *
+     * One candle per "transaction group" (consecutive trades by the same player on the
+     * same calendar day). Open = price right before the group, Close = price right after.
+     * Wick covers the high/low touched during the group. Green when close > open (price
+     * rose; usually buys), red when close < open (usually sells), grey when unchanged.
+     *
+     * Below the candles, a single-line volume sparkline shows total qty per candle. The
+     * legend underneath gives min/max/last and aggregate buy/sell volume.
      */
     private fun showPriceChart(source: CommandSourceStack, rawItemId: String) {
         val itemId = resolveItemId(rawItemId)
@@ -310,33 +321,91 @@ object MarketCommands {
             return
         }
 
-        val min = history.minOf { it.pricePerUnit }
-        val max = history.maxOf { it.pricePerUnit }
-        val last = history.last().pricePerUnit
-        val totalQty = history.sumOf { it.quantity }
-        val bought = history.filter { it.type == "buy" }.sumOf { it.quantity }
-        val sold = totalQty - bought
+        val candles = PriceHistory.groupIntoCandles(history)
+        val displayed = if (candles.size > CANDLE_LIMIT) candles.subList(candles.size - CANDLE_LIMIT, candles.size) else candles
         val factorPct = (state.priceFactor * 100).toInt()
 
-        val recent = history.takeLast(SPARKLINE_LENGTH)
-        val blocks = "▁▂▃▄▅▆▇█"
-        val range = (max - min).coerceAtLeast(1)
-        val chart = buildString {
-            for (tick in recent) {
-                val normalized = (tick.pricePerUnit - min).toDouble() / range
-                val level = (normalized * (blocks.length - 1)).toInt().coerceIn(0, blocks.length - 1)
-                append(if (tick.type == "buy") "§a" else "§c")
-                append(blocks[level])
-            }
+        source.sendSystemMessage(Component.literal(
+            "§e[Market] §f$displayName §7— ${candles.size} candle${if (candles.size == 1) "" else "s"} (${history.size} trades), factor §f$factorPct%"))
+
+        for (line in renderCandleChart(displayed)) {
+            source.sendSystemMessage(Component.literal(line))
         }
 
+        // Aggregate stats from full history (not just displayed window).
+        var totalQty = 0; var bought = 0; var minPrice = Int.MAX_VALUE; var maxPrice = Int.MIN_VALUE
+        for (t in history) {
+            totalQty += t.quantity
+            if (t.type == "buy") bought += t.quantity
+            if (t.pricePerUnit < minPrice) minPrice = t.pricePerUnit
+            if (t.pricePerUnit > maxPrice) maxPrice = t.pricePerUnit
+        }
+        val sold = totalQty - bought
+        val last = history.last().pricePerUnit
         source.sendSystemMessage(Component.literal(
-            "§e[Market] §f$displayName §7— ${history.size} trades, factor §f$factorPct%"))
-        source.sendSystemMessage(Component.literal("  $chart§r"))
+            "§7Min §c\$$minPrice§7  Max §a\$$maxPrice§7  Last §f\$$last"))
         source.sendSystemMessage(Component.literal(
-            "  §7Min §c$$min§7  Max §a$$max§7  Last §f$$last"))
-        source.sendSystemMessage(Component.literal(
-            "  §7Volume §f$totalQty units §8(§a$bought bought§8 / §c$sold sold§8)"))
+            "§7Volume §f$totalQty units §8(§a$bought bought§8 / §c$sold sold§8)"))
+    }
+
+    /**
+     * Builds the chat-line representation of [candles] as CANDLE_ROWS rows of candle
+     * bodies/wicks plus one row of volume bars. Returns the lines top-down.
+     *
+     * Each candle is one column wide. Body is `█`, wick is `│`, empty is space. Color
+     * codes are emitted before each character so colors can mix within a row.
+     */
+    private fun renderCandleChart(candles: List<Candle>): List<String> {
+        if (candles.isEmpty()) return listOf("§7(no candles yet)")
+
+        var globalHigh = Int.MIN_VALUE
+        var globalLow = Int.MAX_VALUE
+        var maxVolume = 0
+        for (c in candles) {
+            if (c.high > globalHigh) globalHigh = c.high
+            if (c.low < globalLow) globalLow = c.low
+            if (c.volume > maxVolume) maxVolume = c.volume
+        }
+        val priceRange = (globalHigh - globalLow).coerceAtLeast(1)
+
+        // Each row 0..CANDLE_ROWS-1 covers a slice of the price range, top first.
+        // For row r, slice is [globalHigh - (r+1)*step, globalHigh - r*step].
+        val step = priceRange.toDouble() / CANDLE_ROWS
+        val out = mutableListOf<String>()
+        for (row in 0 until CANDLE_ROWS) {
+            val rowTop = globalHigh - row * step
+            val rowBot = globalHigh - (row + 1) * step
+            val sb = StringBuilder()
+            for (c in candles) {
+                val color = when {
+                    c.close > c.open -> "§a"   // up — green
+                    c.close < c.open -> "§c"   // down — red
+                    else -> "§7"               // flat — grey
+                }
+                val bodyHi = maxOf(c.open, c.close).toDouble()
+                val bodyLo = minOf(c.open, c.close).toDouble()
+                val char = when {
+                    rowTop < c.low.toDouble() -> ' '          // entirely below this candle's range
+                    rowBot > c.high.toDouble() -> ' '         // entirely above this candle's range
+                    rowTop >= bodyLo && rowBot <= bodyHi -> '█' // overlaps body → solid
+                    else -> '│'                                // overlaps wick only
+                }
+                sb.append(color).append(char)
+            }
+            out.add(sb.toString())
+        }
+
+        // Volume sparkline — one block per candle, height proportional to qty.
+        val blocks = "▁▂▃▄▅▆▇█"
+        val volSb = StringBuilder("§7")
+        val volMax = maxVolume.coerceAtLeast(1)
+        for (c in candles) {
+            val level = ((c.volume.toDouble() / volMax) * (blocks.length - 1)).toInt().coerceIn(0, blocks.length - 1)
+            volSb.append(blocks[level])
+        }
+        out.add(volSb.toString())
+
+        return out
     }
 
     private fun showHelp(source: CommandSourceStack, includeAdmin: Boolean) {
