@@ -1,0 +1,33 @@
+modLoader = "kotlinforforge"
+loaderVersion = "[5,)"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "cobblemon_gacha"
+version = "${version}"
+displayName = "Cobblemon Gacha"
+description = "Gacha-style lootboxes for the Cobblemon server"
+authors = "almutwakel"
+# Server-side only: clients don't need this jar.
+displayTest = "IGNORE_ALL_VERSION"
+
+[[dependencies.cobblemon_gacha]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblemon_gacha]]
+modId = "kotlinforforge"
+type = "required"
+versionRange = "[5,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblemon_gacha]]
+modId = "cobblemon"
+type = "required"
+versionRange = "[1.7.1,)"
+ordering = "AFTER"
+side = "BOTH"
