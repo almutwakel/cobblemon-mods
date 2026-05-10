@@ -56,9 +56,11 @@ object RankedCommands {
                         showStats(ctx.source.playerOrException, ctx.source.playerOrException)
                         1
                     }
-                    .then(Commands.argument("player", EntityArgument.player())
+                    .then(Commands.argument("player", StringArgumentType.string())
                         .executes { ctx ->
-                            showStats(ctx.source.playerOrException, EntityArgument.getPlayer(ctx, "player"))
+                            // Accept either an online player name or any name with an EloStore entry,
+                            // so the console can inspect offline players' stats too.
+                            showStatsByName(ctx.source, StringArgumentType.getString(ctx, "player"))
                             1
                         }
                     )
@@ -214,6 +216,34 @@ object RankedCommands {
         ))
     }
 
+    /**
+     * Stats lookup that works from any source (player or console). Resolves the target by:
+     *   1) An online player matching the name (case-insensitive), preferring their server UUID.
+     *   2) An existing EloStore entry whose stored name matches (case-insensitive).
+     *   3) Returns "no stats" if no record found and the target isn't online.
+     */
+    private fun showStatsByName(source: CommandSourceStack, name: String) {
+        val online = source.server.playerList.players.firstOrNull { it.name.string.equals(name, ignoreCase = true) }
+        if (online != null) {
+            val data = CobblemonRanked.eloStore.getOrCreate(online.uuid, online.name.string)
+            source.sendSystemMessage(Component.literal(
+                "[Ranked] ${online.name.string}: ELO ${data.elo} | ${data.wins}W / ${data.losses}L | Last battle: ${data.lastBattleDate ?: "never"}"
+            ))
+            return
+        }
+        val existing = CobblemonRanked.eloStore.getAll().entries.firstOrNull {
+            it.value.name.equals(name, ignoreCase = true)
+        }
+        if (existing != null) {
+            val data = existing.value
+            source.sendSystemMessage(Component.literal(
+                "[Ranked] ${data.name}: ELO ${data.elo} | ${data.wins}W / ${data.losses}L | Last battle: ${data.lastBattleDate ?: "never"} (offline)"
+            ))
+            return
+        }
+        source.sendSystemMessage(Component.literal("§c[Ranked] No record for '$name' (player has not battled and is not online)"))
+    }
+
     private fun showLeaderboard(source: CommandSourceStack) {
         val config = CobblemonRanked.config
         val leaderboard = CobblemonRanked.eloStore.getLeaderboard()
@@ -243,7 +273,7 @@ object RankedCommands {
     }
 
     private fun adminSetElo(source: CommandSourceStack, target: ServerPlayer, value: Int) {
-        CobblemonRanked.eloStore.setElo(target.uuid, value)
+        CobblemonRanked.eloStore.setElo(target.uuid, target.name.string, value)
         source.sendSystemMessage(Component.literal(
             "[Ranked] Set ${target.name.string}'s ELO to ${value.coerceAtLeast(CobblemonRanked.config.minimumElo)}"
         ))

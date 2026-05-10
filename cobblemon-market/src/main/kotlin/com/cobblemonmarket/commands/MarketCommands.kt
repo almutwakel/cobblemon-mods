@@ -495,14 +495,14 @@ object MarketCommands {
         }
     }
 
-    private fun setFactor(source: CommandSourceStack, itemId: String, value: Double) {
-        if (itemId !in CobblemonMarket.items) {
-            source.sendSystemMessage(Component.literal("[Market] Unknown item: $itemId"))
+    private fun setFactor(source: CommandSourceStack, rawItemId: String, value: Double) {
+        val itemId = resolveItemId(rawItemId) ?: run {
+            source.sendSystemMessage(Component.literal("§c[Market] Unknown item: $rawItemId"))
             return
         }
         CobblemonMarket.marketStore.setFactor(itemId, value)
         source.sendSystemMessage(Component.literal(
-            "[Market] Set $itemId factor to ${(value * 100).toInt()}%"))
+            "§a[Market] Set ${formatItemName(itemId)} factor to ${(value * 100).toInt()}%"))
     }
 
     private fun showLeaderboard(source: CommandSourceStack) {

@@ -54,10 +54,14 @@ class EloStore(private val configDir: Path) {
         return result
     }
 
-    fun setElo(uuid: UUID, elo: Int) {
-        players[uuid.toString()]?.let {
-            it.elo = elo.coerceAtLeast(CobblemonRanked.config.minimumElo)
-            save()
-        }
+    /**
+     * Sets a player's ELO. If no record exists yet, creates one with the given [name];
+     * the prior implementation silently no-op'd on missing records, which made
+     * `/ranked admin setelo` look successful while doing nothing.
+     */
+    fun setElo(uuid: UUID, name: String, elo: Int) {
+        val data = getOrCreate(uuid, name)
+        data.elo = elo.coerceAtLeast(CobblemonRanked.config.minimumElo)
+        save()
     }
 }

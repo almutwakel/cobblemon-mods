@@ -370,7 +370,11 @@ object RankedBattleManager {
         val data1 = store.getOrCreate(uuid1, name1)
         val data2 = store.getOrCreate(uuid2, name2)
 
-        val expected1 = 1.0 / (1.0 + Math.pow(10.0, (data2.elo - data1.elo) / 400.0))
+        // Snapshot pre-match ELOs *before* applyMatchResult mutates the records, so the
+        // returned SimulateOutcome reflects the state used to compute the win probability.
+        val preElo1 = data1.elo
+        val preElo2 = data2.elo
+        val expected1 = 1.0 / (1.0 + Math.pow(10.0, (preElo2 - preElo1) / 400.0))
         val roll = Math.random()
         val player1Wins = roll < expected1
 
@@ -386,7 +390,7 @@ object RankedBattleManager {
         val outcome = applyMatchResult(server, winnerUuid, winnerName, loserUuid, loserName)
         return SimulateOutcome(
             name1 = name1, name2 = name2,
-            elo1 = data1.elo, elo2 = data2.elo,
+            elo1 = preElo1, elo2 = preElo2,
             expected1 = expected1, roll = roll, player1Wins = player1Wins,
             applied = outcome,
         )
