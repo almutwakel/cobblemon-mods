@@ -10,8 +10,22 @@ import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
+/**
+ * Per-item market parameters.
+ *
+ * - `baseBuyPrice` / `baseSellPrice` — prices when stock equals `baseStock` (the natural
+ *   spread between them is the merchant's margin).
+ * - `baseStock` — target/equilibrium quantity. Restock pulls stock toward this value.
+ * - `elasticity` — how sharply price reacts to deviation from `baseStock`.
+ *   1.0 ≈ inversely proportional, <1 = stable (consumables like Poké Balls), >1 = volatile (rare items).
+ * - `maxStockMultiplier` — sells are rejected when stock would exceed `baseStock × maxStockMultiplier`.
+ */
 data class ItemEntry(
-    val baseSellPrice: Int
+    val baseBuyPrice: Int,
+    val baseSellPrice: Int,
+    val baseStock: Int = 100,
+    val elasticity: Double = 1.0,
+    val maxStockMultiplier: Double = 10.0,
 )
 
 object ItemConfig {
@@ -39,11 +53,12 @@ object ItemConfig {
         dir.resolve("items.json").writeText(gson.toJson(items))
     }
 
+    // baseBuyPrice ≈ 3× baseSellPrice mirrors the previous spread; tune in items.json.
     private fun defaultItems(): Map<String, ItemEntry> = mapOf(
-        "cobblemon:rare_candy" to ItemEntry(baseSellPrice = 2000),
-        "cobblemon:ultra_ball" to ItemEntry(baseSellPrice = 300),
-        "cobblemon:great_ball" to ItemEntry(baseSellPrice = 100),
-        "cobblemon:poke_ball" to ItemEntry(baseSellPrice = 30),
-        "cobblemon:revive" to ItemEntry(baseSellPrice = 500)
+        "cobblemon:rare_candy" to ItemEntry(baseBuyPrice = 6000, baseSellPrice = 2000, elasticity = 2.0),
+        "cobblemon:ultra_ball" to ItemEntry(baseBuyPrice = 900, baseSellPrice = 300, elasticity = 0.5),
+        "cobblemon:great_ball" to ItemEntry(baseBuyPrice = 300, baseSellPrice = 100, elasticity = 1.0),
+        "cobblemon:poke_ball" to ItemEntry(baseBuyPrice = 90, baseSellPrice = 30, elasticity = 0.3),
+        "cobblemon:revive" to ItemEntry(baseBuyPrice = 1500, baseSellPrice = 500, elasticity = 1.0),
     )
 }
