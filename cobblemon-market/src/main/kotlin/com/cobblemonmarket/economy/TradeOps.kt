@@ -54,6 +54,9 @@ object TradeOps {
         }
         val item: Item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId))
         player.inventory.add(ItemStack(item, qty))
+        // Round-half-up batch average for the price-history chart.
+        val avgPrice = (totalCost + qty / 2) / qty
+        CobblemonMarket.marketStore.recordPriceTick(itemId, "buy", avgPrice, qty)
         CobblemonMarket.marketStore.save()
 
         return TradeResult.Success(totalCost, state.priceFactor)
@@ -83,6 +86,8 @@ object TradeOps {
             CobblemonMarket.marketStore.addTransaction(itemId, "sell")
         }
         EconomyBridge.deposit(player.uuid, totalProceeds)
+        val avgPrice = (totalProceeds + qty / 2) / qty
+        CobblemonMarket.marketStore.recordPriceTick(itemId, "sell", avgPrice, qty)
         CobblemonMarket.marketStore.save()
 
         return TradeResult.Success(totalProceeds, state.priceFactor)

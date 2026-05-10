@@ -18,7 +18,9 @@ data class MarketConfig(
     val sellDecay: Double = 0.98,
     val buyGrowth: Double = 1.02,
     val transactionWindowSize: Int = 50,
-    val leaderboardSize: Int = 10
+    val leaderboardSize: Int = 10,
+    /** Cap on price-history entries per item (one entry per /market buy|sell batch). */
+    val priceHistorySize: Int = 500,
 ) {
     companion object {
         private val gson: Gson = GsonBuilder().setPrettyPrinting().create()

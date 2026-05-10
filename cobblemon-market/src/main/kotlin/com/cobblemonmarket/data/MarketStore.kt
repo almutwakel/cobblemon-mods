@@ -52,4 +52,23 @@ class MarketStore(private val configDir: Path) {
         }
         save()
     }
+
+    /**
+     * Records one batch-level price-history entry for the chart shown by `/market price`.
+     * Bounded by [MarketConfig.priceHistorySize]; oldest entries are dropped when the cap is hit.
+     */
+    fun recordPriceTick(itemId: String, type: String, pricePerUnit: Int, quantity: Int) {
+        val state = getOrCreate(itemId)
+        state.priceHistory.add(PriceTick(
+            type = type,
+            timestamp = System.currentTimeMillis(),
+            pricePerUnit = pricePerUnit,
+            quantity = quantity,
+        ))
+        val cap = CobblemonMarket.config.priceHistorySize
+        while (state.priceHistory.size > cap) {
+            state.priceHistory.removeAt(0)
+        }
+        save()
+    }
 }

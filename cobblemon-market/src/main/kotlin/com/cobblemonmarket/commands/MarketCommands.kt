@@ -23,6 +23,9 @@ import java.util.UUID
 
 object MarketCommands {
 
+    /** Max width of the chat sparkline; one character per recorded trade. */
+    private const val SPARKLINE_LENGTH = 50
+
     fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
         dispatcher.register(
             Commands.literal("market")
@@ -70,6 +73,20 @@ object MarketCommands {
                         }
                         .executes { ctx ->
                             showHistory(ctx.source, StringArgumentType.getString(ctx, "item"))
+                            1
+                        }
+                    )
+                )
+                .then(Commands.literal("price")
+                    .then(Commands.argument("item", StringArgumentType.greedyString())
+                        .suggests { _, builder ->
+                            CobblemonMarket.items.keys.forEach {
+                                builder.suggest(it.substringAfterLast(':'))
+                            }
+                            builder.buildFuture()
+                        }
+                        .executes { ctx ->
+                            showPriceChart(ctx.source, StringArgumentType.getString(ctx, "item"))
                             1
                         }
                     )
@@ -273,10 +290,60 @@ object MarketCommands {
     private fun formatItemName(itemId: String): String =
         itemId.substringAfterLast(':').split('_').joinToString(" ") { it.replaceFirstChar(Char::uppercase) }
 
+    /**
+     * Renders an ASCII sparkline of the per-batch price history for one item. Buys are
+     * coloured green, sells red. Price levels mapped onto eighths-block characters
+     * `▁▂▃▄▅▆▇█` so users can eyeball trend at a glance.
+     */
+    private fun showPriceChart(source: CommandSourceStack, rawItemId: String) {
+        val itemId = resolveItemId(rawItemId)
+        if (itemId == null) {
+            source.sendSystemMessage(Component.literal("§c[Market] Unknown item: $rawItemId"))
+            return
+        }
+        val state = CobblemonMarket.marketStore.getOrCreate(itemId)
+        val history = state.priceHistory
+        val displayName = formatItemName(itemId)
+        if (history.isEmpty()) {
+            source.sendSystemMessage(Component.literal(
+                "§e[Market] §f$displayName §7— no trades recorded yet."))
+            return
+        }
+
+        val min = history.minOf { it.pricePerUnit }
+        val max = history.maxOf { it.pricePerUnit }
+        val last = history.last().pricePerUnit
+        val totalQty = history.sumOf { it.quantity }
+        val bought = history.filter { it.type == "buy" }.sumOf { it.quantity }
+        val sold = totalQty - bought
+        val factorPct = (state.priceFactor * 100).toInt()
+
+        val recent = history.takeLast(SPARKLINE_LENGTH)
+        val blocks = "▁▂▃▄▅▆▇█"
+        val range = (max - min).coerceAtLeast(1)
+        val chart = buildString {
+            for (tick in recent) {
+                val normalized = (tick.pricePerUnit - min).toDouble() / range
+                val level = (normalized * (blocks.length - 1)).toInt().coerceIn(0, blocks.length - 1)
+                append(if (tick.type == "buy") "§a" else "§c")
+                append(blocks[level])
+            }
+        }
+
+        source.sendSystemMessage(Component.literal(
+            "§e[Market] §f$displayName §7— ${history.size} trades, factor §f$factorPct%"))
+        source.sendSystemMessage(Component.literal("  $chart§r"))
+        source.sendSystemMessage(Component.literal(
+            "  §7Min §c$$min§7  Max §a$$max§7  Last §f$$last"))
+        source.sendSystemMessage(Component.literal(
+            "  §7Volume §f$totalQty units §8(§a$bought bought§8 / §c$sold sold§8)"))
+    }
+
     private fun showHelp(source: CommandSourceStack, includeAdmin: Boolean) {
         val lines = mutableListOf(
             "§e[Market] §fCommands:",
             "§7  /market prices §f— show current buy/sell prices for all items",
+            "§7  /market price <item> §f— price-history chart for one item",
             "§7  /market history <item> §f— recent price-movement summary for one item",
             "§7  /market leaderboard §f— top wealth (PokeDollars) on the server",
             "§7  /market open §f— open the chest UI (in-game player only)",
