@@ -45,7 +45,11 @@ object PriceHistory {
             val head = batch.first()
             val sameDay = dayOf(tick.timestamp) == dayOf(head.timestamp)
             val samePlayer = tick.playerUuid == head.playerUuid
-            if (sameDay && samePlayer) {
+            // Also break on direction flip: a buy run followed by a sell run from the
+            // same player should render as two candles (green up, then red down) rather
+            // than collapsing into one ambiguous candle whose open/close mix price kinds.
+            val sameType = tick.type == head.type
+            if (sameDay && samePlayer && sameType) {
                 batch.add(tick)
             } else {
                 candles.add(toCandle(batch))
