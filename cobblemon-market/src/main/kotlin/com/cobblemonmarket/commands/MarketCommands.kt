@@ -6,6 +6,7 @@ import com.cobblemonmarket.config.MarketConfig
 import com.cobblemonmarket.economy.EconomyBridge
 import com.cobblemonmarket.economy.TradeOps
 import com.cobblemonmarket.economy.TradeResult
+import com.cobblemonmarket.gui.ShopMenuProvider
 import com.cobblemonmarket.pricing.PricingEngine
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.DoubleArgumentType
@@ -62,6 +63,12 @@ object MarketCommands {
                             1
                         }
                     )
+                )
+                .then(Commands.literal("open")
+                    .executes { ctx ->
+                        ShopMenuProvider.open(ctx.source.playerOrException)
+                        1
+                    }
                 )
                 .then(Commands.literal("buy")
                     .then(Commands.argument("item", StringArgumentType.string())
@@ -329,7 +336,10 @@ object MarketCommands {
             balances.add(Triple(uuidStr, spendData.name, balance))
         }
 
-        balances.sortByDescending { it.third }
+        // Comparator SAM (invokedynamic) instead of Kotlin's `sortByDescending` — the latter's
+        // `$$inlined$` helper class fails to load under NeoForge + Sinytra Connector
+        // (see cobblemon-ranked EloStore.getLeaderboard for the same fix).
+        balances.sortWith(Comparator { a, b -> b.third.compareTo(a.third) })
 
         source.sendSystemMessage(Component.literal("[Market] === Wealth Leaderboard ==="))
         val topN = balances.take(config.leaderboardSize)

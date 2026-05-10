@@ -44,9 +44,14 @@ class EloStore(private val configDir: Path) {
     fun getAll(): Map<String, PlayerEloData> = players.toMap()
 
     fun getLeaderboard(): List<Pair<String, PlayerEloData>> {
-        return players.entries
-            .sortedByDescending { it.value.elo }
-            .map { it.key to it.value }
+        // Avoid Kotlin's `sortedByDescending` because its synthetic `$$inlined$sortedByDescending$1`
+        // helper class fails to load under NeoForge + Sinytra Connector's class transformation
+        // pipeline. SAM-converting to a Comparator goes through invokedynamic / LambdaMetafactory
+        // and produces no synthetic inner class.
+        val result = ArrayList<Pair<String, PlayerEloData>>(players.size)
+        for ((key, value) in players) result.add(key to value)
+        result.sortWith(Comparator { a, b -> b.second.elo.compareTo(a.second.elo) })
+        return result
     }
 
     fun setElo(uuid: UUID, elo: Int) {
