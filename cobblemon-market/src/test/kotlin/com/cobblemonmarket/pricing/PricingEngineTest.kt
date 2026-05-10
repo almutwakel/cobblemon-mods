@@ -1,246 +1,234 @@
 package com.cobblemonmarket.pricing
 
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class PricingEngineTest {
 
-    // Default config constants mirroring MarketConfig defaults
-    private val spreadBase = 3.0
-    private val spreadExtra = 4.0
-    private val sellDecay = 0.98
-    private val buyGrowth = 1.02
-    private val factorFloor = 0.10
-    private val factorCeiling = 1.00
-
     // -------------------------------------------------------------------------
-    // 1. Buy price with default factor = B × f × S_base
+    // 1. At baseStock, prices equal the base prices (scale = 1.0)
     // -------------------------------------------------------------------------
     @Test
-    fun `buy price with factor 1_0 equals 3x base`() {
-        // P_buy = 2000 * 1.0 * 3.0 = 6000
-        val result = PricingEngine.buyPrice(baseSellPrice = 2000, priceFactor = 1.0, spreadBase = spreadBase)
-        assertEquals(6000, result)
+    fun `prices at base stock equal base prices`() {
+        val buy = PricingEngine.buyPrice(baseBuyPrice = 90, stock = 100.0, baseStock = 100, elasticity = 1.0)
+        val sell = PricingEngine.sellPrice(baseSellPrice = 30, stock = 100.0, baseStock = 100, elasticity = 1.0)
+        assertEquals(90, buy)
+        assertEquals(30, sell)
     }
 
     // -------------------------------------------------------------------------
-    // 2. Sell price with balanced spread = P_buy / 3.0
+    // 2. Empty stock with elasticity 1.0 scales by (baseStock+1)
     // -------------------------------------------------------------------------
     @Test
-    fun `sell price with factor 1_0 and balanced spread equals base`() {
-        // P_buy = 6000, spread = 3.0, P_sell = 6000 / 3.0 = 2000
-        val result = PricingEngine.sellPrice(
-            baseSellPrice = 2000, priceFactor = 1.0,
-            sells = 0, buys = 0, spreadBase = spreadBase, spreadExtra = spreadExtra
-        )
-        assertEquals(2000, result)
+    fun `empty stock scales price by base stock plus one when elasticity is one`() {
+        // ratio = (0+1)/(100+1) = 1/101; scale = 101 → 90 × 101 = 9090
+        val buy = PricingEngine.buyPrice(90, stock = 0.0, baseStock = 100, elasticity = 1.0)
+        assertEquals(9090, buy)
     }
 
     // -------------------------------------------------------------------------
-    // 3. Spread fully one-sided sells (50 sells, 0 buys) → 7.0
+    // 3. Elasticity 0.3 (Poké Ball) keeps prices stable even at low stock
     // -------------------------------------------------------------------------
     @Test
-    fun `spread is 7_0 when fully sell-sided`() {
-        val result = PricingEngine.calculateSpread(sells = 50, buys = 0, spreadBase = spreadBase, spreadExtra = spreadExtra)
-        assertEquals(7.0, result, 1e-9)
+    fun `low elasticity dampens price spike at low stock`() {
+        // ratio ≈ 1/101, scale = (1/101)^(-0.3) = 101^0.3 ≈ 4.0
+        val buy = PricingEngine.buyPrice(90, stock = 0.0, baseStock = 100, elasticity = 0.3)
+        val expected = (90 * 101.0.pow(0.3)).toInt()
+        assertTrue(kotlin.math.abs(buy - expected) <= 1, "Got $buy, expected ≈ $expected")
+        assertTrue(buy in 300..400, "Poké ball at zero stock should be a few hundred, got $buy")
     }
 
     // -------------------------------------------------------------------------
-    // 4. Spread balanced (25 sells / 25 buys) → 3.0
+    // 4. Elasticity 2.0 (rare candy) makes prices spike sharply when scarce
     // -------------------------------------------------------------------------
     @Test
-    fun `spread is 3_0 when perfectly balanced`() {
-        val result = PricingEngine.calculateSpread(sells = 25, buys = 25, spreadBase = spreadBase, spreadExtra = spreadExtra)
-        assertEquals(3.0, result, 1e-9)
+    fun `high elasticity amplifies price spike at low stock`() {
+        // ratio = 1/101, scale = 101^2 = 10201; 6000 * 10201 ≈ 61,206,000
+        val buy = PricingEngine.buyPrice(6000, stock = 0.0, baseStock = 100, elasticity = 2.0)
+        val expected = (6000 * 101.0.pow(2.0)).roundToInt()
+        assertEquals(expected, buy)
     }
 
     // -------------------------------------------------------------------------
-    // 5. Spread mostly buys (10 sells, 40 buys) → ≈ 4.44
+    // 5. Oversupply pulls price below base
     // -------------------------------------------------------------------------
     @Test
-    fun `spread is approximately 4_44 when mostly buys`() {
-        val result = PricingEngine.calculateSpread(sells = 10, buys = 40, spreadBase = spreadBase, spreadExtra = spreadExtra)
-        assertEquals(4.44, result, 1e-9)
+    fun `oversupply scales prices below base`() {
+        // stock = 1000 (10x), ratio = 1001/101 ≈ 9.91, scale = 1/9.91 ≈ 0.10
+        val buy = PricingEngine.buyPrice(90, stock = 1000.0, baseStock = 100, elasticity = 1.0)
+        assertTrue(buy in 8..10, "Oversupplied price should be ~10% of base, got $buy")
     }
 
     // -------------------------------------------------------------------------
-    // 6. Factor after sell decays: 1.0 → 0.98
+    // 6. Buy/sell prices share the same scale (spread = baseBuyPrice / baseSellPrice)
     // -------------------------------------------------------------------------
     @Test
-    fun `factor decays after sell`() {
-        val result = PricingEngine.updateFactorOnSell(priceFactor = 1.0, sellDecay = sellDecay, factorFloor = factorFloor)
-        assertEquals(0.98, result, 1e-9)
+    fun `buy and sell prices share the same scale factor`() {
+        val stock = 50.0
+        val baseBuy = 90; val baseSell = 30
+        val buy = PricingEngine.buyPrice(baseBuy, stock, baseStock = 100, elasticity = 1.0)
+        val sell = PricingEngine.sellPrice(baseSell, stock, baseStock = 100, elasticity = 1.0)
+        // Both scaled by the same ratio so the buy/sell ratio matches the base ratio.
+        assertEquals(baseBuy.toDouble() / baseSell, buy.toDouble() / sell, 0.05)
     }
 
     // -------------------------------------------------------------------------
-    // 7. Factor after buy grows: 0.5 → 0.51
+    // 7. Buying decreases stock → next buy is more expensive
     // -------------------------------------------------------------------------
     @Test
-    fun `factor grows after buy`() {
-        val result = PricingEngine.updateFactorOnBuy(priceFactor = 0.5, buyGrowth = buyGrowth, factorCeiling = factorCeiling)
-        assertEquals(0.51, result, 1e-9)
-    }
-
-    // -------------------------------------------------------------------------
-    // 8. Factor floor is respected
-    // -------------------------------------------------------------------------
-    @Test
-    fun `factor floor is respected on sell decay`() {
-        val result = PricingEngine.updateFactorOnSell(priceFactor = 0.10, sellDecay = sellDecay, factorFloor = factorFloor)
-        assertEquals(factorFloor, result, 1e-9)
-    }
-
-    // -------------------------------------------------------------------------
-    // 9. Factor ceiling is respected
-    // -------------------------------------------------------------------------
-    @Test
-    fun `factor ceiling is respected on buy growth`() {
-        val result = PricingEngine.updateFactorOnBuy(priceFactor = 1.0, buyGrowth = buyGrowth, factorCeiling = factorCeiling)
-        assertEquals(factorCeiling, result, 1e-9)
-    }
-
-    // -------------------------------------------------------------------------
-    // 10. 50 consecutive sells crash factor to 0.98^50 ≈ 0.364
-    // -------------------------------------------------------------------------
-    @Test
-    fun `50 consecutive sells crash factor to approximately 0_364`() {
-        var factor = 1.0
+    fun `every buy raises buy price`() {
+        val baseBuy = 90; val baseStock = 100; val elasticity = 1.0
+        var stock = 100.0
+        var prev = PricingEngine.buyPrice(baseBuy, stock, baseStock, elasticity)
         repeat(50) {
-            factor = PricingEngine.updateFactorOnSell(priceFactor = factor, sellDecay = sellDecay, factorFloor = factorFloor)
+            stock -= 1.0
+            val next = PricingEngine.buyPrice(baseBuy, stock, baseStock, elasticity)
+            assertTrue(next >= prev, "Buy price must never decrease as stock drops: $prev → $next at stock=$stock")
+            prev = next
         }
-        val expected = 0.98.pow(50)
-        assertEquals(expected, factor, 1e-9)
     }
 
     // -------------------------------------------------------------------------
-    // 11. Passive recovery at 4%: 0.50 → 0.52
+    // 8. Selling increases stock → next sell pays less
     // -------------------------------------------------------------------------
     @Test
-    fun `recovery moves factor toward ceiling`() {
-        // 0.50 + 0.04 * (1.0 - 0.50) = 0.50 + 0.02 = 0.52
-        val result = PricingEngine.applyRecovery(priceFactor = 0.50, recoveryRate = 0.04, factorCeiling = factorCeiling)
-        assertEquals(0.52, result, 1e-9)
-    }
-
-    // -------------------------------------------------------------------------
-    // 12. Recovery is faster when factor is low
-    // -------------------------------------------------------------------------
-    @Test
-    fun `recovery step is larger when factor is further from ceiling`() {
-        val recoveryRate = 0.04
-        val highResult = PricingEngine.applyRecovery(0.50, recoveryRate, factorCeiling)
-        val lowResult = PricingEngine.applyRecovery(0.10, recoveryRate, factorCeiling)
-        val highDelta = highResult - 0.50 // 0.02
-        val lowDelta = lowResult - 0.10   // 0.036
-        assertTrue(lowDelta > highDelta, "Recovery delta should be larger when factor is further from ceiling")
-    }
-
-    // -------------------------------------------------------------------------
-    // 13. KEY GUARANTEE: every sell lowers buy price
-    // -------------------------------------------------------------------------
-    @Test
-    fun `every sell always lowers buy price`() {
-        // Buy price = B * f * S_base, and sell always decreases f, so buy price must decrease
-        val base = 2000
-        var factor = 1.0
-        var prevBuyPrice = PricingEngine.buyPrice(base, factor, spreadBase)
-
+    fun `every sell lowers sell price`() {
+        val baseSell = 30; val baseStock = 100; val elasticity = 1.0
+        var stock = 100.0
+        var prev = PricingEngine.sellPrice(baseSell, stock, baseStock, elasticity)
         repeat(50) {
-            factor = PricingEngine.updateFactorOnSell(factor, sellDecay, factorFloor)
-            val newBuyPrice = PricingEngine.buyPrice(base, factor, spreadBase)
-            assertTrue(
-                newBuyPrice <= prevBuyPrice,
-                "Buy price must never increase on sell: was $prevBuyPrice, now $newBuyPrice"
-            )
-            prevBuyPrice = newBuyPrice
+            stock += 1.0
+            val next = PricingEngine.sellPrice(baseSell, stock, baseStock, elasticity)
+            assertTrue(next <= prev, "Sell price must never increase as stock rises: $prev → $next at stock=$stock")
+            prev = next
         }
     }
 
     // -------------------------------------------------------------------------
-    // 14. Sell price with lopsided spread is lower
+    // 9. Restock pulls stock toward baseStock (refill)
     // -------------------------------------------------------------------------
     @Test
-    fun `sell price decreases with wider spread`() {
-        val balancedSell = PricingEngine.sellPrice(2000, 1.0, 25, 25, spreadBase, spreadExtra)
-        val lopsidedSell = PricingEngine.sellPrice(2000, 1.0, 50, 0, spreadBase, spreadExtra)
-        // Balanced: 6000/3.0 = 2000, Lopsided: 6000/7.0 ≈ 857
-        assertEquals(2000, balancedSell)
-        assertEquals(857, lopsidedSell)
-        assertTrue(lopsidedSell < balancedSell)
+    fun `restock refills depleted stock toward base`() {
+        // 50 + 0.07 × (100 - 50) = 53.5
+        val result = PricingEngine.applyRestock(stock = 50.0, baseStock = 100, restockRatePerHour = 0.07)
+        assertEquals(53.5, result, 1e-9)
     }
 
     // -------------------------------------------------------------------------
-    // 15. Rare candy example from spec: 50 sells, f ≈ 0.364, spread = 7x
+    // 10. Restock pulls oversupplied stock down toward baseStock (bleed-off)
     // -------------------------------------------------------------------------
     @Test
-    fun `rare candy 50 sells gives expected prices`() {
-        val base = 2000
-        var factor = 1.0
-        repeat(50) { factor = PricingEngine.updateFactorOnSell(factor, sellDecay, factorFloor) }
-        // f ≈ 0.364
-        assertEquals(0.98.pow(50), factor, 1e-9)
-
-        // P_buy = 2000 * 0.364 * 3 ≈ 2184
-        val buyPrice = PricingEngine.buyPrice(base, factor, spreadBase)
-        assertEquals((base * factor * spreadBase).toInt(), buyPrice)
-
-        // P_sell = P_buy / 7.0 (50 sells, 0 buys → spread = 7)
-        val sellPrice = PricingEngine.sellPrice(base, factor, 50, 0, spreadBase, spreadExtra)
-        assertEquals((buyPrice.toDouble() / 7.0).toInt(), sellPrice)
+    fun `restock bleeds oversupply back toward base`() {
+        // 200 + 0.07 × (100 - 200) = 193
+        val result = PricingEngine.applyRestock(stock = 200.0, baseStock = 100, restockRatePerHour = 0.07)
+        assertEquals(193.0, result, 1e-9)
     }
 
     // -------------------------------------------------------------------------
-    // 16. Batch sell produces decreasing per-unit prices
+    // 11. Restock at baseStock leaves stock unchanged
     // -------------------------------------------------------------------------
     @Test
-    fun `batch sell produces decreasing per-unit prices`() {
-        val result = PricingEngine.simulateBatchSell(
-            baseSellPrice = 2000, startFactor = 1.0, quantity = 5,
-            sellDecay = sellDecay, factorFloor = factorFloor,
-            sells = 0, buys = 0, spreadBase = spreadBase, spreadExtra = spreadExtra
-        )
-        assertEquals(5, result.perUnitPrices.size)
-        for (i in 1 until result.perUnitPrices.size) {
-            assertTrue(result.perUnitPrices[i] <= result.perUnitPrices[i - 1])
-        }
-        assertEquals(result.perUnitPrices.sum(), result.totalPrice)
-        assertEquals(0.98.pow(5), result.finalFactor, 1e-9)
+    fun `restock is a no-op at base stock`() {
+        val result = PricingEngine.applyRestock(stock = 100.0, baseStock = 100, restockRatePerHour = 0.07)
+        assertEquals(100.0, result, 1e-9)
     }
 
     // -------------------------------------------------------------------------
-    // 17. Batch buy at ceiling stays at ceiling
+    // 12. Restock step is larger when stock is further from base
     // -------------------------------------------------------------------------
     @Test
-    fun `batch buy at ceiling clamps factor to ceiling`() {
+    fun `restock step grows with distance from base`() {
+        val nearBase = PricingEngine.applyRestock(stock = 95.0, baseStock = 100, restockRatePerHour = 0.07) - 95.0
+        val farFromBase = PricingEngine.applyRestock(stock = 10.0, baseStock = 100, restockRatePerHour = 0.07) - 10.0
+        assertTrue(farFromBase > nearBase, "Refill rate should grow with distance: near=$nearBase far=$farFromBase")
+    }
+
+    // -------------------------------------------------------------------------
+    // 13. Batch buy yields monotonically increasing per-unit prices
+    // -------------------------------------------------------------------------
+    @Test
+    fun `batch buy produces monotonically increasing prices`() {
         val result = PricingEngine.simulateBatchBuy(
-            baseSellPrice = 2000, startFactor = 1.0, quantity = 3,
-            buyGrowth = buyGrowth, factorCeiling = factorCeiling,
-            spreadBase = spreadBase
-        )
-        assertEquals(3, result.perUnitPrices.size)
-        assertEquals(factorCeiling, result.finalFactor, 1e-9)
-        // All prices should be the same since factor is clamped at 1.0
-        assertTrue(result.perUnitPrices.all { it == 6000 })
-    }
-
-    // -------------------------------------------------------------------------
-    // 18. Batch buy with depressed factor shows increasing prices
-    // -------------------------------------------------------------------------
-    @Test
-    fun `batch buy with depressed factor shows increasing prices`() {
-        val result = PricingEngine.simulateBatchBuy(
-            baseSellPrice = 2000, startFactor = 0.50, quantity = 5,
-            buyGrowth = buyGrowth, factorCeiling = factorCeiling,
-            spreadBase = spreadBase
+            baseBuyPrice = 90, baseStock = 100, elasticity = 1.0,
+            startStock = 100.0, quantity = 5,
         )
         assertEquals(5, result.perUnitPrices.size)
         for (i in 1 until result.perUnitPrices.size) {
             assertTrue(result.perUnitPrices[i] >= result.perUnitPrices[i - 1])
         }
+        assertEquals(95.0, result.finalStock, 1e-9)
         assertEquals(result.perUnitPrices.sum(), result.totalPrice)
-        val expectedFactor = minOf(0.50 * 1.02.pow(5), factorCeiling)
-        assertEquals(expectedFactor, result.finalFactor, 1e-9)
+    }
+
+    // -------------------------------------------------------------------------
+    // 14. Batch sell yields monotonically decreasing per-unit prices
+    // -------------------------------------------------------------------------
+    @Test
+    fun `batch sell produces monotonically decreasing prices`() {
+        val result = PricingEngine.simulateBatchSell(
+            baseSellPrice = 30, baseStock = 100, elasticity = 1.0,
+            startStock = 100.0, quantity = 5,
+        )
+        assertEquals(5, result.perUnitPrices.size)
+        for (i in 1 until result.perUnitPrices.size) {
+            assertTrue(result.perUnitPrices[i] <= result.perUnitPrices[i - 1])
+        }
+        assertEquals(105.0, result.finalStock, 1e-9)
+        assertEquals(result.perUnitPrices.sum(), result.totalPrice)
+    }
+
+    // -------------------------------------------------------------------------
+    // 15. Batch sell with elasticity 1.0 from base: prices match formula
+    // -------------------------------------------------------------------------
+    @Test
+    fun `batch sell from base matches per-step formula`() {
+        val result = PricingEngine.simulateBatchSell(
+            baseSellPrice = 30, baseStock = 100, elasticity = 1.0,
+            startStock = 100.0, quantity = 3,
+        )
+        // Step 1: stock=100, ratio=101/101=1, scale=1.0, sell=30
+        // Step 2: stock=101, ratio=102/101, scale=101/102, sell=30*101/102≈29.7→30
+        // Step 3: stock=102, ratio=103/101, scale=101/103, sell=30*101/103≈29.4→29
+        assertEquals(30, result.perUnitPrices[0])
+        assertTrue(result.perUnitPrices[1] in 29..30)
+        assertTrue(result.perUnitPrices[2] in 29..30)
+    }
+
+    // -------------------------------------------------------------------------
+    // 16. Stock at zero handled gracefully (no infinity from ratio)
+    // -------------------------------------------------------------------------
+    @Test
+    fun `stock at zero gives finite prices`() {
+        val buy = PricingEngine.buyPrice(90, stock = 0.0, baseStock = 100, elasticity = 1.0)
+        val sell = PricingEngine.sellPrice(30, stock = 0.0, baseStock = 100, elasticity = 1.0)
+        // Int values can't be infinite — guarding against the bug where ratio→0 would
+        // overflow Int via Double.POSITIVE_INFINITY.toInt() → Int.MAX_VALUE.
+        assertTrue(buy > 0 && buy < Int.MAX_VALUE)
+        assertTrue(sell > 0 && sell < Int.MAX_VALUE)
+    }
+
+    // -------------------------------------------------------------------------
+    // 17. Negative stock is clamped to zero (defensive — TradeOps prevents it)
+    // -------------------------------------------------------------------------
+    @Test
+    fun `negative stock is clamped to zero`() {
+        val atZero = PricingEngine.buyPrice(90, stock = 0.0, baseStock = 100, elasticity = 1.0)
+        val belowZero = PricingEngine.buyPrice(90, stock = -5.0, baseStock = 100, elasticity = 1.0)
+        assertEquals(atZero, belowZero)
+    }
+
+    // -------------------------------------------------------------------------
+    // 18. Per-unit scale is symmetric: doubling baseStock at same stock-ratio gives same scale
+    // -------------------------------------------------------------------------
+    @Test
+    fun `same stock ratio yields same price scale`() {
+        // (50+1)/(100+1) ≈ (100+1)/(200+1) but not exactly — the +1 makes them differ slightly.
+        // Test with larger numbers where +1 is negligible.
+        val small = PricingEngine.buyPrice(100, stock = 500.0, baseStock = 1000, elasticity = 1.0)
+        val large = PricingEngine.buyPrice(100, stock = 5000.0, baseStock = 10000, elasticity = 1.0)
+        assertTrue(kotlin.math.abs(small - large) <= 1, "Same ratio should give same price: $small vs $large")
     }
 }
