@@ -1,6 +1,7 @@
 package com.cobblemonmarket.data
 
 import com.cobblemonmarket.CobblemonMarket
+import com.cobblemonmarket.config.ItemEntry
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -38,29 +39,36 @@ class MarketStore(private val configDir: Path) {
 
     fun getAll(): Map<String, ItemState> = states.toMap()
 
-    fun setFactor(itemId: String, factor: Double) {
-        getOrCreate(itemId).priceFactor = factor
-        save()
+    /**
+     * Initializes any items that don't yet have an entry — sets stock to baseStock so a
+     * fresh server starts at equilibrium prices instead of zero stock (which would scale
+     * everything by ~baseStock^elasticity on the first /market prices).
+     */
+    fun ensureInitialized(items: Map<String, ItemEntry>) {
+        var changed = false
+        for ((itemId, entry) in items) {
+            if (!states.containsKey(itemId)) {
+                states[itemId] = ItemState(stock = entry.baseStock.toDouble())
+                changed = true
+            }
+        }
+        if (changed) save()
     }
 
-    fun addTransaction(itemId: String, type: String) {
-        val state = getOrCreate(itemId)
-        val windowSize = CobblemonMarket.config.transactionWindowSize
-        state.transactions.add(Transaction(type = type, timestamp = System.currentTimeMillis()))
-        while (state.transactions.size > windowSize) {
-            state.transactions.removeAt(0)
-        }
+    fun setStock(itemId: String, stock: Double) {
+        getOrCreate(itemId).stock = stock.coerceAtLeast(0.0)
         save()
     }
 
     /**
      * Records one batch-level price-history entry for the chart shown by `/market price`.
-     * Bounded by [MarketConfig.priceHistorySize]; oldest entries are dropped when the cap is hit.
+     * Bounded by [com.cobblemonmarket.config.MarketConfig.priceHistorySize]; oldest entries
+     * are dropped when the cap is hit.
      *
-     * `priceBefore`/`priceAfter` should be the per-unit one-trade price at the factor in
+     * `priceBefore`/`priceAfter` should be the per-unit one-trade price at the stock in
      * effect immediately before and immediately after the batch — they drive the open/close
-     * of each candle in the candlestick chart. `playerUuid`/`playerName` identify the trader
-     * for the same-player same-day grouping logic.
+     * of each candle. `playerUuid`/`playerName` identify the trader for the same-player
+     * same-day grouping logic.
      */
     fun recordPriceTick(
         itemId: String, type: String,
