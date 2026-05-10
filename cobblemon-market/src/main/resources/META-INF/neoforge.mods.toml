@@ -8,6 +8,9 @@ version = "${version}"
 displayName = "Cobblemon Market"
 description = "Dynamic-pricing shopkeeper for Cobblemon"
 authors = "almutwakel"
+# Server-side only: clients don't need this jar. IGNORE_ALL_VERSION skips the
+# version handshake so vanilla / mismatched clients can connect without rejection.
+displayTest = "IGNORE_ALL_VERSION"
 
 [[dependencies.cobblemon_market]]
 modId = "neoforge"
