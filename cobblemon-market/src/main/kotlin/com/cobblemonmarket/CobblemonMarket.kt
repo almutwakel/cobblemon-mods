@@ -28,6 +28,9 @@ class CobblemonMarket(modBus: IEventBus, container: ModContainer) {
         items = ItemConfig.load(configDir)
         marketStore = MarketStore(configDir)
         marketStore.load()
+        // Stock-based pricing needs a non-zero starting stock for any newly-configured
+        // item or fresh server, otherwise prices spike to baseStock^elasticity on first read.
+        marketStore.ensureInitialized(items)
         playerSpendStore = PlayerSpendStore(configDir)
         playerSpendStore.load()
 
@@ -45,24 +48,26 @@ class CobblemonMarket(modBus: IEventBus, container: ModContainer) {
 
     private fun onServerTickPost(event: ServerTickEvent.Post) {
         recoveryTickCounter++
+        // 72000 ticks ≈ 1 in-game hour at 20 TPS. Restock pulls each item's stock toward
+        // its baseStock — partial refill of depleted items, partial bleed-off of saturated.
         if (recoveryTickCounter % 72000 == 0) {
-            applyRecoveryToAll()
+            applyRestockToAll()
         }
     }
 
-    private fun applyRecoveryToAll() {
+    private fun applyRestockToAll() {
         var updated = false
-        for ((itemId, _) in items) {
+        for ((itemId, entry) in items) {
             val state = marketStore.getOrCreate(itemId)
-            val oldFactor = state.priceFactor
-            state.priceFactor = PricingEngine.applyRecovery(
-                oldFactor, config.recoveryRatePerHour, config.factorCeiling
+            val oldStock = state.stock
+            state.stock = PricingEngine.applyRestock(
+                oldStock, entry.baseStock, config.restockRatePerHour
             )
-            if (state.priceFactor != oldFactor) updated = true
+            if (state.stock != oldStock) updated = true
         }
         if (updated) {
             marketStore.save()
-            logger.info("Hourly price recovery applied")
+            logger.info("Hourly restock applied")
         }
     }
 
