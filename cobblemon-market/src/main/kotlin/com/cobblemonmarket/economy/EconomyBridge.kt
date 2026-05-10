@@ -78,6 +78,23 @@ object EconomyBridge {
         }
     }
 
+    /**
+     * Returns the top [limit] CE balances as `(uuid, balance)` pairs, sorted by balance
+     * descending. Pulls directly from `EconomyManager.getTopBalance(int)`, so this
+     * includes offline players whose balances exist in CE's persistence.
+     *
+     * Returns an empty list when CE is not loaded.
+     */
+    fun getTopBalance(limit: Int): List<Pair<UUID, Int>> = try {
+        val mgr = manager() ?: return emptyList()
+        val method = mgr.javaClass.getMethod("getTopBalance", Int::class.javaPrimitiveType)
+        @Suppress("UNCHECKED_CAST")
+        val raw = method.invoke(mgr, limit) as List<Map.Entry<UUID, BigDecimal>>
+        raw.map { it.key to it.value.toInt() }
+    } catch (e: Throwable) {
+        log.error("EconomyBridge.getTopBalance failed", e); emptyList()
+    }
+
     fun isAvailable(): Boolean = available.get()
 
     private fun warnOnce(msg: String) {

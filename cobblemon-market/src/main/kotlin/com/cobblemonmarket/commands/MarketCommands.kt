@@ -9,7 +9,6 @@ import com.cobblemonmarket.data.PriceHistory
 import java.time.ZoneId
 import com.cobblemonmarket.economy.TradeOps
 import com.cobblemonmarket.economy.TradeResult
-import com.cobblemonmarket.gui.ShopMenuProvider
 import com.cobblemonmarket.pricing.PricingEngine
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.DoubleArgumentType
@@ -50,6 +49,19 @@ object MarketCommands {
                         showPrices(ctx.source)
                         1
                     }
+                    // Convenience alias: /market prices <item> → /market price <item>
+                    .then(Commands.argument("item", StringArgumentType.greedyString())
+                        .suggests { _, builder ->
+                            CobblemonMarket.items.keys.forEach {
+                                builder.suggest(it.substringAfterLast(':'))
+                            }
+                            builder.buildFuture()
+                        }
+                        .executes { ctx ->
+                            showPriceChart(ctx.source, StringArgumentType.getString(ctx, "item"))
+                            1
+                        }
+                    )
                 )
                 .then(Commands.literal("version")
                     .executes { ctx ->
@@ -96,12 +108,6 @@ object MarketCommands {
                             1
                         }
                     )
-                )
-                .then(Commands.literal("open")
-                    .executes { ctx ->
-                        ShopMenuProvider.open(ctx.source.playerOrException)
-                        1
-                    }
                 )
                 .then(Commands.literal("buy")
                     .then(Commands.argument("item", StringArgumentType.string())
@@ -230,24 +236,50 @@ object MarketCommands {
         val config = CobblemonMarket.config
         val store = CobblemonMarket.marketStore
 
-        source.sendSystemMessage(Component.literal("[Market] === Current Prices ==="))
-
-        for ((itemId, entry) in items) {
+        // Compute everything first so column widths can adapt to the actual content.
+        data class Row(val name: String, val buy: Int, val sell: Int, val factorPct: Int)
+        val rows = items.map { (itemId, entry) ->
             val state = store.getOrCreate(itemId)
-            val sellCount = state.transactions.count { it.type == "sell" }
-            val buyCount = state.transactions.count { it.type == "buy" }
-
-            val buyPrice = PricingEngine.buyPrice(entry.baseSellPrice, state.priceFactor, config.spreadBase)
-            val sellPrice = PricingEngine.sellPrice(
-                entry.baseSellPrice, state.priceFactor,
-                sellCount, buyCount, config.spreadBase, config.spreadExtra
+            val sells = state.transactions.count { it.type == "sell" }
+            val buys = state.transactions.count { it.type == "buy" }
+            Row(
+                name = formatItemName(itemId),
+                buy = PricingEngine.buyPrice(entry.baseSellPrice, state.priceFactor, config.spreadBase),
+                sell = PricingEngine.sellPrice(
+                    entry.baseSellPrice, state.priceFactor, sells, buys, config.spreadBase, config.spreadExtra,
+                ),
+                factorPct = (state.priceFactor * 100).toInt(),
             )
-            val factorPercent = (state.priceFactor * 100).toInt()
+        }
+        val nameWidth = (rows.maxOfOrNull { it.name.length } ?: 0).coerceAtLeast(4)
+        val buyWidth = (rows.maxOfOrNull { dollarString(it.buy).length } ?: 0).coerceAtLeast(3)
+        val sellWidth = (rows.maxOfOrNull { dollarString(it.sell).length } ?: 0).coerceAtLeast(4)
 
+        source.sendSystemMessage(Component.literal("§e[Market] §6═══ Current Prices ═══"))
+        source.sendSystemMessage(Component.literal(
+            "§8  ${"Item".padEnd(nameWidth)}  ${"Buy".padStart(buyWidth)}   ${"Sell".padStart(sellWidth)}   Factor"
+        ))
+        for (r in rows) {
+            val factorColor = factorColor(r.factorPct)
             source.sendSystemMessage(Component.literal(
-                "  ${formatItemName(itemId)}: Sell $sellPrice | Buy $buyPrice ($factorPercent%)"
+                "§7  §f${r.name.padEnd(nameWidth)}  " +
+                "§a${dollarString(r.buy).padStart(buyWidth)}   " +
+                "§c${dollarString(r.sell).padStart(sellWidth)}   " +
+                "$factorColor${r.factorPct.toString().padStart(3)}%"
             ))
         }
+        source.sendSystemMessage(Component.literal(
+            "§8  Tip: §7/market price <item>§8 for the candle chart, §7/market buy|sell <item> <qty>§8 to trade."
+        ))
+    }
+
+    private fun dollarString(n: Int): String = "\$" + "%,d".format(n)
+
+    /** Red <50% (cheap), yellow 50-89% (recovering), green ≥90% (near ceiling). */
+    private fun factorColor(pct: Int): String = when {
+        pct < 50 -> "§c"
+        pct < 90 -> "§e"
+        else -> "§a"
     }
 
     /**
@@ -427,11 +459,10 @@ object MarketCommands {
     private fun showHelp(source: CommandSourceStack, includeAdmin: Boolean) {
         val lines = mutableListOf(
             "§e[Market] §fCommands:",
-            "§7  /market prices §f— show current buy/sell prices for all items",
-            "§7  /market price <item> §f— price-history chart for one item",
-            "§7  /market history <item> §f— recent price-movement summary for one item",
-            "§7  /market leaderboard §f— top wealth (PokeDollars) on the server",
-            "§7  /market open §f— open the chest UI (in-game player only)",
+            "§7  /market prices §f— current buy/sell prices for all items",
+            "§7  /market price <item> §f— candlestick chart for one item §8(/market prices <item> also works)",
+            "§7  /market history <item> §f— buy/sell-count summary for one item",
+            "§7  /market leaderboard §f— top wealth (PokeDollars) across the server",
             "§7  /market buy <item> <qty> §f— buy via command (in-game player)",
             "§7  /market sell <item> <qty> §f— sell via command (in-game player)",
             "§7  /market version §f— show mod version",
@@ -505,48 +536,56 @@ object MarketCommands {
             "§a[Market] Set ${formatItemName(itemId)} factor to ${(value * 100).toInt()}%"))
     }
 
+    /**
+     * Wealth leaderboard pulled directly from Cobblemon Economy via
+     * `EconomyManager.getTopBalance(N)` — covers online and offline players alike.
+     * Names are resolved from (1) the live player list, (2) the server profile cache,
+     * (3) a UUID short fragment as last resort.
+     */
     private fun showLeaderboard(source: CommandSourceStack) {
         val config = CobblemonMarket.config
-        val knownUuids = CobblemonMarket.playerSpendStore.getAllKnownUuids()
+        val server = source.server
+        val top = EconomyBridge.getTopBalance(config.leaderboardSize.coerceAtLeast(1))
 
-        if (knownUuids.isEmpty()) {
-            source.sendSystemMessage(Component.literal("[Market] No players have used the market yet."))
+        if (top.isEmpty()) {
+            source.sendSystemMessage(Component.literal(
+                "§7[Market] No balances yet — Cobblemon Economy may not be loaded, or no player has any PokeDollars."))
             return
         }
 
-        val balances = mutableListOf<Triple<String, String, Int>>()
-        for (uuidStr in knownUuids) {
-            val spendData = CobblemonMarket.playerSpendStore.getAll()[uuidStr] ?: continue
-            val balance = getBalanceForUuid(UUID.fromString(uuidStr))
-            balances.add(Triple(uuidStr, spendData.name, balance))
+        val rows = top.mapIndexed { i, (uuid, balance) ->
+            val name = server.playerList.getPlayer(uuid)?.name?.string
+                ?: server.profileCache?.get(uuid)?.map { it.name }?.orElse(null)
+                ?: uuid.toString().take(8)
+            Triple(i + 1, name, balance)
         }
+        val nameWidth = (rows.maxOfOrNull { it.second.length } ?: 0).coerceAtLeast(6)
+        val balWidth = (rows.maxOfOrNull { dollarString(it.third).length } ?: 0).coerceAtLeast(4)
 
-        // Comparator SAM (invokedynamic) instead of Kotlin's `sortByDescending` — the latter's
-        // `$$inlined$` helper class fails to load under NeoForge + Sinytra Connector
-        // (see cobblemon-ranked EloStore.getLeaderboard for the same fix).
-        balances.sortWith(Comparator { a, b -> b.third.compareTo(a.third) })
-
-        source.sendSystemMessage(Component.literal("[Market] === Wealth Leaderboard ==="))
-        val topN = balances.take(config.leaderboardSize)
-        topN.forEachIndexed { i, (_, name, balance) ->
+        source.sendSystemMessage(Component.literal("§e[Market] §6═══ Wealth Leaderboard ═══"))
+        for ((rank, name, balance) in rows) {
+            val rankLabel = when (rank) {
+                1 -> "§6§l#1"
+                2 -> "§7§l#2"
+                3 -> "§c§l#3"
+                else -> "§8#$rank"
+            }
             source.sendSystemMessage(Component.literal(
-                "  ${i + 1}. $name: $balance PokeDollars"
+                "  $rankLabel §f${name.padEnd(nameWidth)}  §a${dollarString(balance).padStart(balWidth)}"
             ))
         }
 
-        val player = source.player ?: return
-        val playerUuid = player.uuid.toString()
-        val playerIndex = balances.indexOfFirst { it.first == playerUuid }
-        if (playerIndex >= config.leaderboardSize) {
-            val (_, name, balance) = balances[playerIndex]
-            source.sendSystemMessage(Component.literal("  ---"))
+        // If the caller is online but outside the top N, append their rank/balance for context.
+        val callerUuid = source.player?.uuid
+        if (callerUuid != null && top.none { it.first == callerUuid }) {
+            val callerBalance = EconomyBridge.getBalance(callerUuid)
+            val callerName = source.player!!.name.string
+            source.sendSystemMessage(Component.literal("§8  ..."))
             source.sendSystemMessage(Component.literal(
-                "  ${playerIndex + 1}. $name: $balance PokeDollars"
+                "  §8you §f${callerName.padEnd(nameWidth)}  §a${dollarString(callerBalance).padStart(balWidth)}"
             ))
         }
     }
-
-    private fun getBalanceForUuid(uuid: UUID): Int = EconomyBridge.getBalance(uuid)
 
     private fun reload(source: CommandSourceStack) {
         val configDir = FMLPaths.CONFIGDIR.get()
