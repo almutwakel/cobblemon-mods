@@ -4,14 +4,19 @@ import com.cobblemonmarket.CobblemonMarket
 import com.cobblemonmarket.config.ItemConfig
 import com.cobblemonmarket.config.MarketConfig
 import com.cobblemonmarket.economy.EconomyBridge
+import com.cobblemonmarket.economy.TradeOps
+import com.cobblemonmarket.economy.TradeResult
 import com.cobblemonmarket.gui.ShopMenuProvider
 import com.cobblemonmarket.pricing.PricingEngine
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.DoubleArgumentType
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
+import net.minecraft.commands.arguments.EntityArgument
 import net.minecraft.network.chat.Component
+import net.minecraft.server.level.ServerPlayer
 import net.neoforged.fml.ModList
 import net.neoforged.fml.loading.FMLPaths
 import java.util.UUID
@@ -60,8 +65,92 @@ object MarketCommands {
                         1
                     }
                 )
+                .then(Commands.literal("buy")
+                    .then(Commands.argument("item", StringArgumentType.string())
+                        .suggests { _, builder ->
+                            CobblemonMarket.items.keys.forEach { builder.suggest(it) }
+                            builder.buildFuture()
+                        }
+                        .then(Commands.argument("qty", IntegerArgumentType.integer(1, 1024))
+                            .executes { ctx ->
+                                val sp = ctx.source.playerOrException
+                                val itemId = resolveItemId(StringArgumentType.getString(ctx, "item"))
+                                val qty = IntegerArgumentType.getInteger(ctx, "qty")
+                                if (itemId == null) {
+                                    ctx.source.sendSystemMessage(Component.literal("§c[Market] Unknown item"))
+                                    return@executes 0
+                                }
+                                reportTrade(ctx.source, "BUY", sp, itemId, qty, TradeOps.buy(sp, itemId, qty))
+                            }
+                        )
+                    )
+                )
+                .then(Commands.literal("sell")
+                    .then(Commands.argument("item", StringArgumentType.string())
+                        .suggests { _, builder ->
+                            CobblemonMarket.items.keys.forEach { builder.suggest(it) }
+                            builder.buildFuture()
+                        }
+                        .then(Commands.argument("qty", IntegerArgumentType.integer(1, 1024))
+                            .executes { ctx ->
+                                val sp = ctx.source.playerOrException
+                                val itemId = resolveItemId(StringArgumentType.getString(ctx, "item"))
+                                val qty = IntegerArgumentType.getInteger(ctx, "qty")
+                                if (itemId == null) {
+                                    ctx.source.sendSystemMessage(Component.literal("§c[Market] Unknown item"))
+                                    return@executes 0
+                                }
+                                reportTrade(ctx.source, "SELL", sp, itemId, qty, TradeOps.sell(sp, itemId, qty))
+                            }
+                        )
+                    )
+                )
                 .then(Commands.literal("admin")
                     .requires { it.hasPermission(4) }
+                    .then(Commands.literal("trade")
+                        .then(Commands.argument("target", EntityArgument.player())
+                            .then(Commands.literal("buy")
+                                .then(Commands.argument("item", StringArgumentType.string())
+                                    .suggests { _, builder ->
+                                        CobblemonMarket.items.keys.forEach { builder.suggest(it) }
+                                        builder.buildFuture()
+                                    }
+                                    .then(Commands.argument("qty", IntegerArgumentType.integer(1, 1024))
+                                        .executes { ctx ->
+                                            val target = EntityArgument.getPlayer(ctx, "target")
+                                            val itemId = resolveItemId(StringArgumentType.getString(ctx, "item"))
+                                            val qty = IntegerArgumentType.getInteger(ctx, "qty")
+                                            if (itemId == null) {
+                                                ctx.source.sendSystemMessage(Component.literal("§c[Market] Unknown item"))
+                                                return@executes 0
+                                            }
+                                            reportTrade(ctx.source, "BUY (admin for ${target.name.string})", target, itemId, qty, TradeOps.buy(target, itemId, qty))
+                                        }
+                                    )
+                                )
+                            )
+                            .then(Commands.literal("sell")
+                                .then(Commands.argument("item", StringArgumentType.string())
+                                    .suggests { _, builder ->
+                                        CobblemonMarket.items.keys.forEach { builder.suggest(it) }
+                                        builder.buildFuture()
+                                    }
+                                    .then(Commands.argument("qty", IntegerArgumentType.integer(1, 1024))
+                                        .executes { ctx ->
+                                            val target = EntityArgument.getPlayer(ctx, "target")
+                                            val itemId = resolveItemId(StringArgumentType.getString(ctx, "item"))
+                                            val qty = IntegerArgumentType.getInteger(ctx, "qty")
+                                            if (itemId == null) {
+                                                ctx.source.sendSystemMessage(Component.literal("§c[Market] Unknown item"))
+                                                return@executes 0
+                                            }
+                                            reportTrade(ctx.source, "SELL (admin for ${target.name.string})", target, itemId, qty, TradeOps.sell(target, itemId, qty))
+                                        }
+                                    )
+                                )
+                            )
+                        )
+                    )
                     .then(Commands.literal("setfactor")
                         .then(Commands.argument("item", StringArgumentType.string())
                             .suggests { _, builder ->
@@ -146,6 +235,53 @@ object MarketCommands {
 
     private fun formatItemName(itemId: String): String =
         itemId.substringAfterLast(':').split('_').joinToString(" ") { it.replaceFirstChar(Char::uppercase) }
+
+    /**
+     * Renders a TradeResult into chat for the command source. Returns 1 on success, 0 on failure
+     * (Brigadier convention for command return codes).
+     *
+     * Sent to BOTH the source (e.g., the server console) and the affected player so admin trades
+     * are visible to the target without needing the source to relay manually.
+     */
+    private fun reportTrade(
+        source: CommandSourceStack,
+        label: String,
+        target: ServerPlayer,
+        itemId: String,
+        qty: Int,
+        result: TradeResult,
+    ): Int {
+        val itemName = formatItemName(itemId)
+        return when (result) {
+            is TradeResult.Success -> {
+                val factorPct = (result.newFactor * 100).toInt()
+                val msg = Component.literal("§a[Market] $label $qty× $itemName for $${result.totalPrice} (factor → $factorPct%)")
+                source.sendSystemMessage(msg)
+                if (target.uuid != source.player?.uuid) target.sendSystemMessage(msg)
+                1
+            }
+            is TradeResult.InsufficientBalance -> {
+                source.sendSystemMessage(Component.literal("§c[Market] Insufficient balance for ${target.name.string}: have $${result.have}, need $${result.need}"))
+                0
+            }
+            is TradeResult.InsufficientItems -> {
+                source.sendSystemMessage(Component.literal("§c[Market] ${target.name.string} only has ${result.have}× ${formatItemName(result.itemId)} (need ${result.need})"))
+                0
+            }
+            TradeResult.NoInventorySpace -> {
+                source.sendSystemMessage(Component.literal("§c[Market] ${target.name.string} has no inventory space"))
+                0
+            }
+            is TradeResult.UnknownItem -> {
+                source.sendSystemMessage(Component.literal("§c[Market] Unknown item: ${result.itemId}"))
+                0
+            }
+            TradeResult.EconomyFailed -> {
+                source.sendSystemMessage(Component.literal("§c[Market] Cobblemon Economy unavailable"))
+                0
+            }
+        }
+    }
 
     private fun setFactor(source: CommandSourceStack, itemId: String, value: Double) {
         if (itemId !in CobblemonMarket.items) {

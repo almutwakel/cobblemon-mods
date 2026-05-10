@@ -1,7 +1,6 @@
 package com.cobblemonmarket.gui
 
 import com.cobblemonmarket.CobblemonMarket
-import com.cobblemonmarket.economy.EconomyBridge
 import com.cobblemonmarket.pricing.PricingEngine
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.network.chat.Component
@@ -113,85 +112,35 @@ class TransactionMenu(
     }
 
     private fun performBuy(player: ServerPlayer) {
-        val entry = CobblemonMarket.items[itemId] ?: return
-        val state = CobblemonMarket.marketStore.getOrCreate(itemId)
-        val cfg = CobblemonMarket.config
-        val result = PricingEngine.simulateBatchBuy(
-            entry.baseSellPrice, state.priceFactor, quantity,
-            cfg.buyGrowth, cfg.factorCeiling, cfg.spreadBase
-        )
-        val totalCost = result.totalPrice
-        val balance = EconomyBridge.getBalance(player.uuid)
-        if (balance < totalCost) {
-            player.sendSystemMessage(Component.literal("§cInsufficient balance: have $$balance, need $$totalCost"))
-            return
+        when (val r = com.cobblemonmarket.economy.TradeOps.buy(player, itemId, quantity)) {
+            is com.cobblemonmarket.economy.TradeResult.Success ->
+                player.sendSystemMessage(Component.literal("§aBought $quantity for $${r.totalPrice}"))
+            is com.cobblemonmarket.economy.TradeResult.InsufficientBalance ->
+                player.sendSystemMessage(Component.literal("§cInsufficient balance: have $${r.have}, need $${r.need}"))
+            com.cobblemonmarket.economy.TradeResult.NoInventorySpace ->
+                player.sendSystemMessage(Component.literal("§cNot enough inventory space"))
+            com.cobblemonmarket.economy.TradeResult.EconomyFailed ->
+                player.sendSystemMessage(Component.literal("§cTransaction failed (economy unavailable)"))
+            is com.cobblemonmarket.economy.TradeResult.UnknownItem ->
+                player.sendSystemMessage(Component.literal("§cUnknown item: ${r.itemId}"))
+            is com.cobblemonmarket.economy.TradeResult.InsufficientItems -> {} // unreachable for buy
         }
-        if (!hasInventorySpace(player, quantity)) {
-            player.sendSystemMessage(Component.literal("§cNot enough inventory space"))
-            return
-        }
-        if (!EconomyBridge.withdraw(player.uuid, totalCost)) {
-            player.sendSystemMessage(Component.literal("§cTransaction failed (insufficient balance)"))
-            return
-        }
-        repeat(quantity) {
-            state.priceFactor = PricingEngine.updateFactorOnBuy(state.priceFactor, cfg.buyGrowth, cfg.factorCeiling)
-            CobblemonMarket.marketStore.addTransaction(itemId, "buy")
-        }
-        val item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId))
-        player.inventory.add(ItemStack(item, quantity))
-        CobblemonMarket.marketStore.save()
-        player.sendSystemMessage(Component.literal("§aBought $quantity for $$totalCost"))
         repaint()
     }
 
     private fun performSell(player: ServerPlayer) {
-        val entry = CobblemonMarket.items[itemId] ?: return
-        val state = CobblemonMarket.marketStore.getOrCreate(itemId)
-        val cfg = CobblemonMarket.config
-        val sells = state.transactions.count { it.type == "sell" }
-        val buys = state.transactions.count { it.type == "buy" }
-        val result = PricingEngine.simulateBatchSell(
-            entry.baseSellPrice, state.priceFactor, quantity,
-            cfg.sellDecay, cfg.factorFloor, sells, buys, cfg.spreadBase, cfg.spreadExtra
-        )
-        val totalProceeds = result.totalPrice
-        val itemRef = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemId))
-        val have = countItems(player, itemRef)
-        if (have < quantity) {
-            player.sendSystemMessage(Component.literal("§cYou only have $have ${itemId.substringAfterLast(':')}"))
-            return
+        when (val r = com.cobblemonmarket.economy.TradeOps.sell(player, itemId, quantity)) {
+            is com.cobblemonmarket.economy.TradeResult.Success ->
+                player.sendSystemMessage(Component.literal("§aSold $quantity for $${r.totalPrice}"))
+            is com.cobblemonmarket.economy.TradeResult.InsufficientItems ->
+                player.sendSystemMessage(Component.literal("§cYou only have ${r.have} ${itemId.substringAfterLast(':')}"))
+            is com.cobblemonmarket.economy.TradeResult.UnknownItem ->
+                player.sendSystemMessage(Component.literal("§cUnknown item: ${r.itemId}"))
+            is com.cobblemonmarket.economy.TradeResult.InsufficientBalance,
+            com.cobblemonmarket.economy.TradeResult.NoInventorySpace,
+            com.cobblemonmarket.economy.TradeResult.EconomyFailed -> {} // unreachable for sell
         }
-        removeItems(player, itemRef, quantity)
-        repeat(quantity) {
-            state.priceFactor = PricingEngine.updateFactorOnSell(state.priceFactor, cfg.sellDecay, cfg.factorFloor)
-            CobblemonMarket.marketStore.addTransaction(itemId, "sell")
-        }
-        EconomyBridge.deposit(player.uuid, totalProceeds)
-        CobblemonMarket.marketStore.save()
-        player.sendSystemMessage(Component.literal("§aSold $quantity for $$totalProceeds"))
         repaint()
-    }
-
-    private fun countItems(player: Player, item: Item): Int =
-        player.inventory.items.sumOf { if (it.item == item) it.count else 0 }
-
-    private fun removeItems(player: Player, item: Item, count: Int) {
-        var remaining = count
-        for (stack in player.inventory.items) {
-            if (remaining <= 0) break
-            if (stack.item == item) {
-                val take = minOf(remaining, stack.count)
-                stack.shrink(take)
-                remaining -= take
-            }
-        }
-    }
-
-    private fun hasInventorySpace(player: Player, count: Int): Boolean {
-        var space = 0
-        for (s in player.inventory.items) if (s.isEmpty) space += 64
-        return space >= count
     }
 
     override fun quickMoveStack(player: Player, index: Int): ItemStack = ItemStack.EMPTY
