@@ -12,12 +12,13 @@ import kotlin.io.path.writeText
 data class MarketConfig(
     val spreadBase: Double = 3.0,
     val spreadExtra: Double = 4.0,
-    val recoveryRatePerHour: Double = 0.01,
+    val recoveryRatePerHour: Double = 0.04,
     val factorFloor: Double = 0.10,
     val factorCeiling: Double = 1.00,
     val sellDecay: Double = 0.98,
     val buyGrowth: Double = 1.02,
-    val transactionWindowSize: Int = 50
+    val transactionWindowSize: Int = 50,
+    val leaderboardSize: Int = 10
 ) {
     companion object {
         private val gson: Gson = GsonBuilder().setPrettyPrinting().create()

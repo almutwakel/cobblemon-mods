@@ -5,6 +5,7 @@ import com.cobblemonmarket.config.ItemConfig
 import com.cobblemonmarket.config.ItemEntry
 import com.cobblemonmarket.config.MarketConfig
 import com.cobblemonmarket.data.MarketStore
+import com.cobblemonmarket.data.PlayerSpendStore
 import com.cobblemonmarket.pricing.PricingEngine
 import com.cobblemonmarket.shop.ShopkeeperManager
 import net.fabricmc.api.ModInitializer
@@ -20,6 +21,7 @@ object CobblemonMarket : ModInitializer {
     lateinit var config: MarketConfig
     var items: Map<String, ItemEntry> = emptyMap()
     lateinit var marketStore: MarketStore
+    lateinit var playerSpendStore: PlayerSpendStore
 
     override fun onInitialize() {
         logger.info("Cobblemon Market initializing...")
@@ -29,6 +31,8 @@ object CobblemonMarket : ModInitializer {
         items = ItemConfig.load(configDir)
         marketStore = MarketStore(configDir)
         marketStore.load()
+        playerSpendStore = PlayerSpendStore(configDir)
+        playerSpendStore.load()
 
         ShopkeeperManager.init(configDir)
 

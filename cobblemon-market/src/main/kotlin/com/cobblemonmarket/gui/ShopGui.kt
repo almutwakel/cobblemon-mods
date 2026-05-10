@@ -39,8 +39,8 @@ class ShopGui(private val player: ServerPlayer) {
             val sellCount = state.transactions.count { it.type == "sell" }
             val buyCount = state.transactions.count { it.type == "buy" }
 
-            val currentSellPrice = PricingEngine.sellPrice(itemEntry.baseSellPrice, state.priceFactor)
-            val currentBuyPrice = PricingEngine.buyPrice(
+            val currentBuyPrice = PricingEngine.buyPrice(itemEntry.baseSellPrice, state.priceFactor, config.spreadBase)
+            val currentSellPrice = PricingEngine.sellPrice(
                 itemEntry.baseSellPrice, state.priceFactor,
                 sellCount, buyCount, config.spreadBase, config.spreadExtra
             )
@@ -58,7 +58,7 @@ class ShopGui(private val player: ServerPlayer) {
                 .setLore(listOf(
                     Component.literal("Sell to shop: $currentSellPrice PokeDollars"),
                     Component.literal("Buy from shop: $currentBuyPrice PokeDollars"),
-                    Component.literal("Market factor: $factorPercent%"),
+                    Component.literal("Demand: $factorPercent%"),
                     Component.literal(""),
                     Component.literal("Click to buy or sell")
                 ))

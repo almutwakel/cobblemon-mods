@@ -24,6 +24,7 @@ data class RankedConfig(
     val maxLegendaries: Int = 1,
     val forcesPerDayPerPair: Int = 1,
     val decayEnabled: Boolean = true,
+    val leaderboardSize: Int = 10,
     val arenaCoords: ArenaCoords? = null
 ) {
     companion object {

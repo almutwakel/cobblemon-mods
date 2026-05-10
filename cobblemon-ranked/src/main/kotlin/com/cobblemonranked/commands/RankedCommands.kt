@@ -137,15 +137,29 @@ object RankedCommands {
     }
 
     private fun showLeaderboard(source: CommandSourceStack) {
+        val config = CobblemonRanked.config
         val leaderboard = CobblemonRanked.eloStore.getLeaderboard()
-        source.sendSystemMessage(Component.literal("[Ranked] === Leaderboard ==="))
+        source.sendSystemMessage(Component.literal("[Ranked] === ELO Leaderboard ==="))
         if (leaderboard.isEmpty()) {
             source.sendSystemMessage(Component.literal("  No players ranked yet."))
             return
         }
-        leaderboard.take(10).forEachIndexed { i, (_, data) ->
+        val topN = leaderboard.take(config.leaderboardSize)
+        topN.forEachIndexed { i, (_, data) ->
             source.sendSystemMessage(Component.literal(
                 "  ${i + 1}. ${data.name}: ${data.elo} (${data.wins}W/${data.losses}L)"
+            ))
+        }
+
+        // Show caller's rank if not in top N
+        val player = source.player ?: return
+        val playerUuid = player.uuid.toString()
+        val playerIndex = leaderboard.indexOfFirst { it.first == playerUuid }
+        if (playerIndex >= config.leaderboardSize) {
+            val (_, playerData) = leaderboard[playerIndex]
+            source.sendSystemMessage(Component.literal("  ---"))
+            source.sendSystemMessage(Component.literal(
+                "  ${playerIndex + 1}. ${playerData.name}: ${playerData.elo} (${playerData.wins}W/${playerData.losses}L)"
             ))
         }
     }

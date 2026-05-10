@@ -13,17 +13,23 @@ data class BatchResult(
 object PricingEngine {
 
     /**
-     * Returns the price at which the shop buys one unit from the player (sell side),
-     * scaled by the current price factor.
+     * Returns the price at which a player buys one unit from the shop.
+     * Buy price is driven purely by the factor and constant spreadBase:
+     *   P_buy = baseSellPrice × priceFactor × spreadBase
+     *
+     * This guarantees that every sell (which lowers priceFactor) always lowers the buy price.
      */
-    fun sellPrice(baseSellPrice: Int, priceFactor: Double): Int =
-        (baseSellPrice * priceFactor).roundToInt()
+    fun buyPrice(baseSellPrice: Int, priceFactor: Double, spreadBase: Double): Int =
+        (baseSellPrice * priceFactor * spreadBase).roundToInt()
 
     /**
-     * Returns the price at which a player buys one unit from the shop (buy side),
-     * incorporating the spread multiplier derived from recent transaction history.
+     * Returns the price at which the shop buys one unit from the player (sell side).
+     * Sell price = buyPrice / dynamicSpread.
+     *
+     * The dynamic spread only punishes sellers during lopsided activity —
+     * it never raises the cost for buyers.
      */
-    fun buyPrice(
+    fun sellPrice(
         baseSellPrice: Int,
         priceFactor: Double,
         sells: Int,
@@ -31,20 +37,16 @@ object PricingEngine {
         spreadBase: Double,
         spreadExtra: Double
     ): Int {
+        val buy = buyPrice(baseSellPrice, priceFactor, spreadBase)
         val spread = calculateSpread(sells, buys, spreadBase, spreadExtra)
-        return (baseSellPrice * priceFactor * spread).roundToInt()
+        return (buy.toDouble() / spread).roundToInt()
     }
 
     /**
      * Computes the bid-ask spread multiplier based on the skew of recent sells vs buys.
      *
-     * The spread is minimum (spreadBase) when sells and buys are balanced, and maximum
-     * (spreadBase + spreadExtra) when activity is entirely one-sided.
-     *
-     * Formula:
-     *   total = sells + buys
-     *   skew  = if total < 2 then 0.5 else sells / total
-     *   spread = spreadBase + spreadExtra * (2 * |skew - 0.5|)^2
+     * spread = spreadBase + spreadExtra × (2 × |skew − 0.5|)²
+     * Minimum (spreadBase) when balanced, maximum (spreadBase + spreadExtra) when one-sided.
      */
     fun calculateSpread(sells: Int, buys: Int, spreadBase: Double, spreadExtra: Double): Double {
         val total = sells + buys
@@ -68,30 +70,34 @@ object PricingEngine {
 
     /**
      * Passively recovers the price factor toward the ceiling over time.
-     * Uses exponential smoothing: factor += recoveryRate * (ceiling - factor).
+     * Uses exponential smoothing: factor += recoveryRate × (ceiling − factor).
      */
     fun applyRecovery(priceFactor: Double, recoveryRate: Double, factorCeiling: Double): Double =
         priceFactor + recoveryRate * (factorCeiling - priceFactor)
 
     /**
      * Simulates selling [quantity] units in sequence.
-     *
-     * For each unit: records the sell price at the current factor, then decays the factor.
-     * Returns the list of per-unit prices, their sum, and the factor after all sells.
+     * For each unit: records the sell price at the current factor/spread, then decays the factor.
      */
     fun simulateBatchSell(
         baseSellPrice: Int,
         startFactor: Double,
         quantity: Int,
         sellDecay: Double,
-        factorFloor: Double
+        factorFloor: Double,
+        sells: Int,
+        buys: Int,
+        spreadBase: Double,
+        spreadExtra: Double
     ): BatchResult {
         val prices = mutableListOf<Int>()
         var factor = startFactor
+        var currentSells = sells
 
         repeat(quantity) {
-            prices.add(sellPrice(baseSellPrice, factor))
+            prices.add(sellPrice(baseSellPrice, factor, currentSells, buys, spreadBase, spreadExtra))
             factor = updateFactorOnSell(factor, sellDecay, factorFloor)
+            currentSells++
         }
 
         return BatchResult(
@@ -103,12 +109,8 @@ object PricingEngine {
 
     /**
      * Simulates buying [quantity] units in sequence.
-     *
-     * For each unit: records the buy price at the current factor and current spread
-     * (spread is recalculated each iteration as the running buys counter increments),
+     * For each unit: records the buy price at the current factor (using constant spreadBase),
      * then grows the factor.
-     *
-     * [sells] and [buys] represent the pre-existing transaction counts before this batch.
      */
     fun simulateBatchBuy(
         baseSellPrice: Int,
@@ -116,19 +118,14 @@ object PricingEngine {
         quantity: Int,
         buyGrowth: Double,
         factorCeiling: Double,
-        sells: Int,
-        buys: Int,
-        spreadBase: Double,
-        spreadExtra: Double
+        spreadBase: Double
     ): BatchResult {
         val prices = mutableListOf<Int>()
         var factor = startFactor
-        var currentBuys = buys
 
         repeat(quantity) {
-            prices.add(buyPrice(baseSellPrice, factor, sells, currentBuys, spreadBase, spreadExtra))
+            prices.add(buyPrice(baseSellPrice, factor, spreadBase))
             factor = updateFactorOnBuy(factor, buyGrowth, factorCeiling)
-            currentBuys++
         }
 
         return BatchResult(

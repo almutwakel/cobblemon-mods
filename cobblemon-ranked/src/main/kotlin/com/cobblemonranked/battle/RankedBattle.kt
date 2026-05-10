@@ -100,6 +100,10 @@ object RankedBattleManager {
             return
         }
 
+        // Save teams for showcase
+        CobblemonRanked.teamStore.saveTeam(player1.uuid, team1)
+        CobblemonRanked.teamStore.saveTeam(player2.uuid, team2)
+
         // Build temporary party stores with selected teams
         val tempParty1 = buildTempParty(player1.uuid, team1)
         val tempParty2 = buildTempParty(player2.uuid, team2)
@@ -219,9 +223,9 @@ object RankedBattleManager {
             "${loser.name.string}: $oldLoserElo -> $newLoserElo ($loserDelta)")
 
         val leaderboard = store.getLeaderboard()
-        val top5 = leaderboard.take(5)
+        val topN = leaderboard.take(config.leaderboardSize)
         broadcast(winner.server, "[Ranked] Leaderboard:")
-        top5.forEachIndexed { i, (_, data) ->
+        topN.forEachIndexed { i, (_, data) ->
             broadcast(winner.server, "  ${i + 1}. ${data.name}: ${data.elo} (${data.wins}W/${data.losses}L)")
         }
     }

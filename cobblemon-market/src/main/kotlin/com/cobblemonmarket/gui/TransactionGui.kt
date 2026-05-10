@@ -87,8 +87,7 @@ class TransactionGui(
                 quantity = quantity,
                 buyGrowth = config.buyGrowth,
                 factorCeiling = config.factorCeiling,
-                sells = sellCount, buys = buyCount,
-                spreadBase = config.spreadBase, spreadExtra = config.spreadExtra
+                spreadBase = config.spreadBase
             )
             lore = buildList {
                 add(Component.literal("Buy $quantity x $itemName:"))
@@ -104,7 +103,9 @@ class TransactionGui(
                 startFactor = state.priceFactor,
                 quantity = quantity,
                 sellDecay = config.sellDecay,
-                factorFloor = config.factorFloor
+                factorFloor = config.factorFloor,
+                sells = sellCount, buys = buyCount,
+                spreadBase = config.spreadBase, spreadExtra = config.spreadExtra
             )
             lore = buildList {
                 add(Component.literal("Sell $quantity x $itemName:"))
@@ -154,17 +155,13 @@ class TransactionGui(
         val mcItem = resolveItem()
 
         if (isBuying) {
-            val sellCount = state.transactions.count { it.type == "sell" }
-            val buyCount = state.transactions.count { it.type == "buy" }
-
             val result = PricingEngine.simulateBatchBuy(
                 baseSellPrice = itemEntry.baseSellPrice,
                 startFactor = state.priceFactor,
                 quantity = quantity,
                 buyGrowth = config.buyGrowth,
                 factorCeiling = config.factorCeiling,
-                sells = sellCount, buys = buyCount,
-                spreadBase = config.spreadBase, spreadExtra = config.spreadExtra
+                spreadBase = config.spreadBase
             )
 
             val balance = getPlayerBalance()
@@ -179,6 +176,7 @@ class TransactionGui(
             }
 
             subtractBalance(result.totalPrice)
+            CobblemonMarket.playerSpendStore.recordSpend(player.uuid, player.name.string, result.totalPrice)
             player.inventory.add(ItemStack(mcItem, quantity))
             state.priceFactor = result.finalFactor
             repeat(quantity) { store.addTransaction(itemId, "buy") }
@@ -187,12 +185,17 @@ class TransactionGui(
             player.sendSystemMessage(Component.literal(
                 "[Market] Bought $quantity x ${ShopGui.formatItemName(itemId)} for ${result.totalPrice} PokeDollars."))
         } else {
+            val sellCount = state.transactions.count { it.type == "sell" }
+            val buyCount = state.transactions.count { it.type == "buy" }
+
             val result = PricingEngine.simulateBatchSell(
                 baseSellPrice = itemEntry.baseSellPrice,
                 startFactor = state.priceFactor,
                 quantity = quantity,
                 sellDecay = config.sellDecay,
-                factorFloor = config.factorFloor
+                factorFloor = config.factorFloor,
+                sells = sellCount, buys = buyCount,
+                spreadBase = config.spreadBase, spreadExtra = config.spreadExtra
             )
 
             val itemCount = countItems(mcItem)
@@ -212,19 +215,30 @@ class TransactionGui(
                 "[Market] Sold $quantity x ${ShopGui.formatItemName(itemId)} for ${result.totalPrice} PokeDollars."))
         }
 
-        ShopGui(player).open()
+        rebuild()
     }
 
     // --- Economy bridge ---
     // Uses Cobblemon Economy API via reflection for soft dependency.
     // Replace with direct imports if cobblemon-economy is a compile dependency.
 
+    private fun getEconomyManager(): Any? {
+        // CobblemonEconomy is a regular class instantiated by Fabric's mod loader.
+        // We get the instance via FabricLoader's entrypoint container.
+        val loader = net.fabricmc.loader.api.FabricLoader.getInstance()
+        val container = loader.getModContainer("cobblemon-economy").orElse(null) ?: return null
+        val entrypoints = loader.getEntrypointContainers("main", net.fabricmc.api.ModInitializer::class.java)
+        val economyEntry = entrypoints.firstOrNull { it.provider.metadata.id == "cobblemon-economy" }
+            ?: return null
+        val economyInstance = economyEntry.entrypoint
+        return economyInstance.javaClass.getMethod("getEconomyManager").invoke(economyInstance)
+    }
+
     private fun getPlayerBalance(): Int {
         return try {
-            val economyClass = Class.forName("com.ryvexam.cobblemoneconomy.CobblemonEconomy")
-            val instance = economyClass.getField("INSTANCE").get(null)
-            val getBalance = economyClass.getMethod("getBalance", java.util.UUID::class.java)
-            val balance = getBalance.invoke(instance, player.uuid) as BigDecimal
+            val manager = getEconomyManager() ?: return 0
+            val method = manager.javaClass.getMethod("getBalance", java.util.UUID::class.java)
+            val balance = method.invoke(manager, player.uuid) as BigDecimal
             balance.toInt()
         } catch (e: Exception) {
             CobblemonMarket.logger.error("Failed to get player balance via CobblemonEconomy", e)
@@ -234,11 +248,10 @@ class TransactionGui(
 
     private fun subtractBalance(amount: Int) {
         try {
-            val economyClass = Class.forName("com.ryvexam.cobblemoneconomy.CobblemonEconomy")
-            val instance = economyClass.getField("INSTANCE").get(null)
-            val method = economyClass.getMethod("removeBalance",
+            val manager = getEconomyManager() ?: return
+            val method = manager.javaClass.getMethod("subtractBalance",
                 java.util.UUID::class.java, BigDecimal::class.java)
-            method.invoke(instance, player.uuid, BigDecimal(amount))
+            method.invoke(manager, player.uuid, BigDecimal(amount))
         } catch (e: Exception) {
             CobblemonMarket.logger.error("Failed to subtract balance", e)
         }
@@ -246,11 +259,10 @@ class TransactionGui(
 
     private fun addBalance(amount: Int) {
         try {
-            val economyClass = Class.forName("com.ryvexam.cobblemoneconomy.CobblemonEconomy")
-            val instance = economyClass.getField("INSTANCE").get(null)
-            val method = economyClass.getMethod("addBalance",
+            val manager = getEconomyManager() ?: return
+            val method = manager.javaClass.getMethod("addBalance",
                 java.util.UUID::class.java, BigDecimal::class.java)
-            method.invoke(instance, player.uuid, BigDecimal(amount))
+            method.invoke(manager, player.uuid, BigDecimal(amount))
         } catch (e: Exception) {
             CobblemonMarket.logger.error("Failed to add balance", e)
         }

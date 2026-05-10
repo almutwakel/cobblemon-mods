@@ -5,6 +5,7 @@ import com.cobblemonranked.challenge.ChallengeManager
 import com.cobblemonranked.commands.RankedCommands
 import com.cobblemonranked.config.RankedConfig
 import com.cobblemonranked.data.EloStore
+import com.cobblemonranked.data.TeamStore
 import com.cobblemonranked.decay.DecayManager
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
@@ -19,6 +20,7 @@ object CobblemonRanked : ModInitializer {
     lateinit var config: RankedConfig
     lateinit var eloStore: EloStore
     lateinit var challengeManager: ChallengeManager
+    lateinit var teamStore: TeamStore
 
     override fun onInitialize() {
         logger.info("Cobblemon Ranked initializing...")
@@ -28,6 +30,7 @@ object CobblemonRanked : ModInitializer {
         eloStore = EloStore(configDir)
         eloStore.load()
         challengeManager = ChallengeManager()
+        teamStore = TeamStore(configDir)
 
         RankedBattleManager.registerEvents()
 
