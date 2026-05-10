@@ -21,7 +21,6 @@ import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.neoforged.fml.ModList
 import net.neoforged.fml.loading.FMLPaths
-import java.util.UUID
 
 object MarketCommands {
 
@@ -81,9 +80,6 @@ object MarketCommands {
                 .then(Commands.literal("history")
                     .then(Commands.argument("item", StringArgumentType.greedyString())
                         .suggests { _, builder ->
-                            // Suggest short names so users don't have to type colons (which
-                            // Brigadier StringArgumentType.string() rejects unquoted).
-                            // resolveItemId() handles the short→full mapping bidirectionally.
                             CobblemonMarket.items.keys.forEach {
                                 builder.suggest(it.substringAfterLast(':'))
                             }
@@ -112,9 +108,6 @@ object MarketCommands {
                 .then(Commands.literal("buy")
                     .then(Commands.argument("item", StringArgumentType.string())
                         .suggests { _, builder ->
-                            // Suggest short names so users don't have to type colons (which
-                            // Brigadier StringArgumentType.string() rejects unquoted).
-                            // resolveItemId() handles the short→full mapping bidirectionally.
                             CobblemonMarket.items.keys.forEach {
                                 builder.suggest(it.substringAfterLast(':'))
                             }
@@ -137,9 +130,6 @@ object MarketCommands {
                 .then(Commands.literal("sell")
                     .then(Commands.argument("item", StringArgumentType.string())
                         .suggests { _, builder ->
-                            // Suggest short names so users don't have to type colons (which
-                            // Brigadier StringArgumentType.string() rejects unquoted).
-                            // resolveItemId() handles the short→full mapping bidirectionally.
                             CobblemonMarket.items.keys.forEach {
                                 builder.suggest(it.substringAfterLast(':'))
                             }
@@ -205,17 +195,17 @@ object MarketCommands {
                             )
                         )
                     )
-                    .then(Commands.literal("setfactor")
+                    .then(Commands.literal("setstock")
                         .then(Commands.argument("item", StringArgumentType.string())
                             .suggests { _, builder ->
                                 CobblemonMarket.items.keys.forEach { builder.suggest(it) }
                                 builder.buildFuture()
                             }
-                            .then(Commands.argument("value", DoubleArgumentType.doubleArg(0.0, 1.0))
+                            .then(Commands.argument("value", DoubleArgumentType.doubleArg(0.0))
                                 .executes { ctx ->
                                     val itemId = StringArgumentType.getString(ctx, "item")
                                     val value = DoubleArgumentType.getDouble(ctx, "value")
-                                    setFactor(ctx.source, itemId, value)
+                                    setStock(ctx.source, itemId, value)
                                     1
                                 }
                             )
@@ -233,39 +223,36 @@ object MarketCommands {
 
     private fun showPrices(source: CommandSourceStack) {
         val items = CobblemonMarket.items
-        val config = CobblemonMarket.config
         val store = CobblemonMarket.marketStore
 
         // Compute everything first so column widths can adapt to the actual content.
-        data class Row(val name: String, val buy: Int, val sell: Int, val factorPct: Int)
+        data class Row(val name: String, val buy: Int, val sell: Int, val stock: Int, val baseStock: Int)
         val rows = items.map { (itemId, entry) ->
             val state = store.getOrCreate(itemId)
-            val sells = state.transactions.count { it.type == "sell" }
-            val buys = state.transactions.count { it.type == "buy" }
             Row(
                 name = formatItemName(itemId),
-                buy = PricingEngine.buyPrice(entry.baseSellPrice, state.priceFactor, config.spreadBase),
-                sell = PricingEngine.sellPrice(
-                    entry.baseSellPrice, state.priceFactor, sells, buys, config.spreadBase, config.spreadExtra,
-                ),
-                factorPct = (state.priceFactor * 100).toInt(),
+                buy = PricingEngine.buyPrice(entry.baseBuyPrice, state.stock, entry.baseStock, entry.elasticity),
+                sell = PricingEngine.sellPrice(entry.baseSellPrice, state.stock, entry.baseStock, entry.elasticity),
+                stock = state.stock.toInt(),
+                baseStock = entry.baseStock,
             )
         }
         val nameWidth = (rows.maxOfOrNull { it.name.length } ?: 0).coerceAtLeast(4)
         val buyWidth = (rows.maxOfOrNull { dollarString(it.buy).length } ?: 0).coerceAtLeast(3)
         val sellWidth = (rows.maxOfOrNull { dollarString(it.sell).length } ?: 0).coerceAtLeast(4)
+        val stockWidth = (rows.maxOfOrNull { it.stock.toString().length } ?: 0).coerceAtLeast(5)
 
         source.sendSystemMessage(Component.literal("§e[Market] §6═══ Current Prices ═══"))
         source.sendSystemMessage(Component.literal(
-            "§8  ${"Item".padEnd(nameWidth)}  ${"Buy".padStart(buyWidth)}   ${"Sell".padStart(sellWidth)}   Factor"
+            "§8  ${"Item".padEnd(nameWidth)}  ${"Buy".padStart(buyWidth)}   ${"Sell".padStart(sellWidth)}   ${"Stock".padStart(stockWidth)}"
         ))
         for (r in rows) {
-            val factorColor = factorColor(r.factorPct)
+            val stockColor = stockColor(r.stock, r.baseStock)
             source.sendSystemMessage(Component.literal(
                 "§7  §f${r.name.padEnd(nameWidth)}  " +
                 "§a${dollarString(r.buy).padStart(buyWidth)}   " +
                 "§c${dollarString(r.sell).padStart(sellWidth)}   " +
-                "$factorColor${r.factorPct.toString().padStart(3)}%"
+                "$stockColor${r.stock.toString().padStart(stockWidth)}"
             ))
         }
         source.sendSystemMessage(Component.literal(
@@ -275,11 +262,11 @@ object MarketCommands {
 
     private fun dollarString(n: Int): String = "\$" + "%,d".format(n)
 
-    /** Red <50% (cheap), yellow 50-89% (recovering), green ≥90% (near ceiling). */
-    private fun factorColor(pct: Int): String = when {
-        pct < 50 -> "§c"
-        pct < 90 -> "§e"
-        else -> "§a"
+    /** Red when scarce (<50% of base), yellow normal, green when oversupplied (>150% of base). */
+    private fun stockColor(stock: Int, baseStock: Int): String = when {
+        stock < baseStock * 0.5 -> "§c"
+        stock > baseStock * 1.5 -> "§a"
+        else -> "§e"
     }
 
     /**
@@ -304,25 +291,25 @@ object MarketCommands {
     private fun normalizeItemKey(s: String): String =
         s.lowercase().replace("_", "").replace("-", "").replace(" ", "")
 
-    private fun showHistory(source: CommandSourceStack, itemId: String) {
-        val resolved = resolveItemId(itemId)
+    private fun showHistory(source: CommandSourceStack, rawItemId: String) {
+        val resolved = resolveItemId(rawItemId)
         if (resolved == null) {
-            source.sendSystemMessage(Component.literal("[Market] Unknown item: $itemId"))
+            source.sendSystemMessage(Component.literal("§c[Market] Unknown item: $rawItemId"))
             return
         }
-        val itemId = resolved
-        val state = CobblemonMarket.marketStore.getOrCreate(itemId)
-        val sells = state.transactions.count { it.type == "sell" }
-        val buys = state.transactions.count { it.type == "buy" }
-        val total = state.transactions.size
-        val factorPercent = (state.priceFactor * 100).toInt()
+        val entry = CobblemonMarket.items[resolved] ?: return
+        val state = CobblemonMarket.marketStore.getOrCreate(resolved)
 
-        source.sendSystemMessage(Component.literal("[Market] History for $itemId:"))
-        source.sendSystemMessage(Component.literal("  Factor: $factorPercent%"))
-        source.sendSystemMessage(Component.literal("  Last $total transactions: $sells sells, $buys buys"))
+        val buyTicks = state.priceHistory.count { it.type == "buy" }
+        val sellTicks = state.priceHistory.size - buyTicks
+        val totalBuyQty = state.priceHistory.filter { it.type == "buy" }.sumOf { it.quantity }
+        val totalSellQty = state.priceHistory.sumOf { it.quantity } - totalBuyQty
+
+        source.sendSystemMessage(Component.literal("§e[Market] §fHistory for ${formatItemName(resolved)}:"))
         source.sendSystemMessage(Component.literal(
-            "  Skew: ${if (total < 2) "N/A" else "${"%.1f".format(sells.toDouble() / total * 100)}% sells"}"
-        ))
+            "  §7Stock: §f${state.stock.toInt()} §7/ §f${entry.baseStock} §8(target)"))
+        source.sendSystemMessage(Component.literal(
+            "  §7Trades: §a$buyTicks buys §8($totalBuyQty units)§7, §c$sellTicks sells §8($totalSellQty units)"))
     }
 
     private fun formatItemName(itemId: String): String =
@@ -345,6 +332,7 @@ object MarketCommands {
             source.sendSystemMessage(Component.literal("§c[Market] Unknown item: $rawItemId"))
             return
         }
+        val entry = CobblemonMarket.items[itemId] ?: return
         val state = CobblemonMarket.marketStore.getOrCreate(itemId)
         val history = state.priceHistory
         val displayName = formatItemName(itemId)
@@ -365,10 +353,9 @@ object MarketCommands {
         }
         val candles = PriceHistory.groupIntoCandles(history, zone)
         val displayed = if (candles.size > CANDLE_LIMIT) candles.subList(candles.size - CANDLE_LIMIT, candles.size) else candles
-        val factorPct = (state.priceFactor * 100).toInt()
 
         source.sendSystemMessage(Component.literal(
-            "§e[Market] §f$displayName §7— ${candles.size} candle${if (candles.size == 1) "" else "s"} (${history.size} trades), factor §f$factorPct%"))
+            "§e[Market] §f$displayName §7— ${candles.size} candle${if (candles.size == 1) "" else "s"} (${history.size} trades), stock §f${state.stock.toInt()}§7/§f${entry.baseStock}"))
 
         for (line in renderCandleChart(displayed)) {
             source.sendSystemMessage(Component.literal(line))
@@ -459,9 +446,9 @@ object MarketCommands {
     private fun showHelp(source: CommandSourceStack, includeAdmin: Boolean) {
         val lines = mutableListOf(
             "§e[Market] §fCommands:",
-            "§7  /market prices §f— current buy/sell prices for all items",
+            "§7  /market prices §f— current buy/sell prices and stock for all items",
             "§7  /market price <item> §f— candlestick chart for one item §8(/market prices <item> also works)",
-            "§7  /market history <item> §f— buy/sell-count summary for one item",
+            "§7  /market history <item> §f— stock + trade-volume summary for one item",
             "§7  /market leaderboard §f— top wealth (PokeDollars) across the server",
             "§7  /market buy <item> <qty> §f— buy via command (in-game player)",
             "§7  /market sell <item> <qty> §f— sell via command (in-game player)",
@@ -471,7 +458,7 @@ object MarketCommands {
             lines += listOf(
                 "§e[Market] §fAdmin (op level 4):",
                 "§7  /market admin trade <player> buy|sell <item> <qty> §f— drive a trade for a target player (console-friendly)",
-                "§7  /market admin setfactor <item> <0.0-1.0> §f— override price factor",
+                "§7  /market admin setstock <item> <amount> §f— override an item's stock level",
                 "§7  /market admin reload §f— reload config + items.json from disk",
             )
         }
@@ -497,8 +484,7 @@ object MarketCommands {
         val itemName = formatItemName(itemId)
         return when (result) {
             is TradeResult.Success -> {
-                val factorPct = (result.newFactor * 100).toInt()
-                val msg = Component.literal("§a[Market] $label $qty× $itemName for $${result.totalPrice} (factor → $factorPct%)")
+                val msg = Component.literal("§a[Market] $label $qty× $itemName for $${result.totalPrice} §7(stock → ${result.newStock.toInt()})")
                 source.sendSystemMessage(msg)
                 if (target.uuid != source.player?.uuid) target.sendSystemMessage(msg)
                 1
@@ -509,6 +495,14 @@ object MarketCommands {
             }
             is TradeResult.InsufficientItems -> {
                 source.sendSystemMessage(Component.literal("§c[Market] ${target.name.string} only has ${result.have}× ${formatItemName(result.itemId)} (need ${result.need})"))
+                0
+            }
+            is TradeResult.OutOfStock -> {
+                source.sendSystemMessage(Component.literal("§c[Market] Out of stock for ${formatItemName(result.itemId)}: only ${result.available} available (requested ${result.requested})"))
+                0
+            }
+            is TradeResult.MarketSaturated -> {
+                source.sendSystemMessage(Component.literal("§c[Market] Market saturated for ${formatItemName(result.itemId)}: stock ${result.currentStock}/${result.maxStock} — try again later"))
                 0
             }
             TradeResult.NoInventorySpace -> {
@@ -526,14 +520,14 @@ object MarketCommands {
         }
     }
 
-    private fun setFactor(source: CommandSourceStack, rawItemId: String, value: Double) {
+    private fun setStock(source: CommandSourceStack, rawItemId: String, value: Double) {
         val itemId = resolveItemId(rawItemId) ?: run {
             source.sendSystemMessage(Component.literal("§c[Market] Unknown item: $rawItemId"))
             return
         }
-        CobblemonMarket.marketStore.setFactor(itemId, value)
+        CobblemonMarket.marketStore.setStock(itemId, value)
         source.sendSystemMessage(Component.literal(
-            "§a[Market] Set ${formatItemName(itemId)} factor to ${(value * 100).toInt()}%"))
+            "§a[Market] Set ${formatItemName(itemId)} stock to ${value.toInt()}"))
     }
 
     /**
@@ -591,6 +585,7 @@ object MarketCommands {
         val configDir = FMLPaths.CONFIGDIR.get()
         CobblemonMarket.config = MarketConfig.load(configDir)
         CobblemonMarket.items = ItemConfig.load(configDir)
+        CobblemonMarket.marketStore.ensureInitialized(CobblemonMarket.items)
         source.sendSystemMessage(Component.literal(
             "[Market] Config reloaded. ${CobblemonMarket.items.size} items loaded."))
     }
