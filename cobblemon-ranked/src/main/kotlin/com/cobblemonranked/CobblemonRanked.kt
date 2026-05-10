@@ -7,25 +7,24 @@ import com.cobblemonranked.config.RankedConfig
 import com.cobblemonranked.data.EloStore
 import com.cobblemonranked.data.TeamStore
 import com.cobblemonranked.decay.DecayManager
-import net.fabricmc.api.ModInitializer
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
-import net.fabricmc.loader.api.FabricLoader
+import com.cobblemonranked.gui.MenuRegistry
+import net.neoforged.bus.api.IEventBus
+import net.neoforged.fml.ModContainer
+import net.neoforged.fml.common.Mod
+import net.neoforged.fml.loading.FMLPaths
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.event.RegisterCommandsEvent
+import net.neoforged.neoforge.event.tick.ServerTickEvent
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-object CobblemonRanked : ModInitializer {
-    const val MOD_ID = "cobblemon-ranked"
-    val logger = LoggerFactory.getLogger(MOD_ID)
+@Mod(CobblemonRanked.MOD_ID)
+class CobblemonRanked(modBus: IEventBus, container: ModContainer) {
 
-    lateinit var config: RankedConfig
-    lateinit var eloStore: EloStore
-    lateinit var challengeManager: ChallengeManager
-    lateinit var teamStore: TeamStore
-
-    override fun onInitialize() {
+    init {
         logger.info("Cobblemon Ranked initializing...")
 
-        val configDir = FabricLoader.getInstance().configDir
+        val configDir = FMLPaths.CONFIGDIR.get()
         config = RankedConfig.load(configDir)
         eloStore = EloStore(configDir)
         eloStore.load()
@@ -34,21 +33,38 @@ object CobblemonRanked : ModInitializer {
 
         RankedBattleManager.registerEvents()
 
-        CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
-            RankedCommands.register(dispatcher)
-        }
+        MenuRegistry.MENUS.register(modBus)
 
-        var tickCounter = 0
-        ServerTickEvents.END_SERVER_TICK.register { server ->
-            tickCounter++
-            if (tickCounter % 100 == 0) { // Every 5 seconds
-                challengeManager.cleanupExpired()
-            }
-            if (tickCounter % 1200 == 0) { // Every 60 seconds
-                DecayManager.tryDailyDecay(server)
-            }
-        }
+        NeoForge.EVENT_BUS.addListener(::onRegisterCommands)
+        NeoForge.EVENT_BUS.addListener(::onServerTickPost)
 
         logger.info("Cobblemon Ranked initialized! ${eloStore.getAll().size} players loaded.")
+    }
+
+    private fun onRegisterCommands(event: RegisterCommandsEvent) {
+        RankedCommands.register(event.dispatcher)
+    }
+
+    private var tickCounter: Int = 0
+
+    private fun onServerTickPost(event: ServerTickEvent.Post) {
+        tickCounter++
+        if (tickCounter % 100 == 0) {
+            challengeManager.cleanupExpired()
+        }
+        if (tickCounter % 1200 == 0) {
+            DecayManager.tryDailyDecay(event.server)
+        }
+    }
+
+    companion object {
+        const val MOD_ID = "cobblemon_ranked"
+        const val PERSISTENCE_DIR_NAME = "cobblemon-ranked"
+        val logger: Logger = LoggerFactory.getLogger(MOD_ID)
+
+        lateinit var config: RankedConfig
+        lateinit var eloStore: EloStore
+        lateinit var challengeManager: ChallengeManager
+        lateinit var teamStore: TeamStore
     }
 }

@@ -1,0 +1,31 @@
+modLoader = "kotlinforforge"
+loaderVersion = "[5,)"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "cobblemon_ranked"
+version = "${version}"
+displayName = "Cobblemon Ranked"
+description = "ELO-rated ranked PvP battles for Cobblemon"
+authors = "almutwakel"
+
+[[dependencies.cobblemon_ranked]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblemon_ranked]]
+modId = "kotlinforforge"
+type = "required"
+versionRange = "[5,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblemon_ranked]]
+modId = "cobblemon"
+type = "required"
+versionRange = "[1.7.1,)"
+ordering = "AFTER"
+side = "BOTH"
