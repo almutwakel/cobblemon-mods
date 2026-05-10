@@ -3,13 +3,15 @@ package com.cobblemonmarket.data
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import java.time.ZoneId
 
 class PriceHistoryTest {
 
-    /** All times in the same UTC day so timezone-shifted day boundaries don't trip the test. */
+    /** Tests pin the zone to UTC so day-boundary math is unambiguous regardless of host. */
+    private val UTC = ZoneId.of("UTC")
     private val day0Noon = 1_700_000_000_000L              // some Tuesday around noon UTC
-    private val day0Later = day0Noon + 60 * 60 * 1000L     // +1h, same day
-    private val day1Noon = day0Noon + 24L * 60 * 60 * 1000L // +24h → next day
+    private val day0Later = day0Noon + 60 * 60 * 1000L     // +1h, same UTC day
+    private val day1Noon = day0Noon + 24L * 60 * 60 * 1000L // +24h → next UTC day
 
     private fun tick(
         ts: Long, player: String, type: String,
@@ -22,13 +24,13 @@ class PriceHistoryTest {
 
     @Test
     fun `empty history produces no candles`() {
-        assertTrue(PriceHistory.groupIntoCandles(emptyList()).isEmpty())
+        assertTrue(PriceHistory.groupIntoCandles(emptyList(), UTC).isEmpty())
     }
 
     @Test
     fun `single tick produces one candle with open=before and close=after`() {
         val history = listOf(tick(day0Noon, "p1", "buy", priceBefore = 100, priceAfter = 110, qty = 5))
-        val candles = PriceHistory.groupIntoCandles(history)
+        val candles = PriceHistory.groupIntoCandles(history, UTC)
         assertEquals(1, candles.size)
         val c = candles[0]
         assertEquals(100, c.open)
@@ -44,7 +46,7 @@ class PriceHistoryTest {
             tick(day0Noon, "p1", "buy", 100, 110, qty = 3),
             tick(day0Later, "p1", "buy", 110, 125, qty = 2),
         )
-        val candles = PriceHistory.groupIntoCandles(history)
+        val candles = PriceHistory.groupIntoCandles(history, UTC)
         assertEquals(1, candles.size)
         assertEquals(100, candles[0].open)
         assertEquals(125, candles[0].close)
@@ -60,7 +62,7 @@ class PriceHistoryTest {
             tick(day0Noon, "p1", "buy", 100, 110),
             tick(day0Later, "p2", "buy", 110, 120),
         )
-        val candles = PriceHistory.groupIntoCandles(history)
+        val candles = PriceHistory.groupIntoCandles(history, UTC)
         assertEquals(2, candles.size)
         assertEquals("p1", candles[0].playerName)
         assertEquals("p2", candles[1].playerName)
@@ -72,7 +74,7 @@ class PriceHistoryTest {
             tick(day0Noon, "p1", "buy", 100, 110),
             tick(day1Noon, "p1", "buy", 110, 120),
         )
-        val candles = PriceHistory.groupIntoCandles(history)
+        val candles = PriceHistory.groupIntoCandles(history, UTC)
         assertEquals(2, candles.size)
     }
 
@@ -86,7 +88,7 @@ class PriceHistoryTest {
             tick(day0Noon + 4000, "p1", "buy", 115, 125),
             tick(day0Noon + 5000, "p1", "buy", 125, 135),
         )
-        val candles = PriceHistory.groupIntoCandles(history)
+        val candles = PriceHistory.groupIntoCandles(history, UTC)
         assertEquals(3, candles.size)
         assertEquals("p1", candles[0].playerName); assertEquals(2, candles[0].tickCount)
         assertEquals("p2", candles[1].playerName); assertEquals(1, candles[1].tickCount)
@@ -96,7 +98,7 @@ class PriceHistoryTest {
     @Test
     fun `sell candle has close below open (red)`() {
         val history = listOf(tick(day0Noon, "p1", "sell", priceBefore = 200, priceAfter = 180, qty = 4))
-        val c = PriceHistory.groupIntoCandles(history)[0]
+        val c = PriceHistory.groupIntoCandles(history, UTC).first()
         assertTrue(c.close < c.open)
         assertEquals(200, c.high)
         assertEquals(180, c.low)
@@ -108,7 +110,7 @@ class PriceHistoryTest {
             type = "buy", timestamp = day0Noon, pricePerUnit = 150, quantity = 3,
             playerUuid = "p1", playerName = "p1", priceBefore = 0, priceAfter = 0,
         )
-        val c = PriceHistory.groupIntoCandles(listOf(legacy))[0]
+        val c = PriceHistory.groupIntoCandles(listOf(legacy), UTC).first()
         assertEquals(150, c.open)
         assertEquals(150, c.close)
         assertEquals(150, c.high)

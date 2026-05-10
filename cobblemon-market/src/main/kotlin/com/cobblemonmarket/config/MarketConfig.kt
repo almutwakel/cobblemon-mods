@@ -21,6 +21,11 @@ data class MarketConfig(
     val leaderboardSize: Int = 10,
     /** Cap on price-history entries per item (one entry per /market buy|sell batch). */
     val priceHistorySize: Int = 500,
+    /**
+     * IANA timezone used to decide calendar-day boundaries when grouping ticks into candles.
+     * Defaults to "America/New_York" (EST/EDT) — change if your players live elsewhere.
+     */
+    val priceHistoryTimeZone: String = "America/New_York",
 ) {
     companion object {
         private val gson: Gson = GsonBuilder().setPrettyPrinting().create()

@@ -1,6 +1,8 @@
 package com.cobblemonmarket.data
 
-import java.util.TimeZone
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 /**
  * One bar in the candlestick chart shown by `/market price`. See spec in `PriceTick`
@@ -19,19 +21,19 @@ data class Candle(
 
 object PriceHistory {
 
-    private const val DAY_MS = 24L * 60L * 60L * 1000L
-
     /**
      * Groups a chronologically-ordered list of [PriceTick]s into [Candle]s.
      *
      * A group is a maximal run of consecutive ticks by the same player on the same
-     * server-local calendar day. A different player's tick or a day rollover starts
+     * calendar day in [zoneId]. A different player's tick or a day rollover starts
      * a new group.
      */
-    fun groupIntoCandles(history: List<PriceTick>): List<Candle> {
+    fun groupIntoCandles(
+        history: List<PriceTick>,
+        zoneId: ZoneId = ZoneId.systemDefault(),
+    ): List<Candle> {
         if (history.isEmpty()) return emptyList()
-        val tzOffset = TimeZone.getDefault().rawOffset.toLong()
-        fun dayOf(ts: Long): Long = (ts + tzOffset) / DAY_MS
+        fun dayOf(ts: Long): LocalDate = Instant.ofEpochMilli(ts).atZone(zoneId).toLocalDate()
 
         val candles = mutableListOf<Candle>()
         var batch = mutableListOf<PriceTick>()

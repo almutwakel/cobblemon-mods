@@ -6,6 +6,7 @@ import com.cobblemonmarket.config.MarketConfig
 import com.cobblemonmarket.economy.EconomyBridge
 import com.cobblemonmarket.data.Candle
 import com.cobblemonmarket.data.PriceHistory
+import java.time.ZoneId
 import com.cobblemonmarket.economy.TradeOps
 import com.cobblemonmarket.economy.TradeResult
 import com.cobblemonmarket.gui.ShopMenuProvider
@@ -321,7 +322,16 @@ object MarketCommands {
             return
         }
 
-        val candles = PriceHistory.groupIntoCandles(history)
+        val zone = try {
+            ZoneId.of(CobblemonMarket.config.priceHistoryTimeZone)
+        } catch (e: Exception) {
+            CobblemonMarket.logger.warn(
+                "Invalid priceHistoryTimeZone '{}'; falling back to system default",
+                CobblemonMarket.config.priceHistoryTimeZone
+            )
+            ZoneId.systemDefault()
+        }
+        val candles = PriceHistory.groupIntoCandles(history, zone)
         val displayed = if (candles.size > CANDLE_LIMIT) candles.subList(candles.size - CANDLE_LIMIT, candles.size) else candles
         val factorPct = (state.priceFactor * 100).toInt()
 
@@ -394,6 +404,12 @@ object MarketCommands {
             }
             out.add(sb.toString())
         }
+
+        // Visual gap between the candles and the volume row so the volume bars
+        // don't get visually mistaken for the lowest candle row. Two blank rows
+        // is enough on most chat clients to read as separation.
+        out.add("§r")
+        out.add("§r")
 
         // Volume sparkline — one block per candle, height proportional to qty.
         val blocks = "▁▂▃▄▅▆▇█"
