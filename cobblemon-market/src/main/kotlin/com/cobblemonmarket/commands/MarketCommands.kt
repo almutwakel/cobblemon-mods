@@ -26,6 +26,16 @@ object MarketCommands {
     fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
         dispatcher.register(
             Commands.literal("market")
+                .executes { ctx ->
+                    showHelp(ctx.source, ctx.source.hasPermission(4))
+                    1
+                }
+                .then(Commands.literal("help")
+                    .executes { ctx ->
+                        showHelp(ctx.source, ctx.source.hasPermission(4))
+                        1
+                    }
+                )
                 .then(Commands.literal("prices")
                     .executes { ctx ->
                         showPrices(ctx.source)
@@ -262,6 +272,29 @@ object MarketCommands {
 
     private fun formatItemName(itemId: String): String =
         itemId.substringAfterLast(':').split('_').joinToString(" ") { it.replaceFirstChar(Char::uppercase) }
+
+    private fun showHelp(source: CommandSourceStack, includeAdmin: Boolean) {
+        val lines = mutableListOf(
+            "§e[Market] §fCommands:",
+            "§7  /market prices §f— show current buy/sell prices for all items",
+            "§7  /market history <item> §f— recent price-movement summary for one item",
+            "§7  /market leaderboard §f— top wealth (PokeDollars) on the server",
+            "§7  /market open §f— open the chest UI (in-game player only)",
+            "§7  /market buy <item> <qty> §f— buy via command (in-game player)",
+            "§7  /market sell <item> <qty> §f— sell via command (in-game player)",
+            "§7  /market version §f— show mod version",
+        )
+        if (includeAdmin) {
+            lines += listOf(
+                "§e[Market] §fAdmin (op level 4):",
+                "§7  /market admin trade <player> buy|sell <item> <qty> §f— drive a trade for a target player (console-friendly)",
+                "§7  /market admin setfactor <item> <0.0-1.0> §f— override price factor",
+                "§7  /market admin reload §f— reload config + items.json from disk",
+            )
+        }
+        lines += "§8Tip: item names accept short forms — \"rare_candy\", \"rarecandy\", \"RareCandy\" all work."
+        lines.forEach { source.sendSystemMessage(Component.literal(it)) }
+    }
 
     /**
      * Renders a TradeResult into chat for the command source. Returns 1 on success, 0 on failure

@@ -18,6 +18,16 @@ object RankedCommands {
     fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
         dispatcher.register(
             Commands.literal("ranked")
+                .executes { ctx ->
+                    showHelp(ctx.source, ctx.source.hasPermission(4))
+                    1
+                }
+                .then(Commands.literal("help")
+                    .executes { ctx ->
+                        showHelp(ctx.source, ctx.source.hasPermission(4))
+                        1
+                    }
+                )
                 .then(Commands.literal("challenge")
                     .then(Commands.argument("player", EntityArgument.player())
                         .executes { ctx ->
@@ -101,6 +111,27 @@ object RankedCommands {
                     )
                 )
         )
+    }
+
+    private fun showHelp(source: CommandSourceStack, includeAdmin: Boolean) {
+        val lines = mutableListOf(
+            "§e[Ranked] §fCommands:",
+            "§7  /ranked challenge <player> §f— challenge a player to a ranked match",
+            "§7  /ranked accept §f— accept a pending challenge",
+            "§7  /ranked decline §f— decline a pending challenge",
+            "§7  /ranked stats [player] §f— view ELO, wins, losses",
+            "§7  /ranked leaderboard §f— top players by ELO",
+        )
+        if (includeAdmin) {
+            lines += listOf(
+                "§e[Ranked] §fAdmin (op level 4):",
+                "§7  /ranked admin setelo <player> <value> §f— override a player's ELO",
+                "§7  /ranked admin decay §f— manually trigger daily decay",
+                "§7  /ranked admin force <player1> <player2> §f— force a match (bypasses daily limit)",
+                "§7  /ranked admin reload §f— reload config.json from disk",
+            )
+        }
+        lines.forEach { source.sendSystemMessage(Component.literal(it)) }
     }
 
     private fun handleChallenge(challenger: ServerPlayer, target: ServerPlayer) {
