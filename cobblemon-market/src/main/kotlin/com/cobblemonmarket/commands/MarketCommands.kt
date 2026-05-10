@@ -3,19 +3,17 @@ package com.cobblemonmarket.commands
 import com.cobblemonmarket.CobblemonMarket
 import com.cobblemonmarket.config.ItemConfig
 import com.cobblemonmarket.config.MarketConfig
-import com.cobblemonmarket.gui.ShopGui
+import com.cobblemonmarket.economy.EconomyBridge
+import com.cobblemonmarket.gui.ShopMenuProvider
 import com.cobblemonmarket.pricing.PricingEngine
-import com.cobblemonmarket.shop.ShopkeeperManager
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.DoubleArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
-import net.fabricmc.api.ModInitializer
-import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.network.chat.Component
-import net.minecraft.server.level.ServerPlayer
-import java.math.BigDecimal
+import net.neoforged.fml.ModList
+import net.neoforged.fml.loading.FMLPaths
 import java.util.UUID
 
 object MarketCommands {
@@ -31,8 +29,8 @@ object MarketCommands {
                 )
                 .then(Commands.literal("version")
                     .executes { ctx ->
-                        val version = FabricLoader.getInstance().getModContainer(CobblemonMarket.MOD_ID)
-                            .map { it.metadata.version.friendlyString }
+                        val version = ModList.get().getModContainerById(CobblemonMarket.MOD_ID)
+                            .map { it.modInfo.version.toString() }
                             .orElse("unknown")
                         ctx.source.sendSystemMessage(Component.literal("[Market] Cobblemon Market v$version"))
                         1
@@ -56,23 +54,11 @@ object MarketCommands {
                         }
                     )
                 )
-                .then(Commands.literal("npc")
-                    .requires { it.hasPermission(4) }
-                    .then(Commands.literal("create")
-                        .then(Commands.argument("name", StringArgumentType.greedyString())
-                            .executes { ctx ->
-                                val player = ctx.source.playerOrException
-                                createNpc(player, StringArgumentType.getString(ctx, "name"))
-                                1
-                            }
-                        )
-                    )
-                    .then(Commands.literal("remove")
-                        .executes { ctx ->
-                            removeNpc(ctx.source.playerOrException)
-                            1
-                        }
-                    )
+                .then(Commands.literal("open")
+                    .executes { ctx ->
+                        ShopMenuProvider.open(ctx.source.playerOrException)
+                        1
+                    }
                 )
                 .then(Commands.literal("admin")
                     .requires { it.hasPermission(4) }
@@ -122,7 +108,7 @@ object MarketCommands {
             val factorPercent = (state.priceFactor * 100).toInt()
 
             source.sendSystemMessage(Component.literal(
-                "  ${ShopGui.formatItemName(itemId)}: Sell $sellPrice | Buy $buyPrice ($factorPercent%)"
+                "  ${formatItemName(itemId)}: Sell $sellPrice | Buy $buyPrice ($factorPercent%)"
             ))
         }
     }
@@ -158,21 +144,8 @@ object MarketCommands {
         ))
     }
 
-    private fun createNpc(player: ServerPlayer, name: String) {
-        if (ShopkeeperManager.spawnShopkeeper(player, name)) {
-            player.sendSystemMessage(Component.literal("[Market] Shopkeeper '$name' created."))
-        } else {
-            player.sendSystemMessage(Component.literal("[Market] Failed to create shopkeeper."))
-        }
-    }
-
-    private fun removeNpc(player: ServerPlayer) {
-        if (ShopkeeperManager.removeNearest(player)) {
-            player.sendSystemMessage(Component.literal("[Market] Nearest shopkeeper removed."))
-        } else {
-            player.sendSystemMessage(Component.literal("[Market] No shopkeeper found within 5 blocks."))
-        }
-    }
+    private fun formatItemName(itemId: String): String =
+        itemId.substringAfterLast(':').split('_').joinToString(" ") { it.replaceFirstChar(Char::uppercase) }
 
     private fun setFactor(source: CommandSourceStack, itemId: String, value: Double) {
         if (itemId !in CobblemonMarket.items) {
@@ -222,24 +195,10 @@ object MarketCommands {
         }
     }
 
-    private fun getBalanceForUuid(uuid: UUID): Int {
-        return try {
-            val loader = FabricLoader.getInstance()
-            val entrypoints = loader.getEntrypointContainers("main", ModInitializer::class.java)
-            val economyEntry = entrypoints.firstOrNull { it.provider.metadata.id == "cobblemon-economy" }
-                ?: return 0
-            val economyInstance = economyEntry.entrypoint
-            val manager = economyInstance.javaClass.getMethod("getEconomyManager").invoke(economyInstance)
-            val method = manager.javaClass.getMethod("getBalance", java.util.UUID::class.java)
-            val balance = method.invoke(manager, uuid) as BigDecimal
-            balance.toInt()
-        } catch (e: Exception) {
-            0
-        }
-    }
+    private fun getBalanceForUuid(uuid: UUID): Int = EconomyBridge.getBalance(uuid)
 
     private fun reload(source: CommandSourceStack) {
-        val configDir = FabricLoader.getInstance().configDir
+        val configDir = FMLPaths.CONFIGDIR.get()
         CobblemonMarket.config = MarketConfig.load(configDir)
         CobblemonMarket.items = ItemConfig.load(configDir)
         source.sendSystemMessage(Component.literal(

@@ -6,27 +6,25 @@ import com.cobblemonmarket.config.ItemEntry
 import com.cobblemonmarket.config.MarketConfig
 import com.cobblemonmarket.data.MarketStore
 import com.cobblemonmarket.data.PlayerSpendStore
+import com.cobblemonmarket.gui.MenuRegistry
 import com.cobblemonmarket.pricing.PricingEngine
-import com.cobblemonmarket.shop.ShopkeeperManager
-import net.fabricmc.api.ModInitializer
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
-import net.fabricmc.loader.api.FabricLoader
+import net.neoforged.bus.api.IEventBus
+import net.neoforged.fml.ModContainer
+import net.neoforged.fml.common.Mod
+import net.neoforged.fml.loading.FMLPaths
+import net.neoforged.neoforge.common.NeoForge
+import net.neoforged.neoforge.event.RegisterCommandsEvent
+import net.neoforged.neoforge.event.tick.ServerTickEvent
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-object CobblemonMarket : ModInitializer {
-    const val MOD_ID = "cobblemon-market"
-    val logger = LoggerFactory.getLogger(MOD_ID)
+@Mod(CobblemonMarket.MOD_ID)
+class CobblemonMarket(modBus: IEventBus, container: ModContainer) {
 
-    lateinit var config: MarketConfig
-    var items: Map<String, ItemEntry> = emptyMap()
-    lateinit var marketStore: MarketStore
-    lateinit var playerSpendStore: PlayerSpendStore
-
-    override fun onInitialize() {
+    init {
         logger.info("Cobblemon Market initializing...")
 
-        val configDir = FabricLoader.getInstance().configDir
+        val configDir = FMLPaths.CONFIGDIR.get()
         config = MarketConfig.load(configDir)
         items = ItemConfig.load(configDir)
         marketStore = MarketStore(configDir)
@@ -34,22 +32,25 @@ object CobblemonMarket : ModInitializer {
         playerSpendStore = PlayerSpendStore(configDir)
         playerSpendStore.load()
 
-        ShopkeeperManager.init(configDir)
+        MenuRegistry.MENUS.register(modBus)
 
-        CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
-            MarketCommands.register(dispatcher)
-        }
-
-        // Hourly price recovery
-        var recoveryTickCounter = 0
-        ServerTickEvents.END_SERVER_TICK.register { _ ->
-            recoveryTickCounter++
-            if (recoveryTickCounter % 72000 == 0) { // Every hour at 20 tps
-                applyRecoveryToAll()
-            }
-        }
+        NeoForge.EVENT_BUS.addListener(::onRegisterCommands)
+        NeoForge.EVENT_BUS.addListener(::onServerTickPost)
 
         logger.info("Cobblemon Market initialized! ${items.size} items, market state loaded.")
+    }
+
+    private fun onRegisterCommands(event: RegisterCommandsEvent) {
+        MarketCommands.register(event.dispatcher)
+    }
+
+    private var recoveryTickCounter: Int = 0
+
+    private fun onServerTickPost(event: ServerTickEvent.Post) {
+        recoveryTickCounter++
+        if (recoveryTickCounter % 72000 == 0) {
+            applyRecoveryToAll()
+        }
     }
 
     private fun applyRecoveryToAll() {
@@ -66,5 +67,16 @@ object CobblemonMarket : ModInitializer {
             marketStore.save()
             logger.info("Hourly price recovery applied")
         }
+    }
+
+    companion object {
+        const val MOD_ID = "cobblemon_market"
+        const val PERSISTENCE_DIR_NAME = "cobblemon-market"
+        val logger: Logger = LoggerFactory.getLogger(MOD_ID)
+
+        lateinit var config: MarketConfig
+        var items: Map<String, ItemEntry> = emptyMap()
+        lateinit var marketStore: MarketStore
+        lateinit var playerSpendStore: PlayerSpendStore
     }
 }

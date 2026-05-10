@@ -1,0 +1,38 @@
+modLoader = "kotlinforforge"
+loaderVersion = "[5,)"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "cobblemon_market"
+version = "${version}"
+displayName = "Cobblemon Market"
+description = "Dynamic-pricing shopkeeper for Cobblemon"
+authors = "almutwakel"
+
+[[dependencies.cobblemon_market]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblemon_market]]
+modId = "kotlinforforge"
+type = "required"
+versionRange = "[5,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblemon_market]]
+modId = "cobblemon"
+type = "required"
+versionRange = "[1.7.1,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.cobblemon_market]]
+modId = "cobblemon_economy"
+type = "optional"
+versionRange = "[0.0.16,)"
+ordering = "AFTER"
+side = "BOTH"

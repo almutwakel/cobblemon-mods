@@ -2,49 +2,53 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("java")
-    id("dev.architectury.loom") version "1.11-SNAPSHOT"
-    id("architectury-plugin") version "3.4-SNAPSHOT"
+    id("net.neoforged.moddev") version "2.0.78"
     kotlin("jvm") version "2.2.20"
 }
 
 version = project.property("mod_version") as String
 group = project.property("maven_group") as String
 
-architectury {
-    platformSetupLoomIde()
-    fabric()
-}
-
-loom {
-    silentMojangMappingsLicense()
-}
-
 repositories {
-    maven("https://maven.nucleoid.xyz")
-    maven("https://artefacts.cobblemon.com/releases")
     mavenCentral()
+    maven("https://artefacts.cobblemon.com/releases")
+    maven("https://thedarkcolour.github.io/KotlinForForge/")
+}
+
+neoForge {
+    version = project.property("neoforge_version") as String
+
+    runs {
+        register("server") {
+            server()
+            programArguments.add("--nogui")
+        }
+        register("client") {
+            client()
+        }
+    }
+
+    mods {
+        register("cobblemon_market") {
+            sourceSet(sourceSets.main.get())
+        }
+    }
 }
 
 dependencies {
-    minecraft("net.minecraft:minecraft:${project.property("minecraft_version")}")
-    mappings(loom.officialMojangMappings())
-    modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
-
-    modRuntimeOnly("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
-    modImplementation(fabricApi.module("fabric-command-api-v2", project.property("fabric_version") as String))
-    modImplementation(fabricApi.module("fabric-lifecycle-events-v1", project.property("fabric_version") as String))
-    modImplementation(fabricApi.module("fabric-events-interaction-v0", project.property("fabric_version") as String))
-
-    modImplementation("net.fabricmc:fabric-language-kotlin:1.13.6+kotlin.2.2.20")
-
-    modImplementation("com.cobblemon:mod:1.7.3+1.21.1") { isTransitive = false }
-    modImplementation("com.cobblemon:fabric:1.7.3+1.21.1")
-    // Cobblemon Economy is a soft/runtime dependency — accessed via reflection
-
-    modImplementation(include("eu.pb4:sgui:1.6.1+1.21.1")!!)
+    implementation("thedarkcolour:kotlinforforge-neoforge:${project.property("kotlin_for_forge_version")}")
+    implementation("com.cobblemon:neoforge:${project.property("cobblemon_version")}")
 
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation("org.slf4j:slf4j-api:2.0.9")
+    testRuntimeOnly("org.slf4j:slf4j-simple:2.0.9")
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks {
@@ -54,15 +58,9 @@ tasks {
 
     processResources {
         inputs.property("version", project.version)
-        filesMatching("fabric.mod.json") {
+        filesMatching("META-INF/neoforge.mods.toml") {
             expand(project.properties)
         }
-    }
-
-    java {
-        withSourcesJar()
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
     }
 
     compileJava {
