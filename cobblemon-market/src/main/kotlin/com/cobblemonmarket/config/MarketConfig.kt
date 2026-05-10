@@ -9,15 +9,16 @@ import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
+/**
+ * Server-wide market knobs.
+ *
+ * `restockRatePerHour` is applied once per real-time hour as
+ *   stock += restockRatePerHour × (baseStock − stock)
+ * so stock both refills (after heavy buying) and bleeds off (after heavy dumping)
+ * back toward the per-item `baseStock`. 0.07 = ~7% gap closure per hour.
+ */
 data class MarketConfig(
-    val spreadBase: Double = 3.0,
-    val spreadExtra: Double = 4.0,
-    val recoveryRatePerHour: Double = 0.04,
-    val factorFloor: Double = 0.10,
-    val factorCeiling: Double = 1.00,
-    val sellDecay: Double = 0.98,
-    val buyGrowth: Double = 1.02,
-    val transactionWindowSize: Int = 50,
+    val restockRatePerHour: Double = 0.07,
     val leaderboardSize: Int = 10,
     /** Cap on price-history entries per item (one entry per /market buy|sell batch). */
     val priceHistorySize: Int = 500,
