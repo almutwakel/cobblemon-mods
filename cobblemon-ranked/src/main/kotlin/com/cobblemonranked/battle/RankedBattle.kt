@@ -45,6 +45,25 @@ data class ActiveRankedMatch(
     val originalLocations: Map<UUID, OriginalLocation> = emptyMap(),
 )
 
+/** Result of [RankedBattleManager.applyMatchResult]. */
+data class MatchOutcome(
+    val winnerName: String, val loserName: String,
+    val oldWinnerElo: Int, val newWinnerElo: Int,
+    val oldLoserElo: Int, val newLoserElo: Int,
+)
+
+/** Result of [RankedBattleManager.simulateMatch]; carries the dice roll for transparency. */
+data class SimulateOutcome(
+    val name1: String, val name2: String,
+    val elo1: Int, val elo2: Int,
+    /** Probability that player1 wins given the ELO gap (in 0.0..1.0). */
+    val expected1: Double,
+    /** The random number drawn (in 0.0..1.0). player1 wins when roll < expected1. */
+    val roll: Double,
+    val player1Wins: Boolean,
+    val applied: MatchOutcome,
+)
+
 object RankedBattleManager {
     private val rankedBattles: ConcurrentHashMap<UUID, ActiveRankedMatch> = ConcurrentHashMap()
     private val pendingTeams: ConcurrentHashMap<UUID, List<Pokemon>> = ConcurrentHashMap()
@@ -271,10 +290,30 @@ object RankedBattleManager {
     }
 
     private fun resolveMatch(winner: ServerPlayer, loser: ServerPlayer) {
+        applyMatchResult(
+            server = winner.server,
+            winnerUuid = winner.uuid, winnerName = winner.name.string,
+            loserUuid = loser.uuid, loserName = loser.name.string,
+        )
+    }
+
+    /**
+     * Applies an ELO match outcome: updates ELO/wins/losses, persists, marks the day
+     * for decay tracking, and broadcasts the result + leaderboard to anyone online.
+     *
+     * Shared by the real battle path ([resolveMatch]) and the simulate-from-console path
+     * ([simulateMatch]) so both paths exercise the exact same ELO/persistence/leaderboard
+     * code.
+     */
+    fun applyMatchResult(
+        server: MinecraftServer,
+        winnerUuid: UUID, winnerName: String,
+        loserUuid: UUID, loserName: String,
+    ): MatchOutcome {
         val store = CobblemonRanked.eloStore
         val config = CobblemonRanked.config
-        val winnerData = store.getOrCreate(winner.uuid, winner.name.string)
-        val loserData = store.getOrCreate(loser.uuid, loser.name.string)
+        val winnerData = store.getOrCreate(winnerUuid, winnerName)
+        val loserData = store.getOrCreate(loserUuid, loserName)
 
         val oldWinnerElo = winnerData.elo
         val oldLoserElo = loserData.elo
@@ -283,7 +322,7 @@ object RankedBattleManager {
             winnerElo = oldWinnerElo,
             loserElo = oldLoserElo,
             kFactor = config.kFactor,
-            minimumElo = config.minimumElo
+            minimumElo = config.minimumElo,
         )
 
         winnerData.elo = newWinnerElo
@@ -299,19 +338,62 @@ object RankedBattleManager {
 
         val winnerDelta = newWinnerElo - oldWinnerElo
         val loserDelta = newLoserElo - oldLoserElo
-        broadcast(winner.server,
-            "[Ranked] ${winner.name.string} defeated ${loser.name.string}!")
-        broadcast(winner.server,
-            "[Ranked] ${winner.name.string}: $oldWinnerElo -> $newWinnerElo (+$winnerDelta) | " +
-            "${loser.name.string}: $oldLoserElo -> $newLoserElo ($loserDelta)")
+        broadcast(server, "[Ranked] $winnerName defeated $loserName!")
+        broadcast(server,
+            "[Ranked] $winnerName: $oldWinnerElo -> $newWinnerElo (+$winnerDelta) | " +
+            "$loserName: $oldLoserElo -> $newLoserElo ($loserDelta)")
 
         val leaderboard = store.getLeaderboard()
         val topN = leaderboard.take(config.leaderboardSize)
-        broadcast(winner.server, "[Ranked] Leaderboard:")
+        broadcast(server, "[Ranked] Leaderboard:")
         topN.forEachIndexed { i, (_, data) ->
-            broadcast(winner.server, "  ${i + 1}. ${data.name}: ${data.elo} (${data.wins}W/${data.losses}L)")
+            broadcast(server, "  ${i + 1}. ${data.name}: ${data.elo} (${data.wins}W/${data.losses}L)")
         }
+
+        return MatchOutcome(
+            winnerName = winnerName, loserName = loserName,
+            oldWinnerElo = oldWinnerElo, newWinnerElo = newWinnerElo,
+            oldLoserElo = oldLoserElo, newLoserElo = newLoserElo,
+        )
     }
+
+    /**
+     * Simulates a ranked match between two players (online or not) using offline-mode
+     * UUIDs derived from names. Winner is chosen randomly weighted by ELO win probability:
+     * `expected1 = 1 / (1 + 10^((elo2 - elo1) / 400))`. Then [applyMatchResult] runs the
+     * usual ELO/persistence/leaderboard path.
+     */
+    fun simulateMatch(server: MinecraftServer, name1: String, name2: String): SimulateOutcome {
+        val store = CobblemonRanked.eloStore
+        val uuid1 = offlineUuid(name1)
+        val uuid2 = offlineUuid(name2)
+        val data1 = store.getOrCreate(uuid1, name1)
+        val data2 = store.getOrCreate(uuid2, name2)
+
+        val expected1 = 1.0 / (1.0 + Math.pow(10.0, (data2.elo - data1.elo) / 400.0))
+        val roll = Math.random()
+        val player1Wins = roll < expected1
+
+        val winnerName: String; val loserName: String
+        val winnerUuid: UUID; val loserUuid: UUID
+        if (player1Wins) {
+            winnerName = name1; winnerUuid = uuid1
+            loserName = name2; loserUuid = uuid2
+        } else {
+            winnerName = name2; winnerUuid = uuid2
+            loserName = name1; loserUuid = uuid1
+        }
+        val outcome = applyMatchResult(server, winnerUuid, winnerName, loserUuid, loserName)
+        return SimulateOutcome(
+            name1 = name1, name2 = name2,
+            elo1 = data1.elo, elo2 = data2.elo,
+            expected1 = expected1, roll = roll, player1Wins = player1Wins,
+            applied = outcome,
+        )
+    }
+
+    private fun offlineUuid(name: String): UUID =
+        UUID.nameUUIDFromBytes("OfflinePlayer:$name".toByteArray(Charsets.UTF_8))
 
     private fun cancelMatch(player: ServerPlayer) {
         val opponentUuid = pendingMatches[player.uuid] ?: return

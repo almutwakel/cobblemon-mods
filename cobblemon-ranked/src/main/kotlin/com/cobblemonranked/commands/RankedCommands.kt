@@ -6,6 +6,7 @@ import com.cobblemonranked.config.RankedConfig
 import com.cobblemonranked.decay.DecayManager
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.IntegerArgumentType
+import com.mojang.brigadier.arguments.StringArgumentType
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.commands.arguments.EntityArgument
@@ -109,6 +110,23 @@ object RankedCommands {
                             1
                         }
                     )
+                    .then(Commands.literal("simulate")
+                        .then(Commands.argument("name1", StringArgumentType.string())
+                            .then(Commands.argument("name2", StringArgumentType.string())
+                                .executes { ctx ->
+                                    val n1 = StringArgumentType.getString(ctx, "name1")
+                                    val n2 = StringArgumentType.getString(ctx, "name2")
+                                    if (n1.equals(n2, ignoreCase = true)) {
+                                        ctx.source.sendSystemMessage(Component.literal(
+                                            "§c[Ranked] Both names are the same — pick two different players."))
+                                        return@executes 0
+                                    }
+                                    adminSimulate(ctx.source, n1, n2)
+                                    1
+                                }
+                            )
+                        )
+                    )
                 )
         )
     }
@@ -129,9 +147,28 @@ object RankedCommands {
                 "§7  /ranked admin decay §f— manually trigger daily decay",
                 "§7  /ranked admin force <player1> <player2> §f— force a match (bypasses daily limit)",
                 "§7  /ranked admin reload §f— reload config.json from disk",
+                "§7  /ranked admin simulate <name1> <name2> §f— simulate a match (winner picked by ELO odds; offline-friendly)",
             )
         }
         lines.forEach { source.sendSystemMessage(Component.literal(it)) }
+    }
+
+    /**
+     * Drives RankedBattleManager.simulateMatch and prints a transparent breakdown to the
+     * source: pre-match ELOs, win probability, the random roll, and the applied delta.
+     */
+    private fun adminSimulate(source: CommandSourceStack, name1: String, name2: String) {
+        val outcome = RankedBattleManager.simulateMatch(source.server, name1, name2)
+        val pct1 = (outcome.expected1 * 100).toInt()
+        val pct2 = 100 - pct1
+        val winner = if (outcome.player1Wins) name1 else name2
+        source.sendSystemMessage(Component.literal(
+            "§e[Ranked] §fSimulating §a$name1 §7(${outcome.elo1})§f vs §a$name2 §7(${outcome.elo2})"))
+        source.sendSystemMessage(Component.literal(
+            "§7  Win probability: §f$name1 $pct1%§7 / §f$name2 $pct2%"))
+        source.sendSystemMessage(Component.literal(
+            "§7  Roll: §f${"%.3f".format(outcome.roll)}§7 → §a$winner wins"))
+        // applyMatchResult already broadcasts the ELO update lines, so no need to repeat here.
     }
 
     private fun handleChallenge(challenger: ServerPlayer, target: ServerPlayer) {
