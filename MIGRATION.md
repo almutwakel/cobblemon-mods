@@ -148,3 +148,11 @@ item — see the schema-migration note above.
 Snapshot the destination's `world/`, `config/`, and the Cobblemon Economy SQLite **before**
 swapping any jars. The mod-schema migration on market is the only thing here that can lose
 data, but a snapshot is cheap insurance.
+
+---
+
+## Future tooling (not yet built)
+
+- `scripts/migration_diff.sh <destination-host>`: SSH to the destination, list its `mods/`,
+  diff against our `cobblemon-server/mods/`, print the symmetric difference and warn on
+  any pre-rework `cobblemon-market` state shape. Nice-to-have before a real cutover.
