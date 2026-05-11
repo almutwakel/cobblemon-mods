@@ -43,6 +43,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testImplementation("org.slf4j:slf4j-api:2.0.9")
     testRuntimeOnly("org.slf4j:slf4j-simple:2.0.9")
+    testImplementation("com.google.code.gson:gson:2.10.1")
 }
 
 java {
