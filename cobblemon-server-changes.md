@@ -7,6 +7,11 @@ Server install path: `/Users/almutwakel/Documents/Projects/minecraft/cobblemon-s
 
 ## Mods
 
+### 2026-05-11 — `Cobblemon Server-0.3.4.mrpack` — switched essentials from EssentialCommands to NeoEssentials
+- **Output:** `Cobblemon Server-0.3.4.mrpack` (127 MB). Supersedes 0.3.3.
+- **Swap:** removed `essentials-neoforge-1.0.0.jar` (EssentialCommands v1.0.0 by Doneon — brand-new mod, only one release). Added `neoessentials-1.0.2.5+build.1074.jar` (NeoEssentials by MrWhiteFlamesYT) — more mature (50+ commands, config-driven cooldowns/costs/limits, used on production servers). Marked as server-only in the manifest (`client = "unsupported"`); the mod authors confirm it registers no client-synced items/blocks, so vanilla clients connect cleanly. https://modrinth.com/mod/neoessentials/version/woCkFyUe
+- **Other 0.3.3 additions (starter-kit + collective) carry over unchanged.**
+
 ### 2026-05-11 — `Cobblemon Server-0.3.3.mrpack` — Essential Commands + Starter Kit
 - **Output:** `Cobblemon Server-0.3.3.mrpack` (127 MB). Supersedes 0.3.2.
 - **Added (server + client):**

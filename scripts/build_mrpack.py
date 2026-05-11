@@ -2,8 +2,8 @@ import json, hashlib, os, shutil, urllib.request, sys
 from pathlib import Path
 
 WORK = Path('/tmp/mrpack-work')
-OUT_VERSION = '0.3.3'
-OUT_PATH = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.3.mrpack')
+OUT_VERSION = '0.3.4'
+OUT_PATH = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.4.mrpack')
 SERVER_MODS = Path('/Users/almutwakel/Documents/Projects/minecraft/cobblemon-server/mods')
 CLIENT_ONLY_MODS = Path('/Users/almutwakel/Documents/Projects/minecraft/cobblemon-server/client-only-mods')
 
@@ -33,7 +33,9 @@ NEW_MODRINTH = [
     ('xaeros-minimap',        'CklXEjmp', 'required',    'required',    'xaerominimap-neoforge-1.21.1-25.3.13.jar'),
     ('xaeros-world-map',      'XwL25au3', 'required',    'required',    'xaeroworldmap-neoforge-1.21.1-1.40.16.jar'),
     # Server commands: /spawn, /home, /sethome, /tpa, /warp, /msg, /back, /afk, etc.
-    ('essentialcommands',     'P4CE47vz', 'required',    'required',    'essentials-neoforge-1.0.0.jar'),
+    # NeoEssentials is genuinely server-side-only — does not register any client-synced items
+    # or registry entries, so the mrpack marks client=unsupported. Vanilla clients connect fine.
+    ('neoessentials',         'woCkFyUe', 'unsupported', 'required',    'neoessentials-1.0.2.5+build.1074.jar'),
     # First-join starter kit. Auto-grants the kit named "default" to new players.
     ('starter-kit',           'tKHaJMww', 'required',    'required',    'starterkit-1.21.1-8.0.jar'),
     # Collective: shared Serilum lib required by starter-kit (and many other Serilum mods).
