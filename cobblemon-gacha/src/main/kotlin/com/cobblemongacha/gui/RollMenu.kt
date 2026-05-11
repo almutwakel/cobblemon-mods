@@ -77,6 +77,15 @@ object RollMenu {
                 val entry = sequence.getOrNull(i) ?: return@chain
                 val stack = RewardGranter.representative(entry)
                 container.setItem(4, stack)
+                // Roulette tick — pitch slides from high to low as the wheel decelerates so the
+                // run feels like it's slowing down, then the final settle pling fires in PullAnnouncer.
+                val progress = if (intervals.size > 1) i.toFloat() / (intervals.size - 1) else 1f
+                val pitch = (1.6f - 0.9f * progress).coerceIn(0.5f, 2.0f)
+                player.serverLevel().playSound(
+                    null, player.x, player.y, player.z,
+                    net.minecraft.sounds.SoundEvents.NOTE_BLOCK_HAT.value(),
+                    net.minecraft.sounds.SoundSource.PLAYERS, 0.6f, pitch,
+                )
             },
             finalRun = {
                 container.setItem(4, RewardGranter.representative(decided))
