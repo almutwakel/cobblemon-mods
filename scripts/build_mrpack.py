@@ -2,8 +2,8 @@ import json, hashlib, os, shutil, urllib.request, sys
 from pathlib import Path
 
 WORK = Path('/tmp/mrpack-work')
-OUT_VERSION = '0.3.0'
-OUT_PATH = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.0.mrpack')
+OUT_VERSION = '0.3.2'
+OUT_PATH = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.2.mrpack')
 SERVER_MODS = Path('/Users/almutwakel/Documents/Projects/minecraft/cobblemon-server/mods')
 CLIENT_ONLY_MODS = Path('/Users/almutwakel/Documents/Projects/minecraft/cobblemon-server/client-only-mods')
 
@@ -24,6 +24,21 @@ NEW_MODRINTH = [
     ('coroutil',              'H2YXCYUY', 'required',    'required',    'coroutil-neoforge-1.21.0-1.3.8.jar'),
     ('cobblemon-tim-core',    'QQO61rRS', 'required',    'required',    'timcore-neoforge-1.7.3-1.32.0.jar'),
     ('cobblemon-counter',     'aJArPPZ7', 'required',    'required',    'counter-neoforge-1.7.3-1.9.0.jar'),
+    # cobblemon-economy is a Fabric mod; loaded on both server and client via Sinytra Connector.
+    # Server registers shopkeeper entity_type / spawn_egg item and quest_board block+item, which
+    # get synced on join — clients without it fail at registry sync.
+    ('cobblemon-economy',     'CfJu3YAf', 'required',    'required',    'cobblemon-economy-0.0.17.jar'),
+    # Xaero minimap + world map — upstream 0.2.1 shipped older builds that warn "outdated" at every
+    # client launch. Replace with current Modrinth versions; old entries are filtered below.
+    ('xaeros-minimap',        'CklXEjmp', 'required',    'required',    'xaerominimap-neoforge-1.21.1-25.3.13.jar'),
+    ('xaeros-world-map',      'XwL25au3', 'required',    'required',    'xaeroworldmap-neoforge-1.21.1-1.40.16.jar'),
+]
+
+# Prefixes to drop from the base 0.2.1 manifest (replaced by entries above).
+REPLACED_PREFIXES = [
+    'mods/cobblemon_ranked-neoforge',   # upstream ranked, replaced by in-house override
+    'mods/xaerominimap-neoforge-',      # outdated, replaced by 25.3.13 above
+    'mods/xaeroworldmap-neoforge-',     # outdated, replaced by 1.40.16 above
 ]
 # cloth_config is client-only (Cobbreeding declares side=CLIENT). Look it up.
 # In-house mods to add as overrides
@@ -68,8 +83,11 @@ def file_entry(filename, primary, env_client, env_server):
 
 # Load existing manifest
 manifest = json.load(open(WORK / 'modrinth.index.json'))
-# Drop upstream cobblemon_ranked (replaced by in-house build via override)
-manifest['files'] = [f for f in manifest['files'] if 'cobblemon_ranked-neoforge' not in f['path']]
+# Drop entries replaced by this build (upstream cobblemon_ranked, outdated Xaero, etc.)
+manifest['files'] = [
+    f for f in manifest['files']
+    if not any(f['path'].startswith(prefix) for prefix in REPLACED_PREFIXES)
+]
 # Bump version
 manifest['versionId'] = OUT_VERSION
 
@@ -104,19 +122,16 @@ for jar_name, src in IN_HOUSE_JARS:
     shutil.copy2(src, dst)
     print(f'  override: {jar_name} ({dst.stat().st_size} bytes)')
 
-# Repackage
+# Repackage. We use the `zip` CLI instead of shutil.make_archive because the upstream mrpack's
+# files carry pre-1980 timestamps that Python's zipfile rejects, but `zip` accepts them.
+import subprocess
 if OUT_PATH.exists():
     OUT_PATH.unlink()
-shutil.make_archive(str(OUT_PATH).removesuffix('.mrpack'), 'zip', WORK)
-# make_archive emits .zip; rename to .mrpack
-zip_path = Path(str(OUT_PATH) + '.zip') if not OUT_PATH.exists() else None
-if zip_path and zip_path.exists():
-    zip_path.rename(OUT_PATH)
-# If shutil already produced .zip with the right name, fix it
-candidates = list(Path(OUT_PATH.parent).glob('Cobblemon Server-0.3.0*'))
-print(f'Output candidates: {candidates}')
-for c in candidates:
-    if c.suffix == '.zip':
-        c.rename(OUT_PATH)
+# Touch every file so timestamps are post-1980, then zip from inside the work dir.
+subprocess.run(['find', str(WORK), '-exec', 'touch', '{}', '+'], check=True)
+subprocess.run(
+    ['zip', '-r', '-q', str(OUT_PATH), 'modrinth.index.json', 'overrides'],
+    cwd=str(WORK), check=True,
+)
 print(f'Wrote {OUT_PATH} ({OUT_PATH.stat().st_size} bytes)')
 print(f'Total files in new manifest: {len(manifest["files"])}')

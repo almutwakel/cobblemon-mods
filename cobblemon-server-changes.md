@@ -7,6 +7,20 @@ Server install path: `/Users/almutwakel/Documents/Projects/minecraft/cobblemon-s
 
 ## Mods
 
+### 2026-05-11 — `Cobblemon Server-0.3.2.mrpack` — Xaero updated, supersedes 0.3.1
+- **Output:** `Cobblemon Server-0.3.2.mrpack` (127 MB). Discards the broken 0.3.0 and the still-warning 0.3.1.
+- **Changes vs 0.3.1:**
+  - `xaerominimap-neoforge-1.21.1-25.3.10.jar` → `25.3.13.jar` (latest 2026-05-06 release). Stops the "outdated Xaero's Minimap" warning that pops up on client launch.
+  - `xaeroworldmap-neoforge-1.21.1-1.40.11.jar` → `1.40.16.jar` (latest 2026-05-05 release).
+- **Server install also updated** — same jars dropped into `cobblemon-server/mods/`. Server-side Xaero is functionally identical (no-op for the most part); kept in sync so the mrpack and server agree on versions.
+- **Script change:** `scripts/build_mrpack.py` now uses a `REPLACED_PREFIXES` list to drop entries from the base 0.2.1 manifest before adding their replacements (was a hardcoded `cobblemon_ranked-neoforge` filter; now configurable).
+
+### 2026-05-11 — `Cobblemon Server-0.3.1.mrpack` adds `cobblemon-economy` (Fabric, via Connector)
+- **Output:** `Cobblemon Server-0.3.1.mrpack` (127 MB) supersedes the broken 0.3.0.
+- **Why 0.3.0 was broken:** the upstream Cobblemon Economy 0.0.17 Fabric jar was on the server but never made it into the client pack. Server registers `cobblemon-economy:shopkeeper` entity_type, `shopkeeper_spawn_egg` item, and `quest_board` block+item; the registry-sync on join rejected vanilla clients with "unknown keys" for all four. Added as a Modrinth-indexed Fabric jar in 0.3.1.
+- **Audit done:** ran `comm -23 <(ls cobblemon-server/mods/) <(unzip -p ... + overrides)` — `cobblemon-economy-0.0.17.jar` was the only server jar missing from the 0.3.0 mrpack. No other gaps.
+- **Script fix:** `scripts/build_mrpack.py` now uses `zip` CLI instead of `shutil.make_archive` to tolerate the pre-1980 timestamps the upstream mrpack carries.
+
 ### 2026-05-11 — Built `Cobblemon Server-0.3.0.mrpack` for client testing
 - **Output:** `Cobblemon Server-0.3.0.mrpack` (127 MB) at repo root. Built by `/tmp/build_mrpack.py` from the previous 0.2.1 manifest.
 - **Index changes vs 0.2.1:**
