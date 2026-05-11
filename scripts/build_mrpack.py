@@ -2,8 +2,8 @@ import json, hashlib, os, shutil, urllib.request, sys
 from pathlib import Path
 
 WORK = Path('/tmp/mrpack-work')
-OUT_VERSION = '0.3.2'
-OUT_PATH = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.2.mrpack')
+OUT_VERSION = '0.3.3'
+OUT_PATH = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.3.mrpack')
 SERVER_MODS = Path('/Users/almutwakel/Documents/Projects/minecraft/cobblemon-server/mods')
 CLIENT_ONLY_MODS = Path('/Users/almutwakel/Documents/Projects/minecraft/cobblemon-server/client-only-mods')
 
@@ -32,6 +32,12 @@ NEW_MODRINTH = [
     # client launch. Replace with current Modrinth versions; old entries are filtered below.
     ('xaeros-minimap',        'CklXEjmp', 'required',    'required',    'xaerominimap-neoforge-1.21.1-25.3.13.jar'),
     ('xaeros-world-map',      'XwL25au3', 'required',    'required',    'xaeroworldmap-neoforge-1.21.1-1.40.16.jar'),
+    # Server commands: /spawn, /home, /sethome, /tpa, /warp, /msg, /back, /afk, etc.
+    ('essentialcommands',     'P4CE47vz', 'required',    'required',    'essentials-neoforge-1.0.0.jar'),
+    # First-join starter kit. Auto-grants the kit named "default" to new players.
+    ('starter-kit',           'tKHaJMww', 'required',    'required',    'starterkit-1.21.1-8.0.jar'),
+    # Collective: shared Serilum lib required by starter-kit (and many other Serilum mods).
+    ('collective',            '6xEh8Qbr', 'required',    'required',    'collective-1.21.1-8.22.jar'),
 ]
 
 # Prefixes to drop from the base 0.2.1 manifest (replaced by entries above).

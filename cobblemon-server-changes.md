@@ -7,6 +7,14 @@ Server install path: `/Users/almutwakel/Documents/Projects/minecraft/cobblemon-s
 
 ## Mods
 
+### 2026-05-11 — `Cobblemon Server-0.3.3.mrpack` — Essential Commands + Starter Kit
+- **Output:** `Cobblemon Server-0.3.3.mrpack` (127 MB). Supersedes 0.3.2.
+- **Added (server + client):**
+  - `essentials-neoforge-1.0.0.jar` (modId `rift_essentials`) — Essential Commands by Doneon. Adds `/spawn`, `/home`, `/sethome`, `/delhome`, `/homes`, `/back`, `/warp`, `/setwarp`, `/delwarp`, `/warps`, `/tpa`, `/tpaaccept`, `/tpadeny`, `/tppos`, `/tphere`, `/msg`, `/r`, `/afk`, `/near`, `/seen`, `/nick`, `/heal`, `/feed`, `/fly`, `/god`, `/repair`, `/workbench`, `/enderchest`, plus `/essentials reload`. Config at `config/essential.commands.toml`; per-player data at `world/data/rift_essentials.dat`. https://modrinth.com/mod/essentialcommands/version/P4CE47vz
+  - `starterkit-1.21.1-8.0.jar` — Starter Kit by Serilum. Auto-grants a configured kit to new players on first join. Build kits in-game via `/sk set <name>` from the op's current inventory. Config in `config/starterkit/` and `config/starterkit.json5`. https://modrinth.com/mod/starter-kit/version/tKHaJMww
+  - `collective-1.21.1-8.22.jar` — required Serilum shared lib for starter-kit. https://modrinth.com/mod/collective/version/6xEh8Qbr
+- **Manual followups for the kit (workflow):** op logs in, assembles the kit inventory using `/give @s cobblemon:poke_ball 10`, `/give @s minecraft:iron_pickaxe`, `/give @s cobblemon:red_apricorn 3`, `/give @s sophisticatedbackpacks:backpack`, `/gacha admin grant <self> common 1`, `/give @s` for the Ash Ketchum hat (CobbleFurnies item id), and a written book as the wiki, then runs `/sk set default` to capture as the auto-granted kit.
+
 ### 2026-05-11 — `Cobblemon Server-0.3.2.mrpack` — Xaero updated, supersedes 0.3.1
 - **Output:** `Cobblemon Server-0.3.2.mrpack` (127 MB). Discards the broken 0.3.0 and the still-warning 0.3.1.
 - **Changes vs 0.3.1:**
