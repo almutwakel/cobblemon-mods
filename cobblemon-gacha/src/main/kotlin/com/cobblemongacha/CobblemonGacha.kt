@@ -6,7 +6,6 @@ import com.cobblemongacha.config.LootTableLoader
 import com.cobblemongacha.data.KeyTier
 import com.cobblemongacha.data.LootTable
 import com.cobblemongacha.data.PlayerGachaStore
-import com.cobblemongacha.gui.GachaMenuRegistry
 import com.cobblemongacha.gui.RollMenu
 import com.cobblemongacha.interaction.CrateInteractionHandler
 import com.cobblemongacha.interaction.KeyGrantHooks
@@ -37,7 +36,8 @@ class CobblemonGacha(modBus: IEventBus, container: ModContainer) {
         playerStore = PlayerGachaStore(configDir)
         playerStore.load()
 
-        GachaMenuRegistry.MENUS.register(modBus)
+        // No custom MenuType registration — RollMenu/OddsMenu use vanilla ChestMenu so the
+        // mod stays server-side-only (no client-side install required).
 
         KeyGrantHooks.registerCobblemonHooks()
 
@@ -61,7 +61,9 @@ class CobblemonGacha(modBus: IEventBus, container: ModContainer) {
 
     private fun onContainerClose(event: PlayerContainerEvent.Close) {
         val player = event.entity as? ServerPlayer ?: return
-        if (player.containerMenu is RollMenu) RollMenu.onPlayerClosedContainer(player)
+        // We use vanilla ChestMenu, so identify the gacha menu by tracking active rolls
+        // by UUID rather than `containerMenu is RollMenu`.
+        if (RollMenu.isRolling(player.uuid)) RollMenu.onPlayerClosedContainer(player)
     }
 
     private fun onLoggedOut(event: PlayerEvent.PlayerLoggedOutEvent) {
