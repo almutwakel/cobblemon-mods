@@ -7,6 +7,14 @@ Server install path: `/Users/almutwakel/Documents/Projects/minecraft/cobblemon-s
 
 ## Mods
 
+### 2026-05-11 — Added 3 Cobblemon gameplay mods (Cobbleworkers, Cobbreeding, Unchained)
+- **Added to `cobblemon-server/mods/`** (all `side = "BOTH"`; clients need them too):
+  - `cobbleworkers-neoforge-2.0.2+1.7.0.jar` — Cobbleworkers by Accieo. Pasture blocks can give Pokémon utility jobs. https://modrinth.com/mod/cobbleworkers/version/2.0.2%2B1.7.0
+  - `Cobbreeding-neoforge-2.2.1.jar` — Cobbreeding by Ludichat/Fuzuki. Adds Pokémon breeding to Cobblemon. https://modrinth.com/mod/cobbreeding/version/2.2.1
+  - `unchained-neoforge-1.7.3-1.7.1.jar` — Cobblemon Unchained. Unlocks held-item/level/etc. constraints on Cobblemon legendaries/mythicals. https://modrinth.com/mod/cobblemon-unchained/version/1.7.3-neoforge-1.7.1
+- **Client-pack additional dependency:** Cobbreeding declares `cloth_config` as a `side = "CLIENT"` required dep. The server doesn't need it (server skips client-only deps), but the next mrpack must bundle `cloth_config` for NeoForge 1.21.1 alongside Cobbreeding or the client will fail to load. https://modrinth.com/mod/cloth-config
+- **Reason:** Server admin ask — these are popular Cobblemon gameplay extensions (breeding, item-unlocks, pasture-block worker assignments).
+
 ### 2026-05-11 — Added 5 QOL mods (client+server) and 1 client-only QOL mod
 - **Added to `cobblemon-server/mods/`** (require client install via mrpack — registry sync would reject vanilla clients without them):
   - `watut-neoforge-1.21.0-1.2.7.jar` — "What Are They Up To" by Corosus. Shows nearby players' state (typing, in GUI, idle) as in-world icons. https://modrinth.com/mod/what-are-they-up-to/version/uWr2aTW9
