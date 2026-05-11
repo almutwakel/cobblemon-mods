@@ -160,12 +160,68 @@ object LootTableLoader {
         return listOf(ItemSpec.Placeholder("tbd_ultra", label, 1))
     }
 
-    private object ItemSpecAdapter // placeholder; Task 6 implements
-
     private val gson: com.google.gson.Gson by lazy {
         com.google.gson.GsonBuilder()
             .setPrettyPrinting()
+            .registerTypeAdapter(ItemSpec::class.java, ItemSpecAdapter)
             .create()
+    }
+
+    /**
+     * Gson adapter that serialises the `ItemSpec` sealed hierarchy with a `type` discriminator.
+     */
+    private object ItemSpecAdapter :
+        com.google.gson.JsonSerializer<ItemSpec>, com.google.gson.JsonDeserializer<ItemSpec> {
+        override fun serialize(src: ItemSpec, t: java.lang.reflect.Type, ctx: com.google.gson.JsonSerializationContext): com.google.gson.JsonElement {
+            val obj = com.google.gson.JsonObject()
+            when (src) {
+                is ItemSpec.Vanilla -> {
+                    obj.addProperty("type", "vanilla")
+                    obj.addProperty("id", src.id)
+                    obj.addProperty("count", src.count)
+                    src.nameOverride?.let { obj.addProperty("nameOverride", it) }
+                    if (src.loreLines.isNotEmpty()) {
+                        val arr = com.google.gson.JsonArray()
+                        src.loreLines.forEach(arr::add)
+                        obj.add("loreLines", arr)
+                    }
+                }
+                is ItemSpec.GachaKeyRef -> {
+                    obj.addProperty("type", "gacha_key")
+                    obj.addProperty("tier", src.tier.key)
+                    obj.addProperty("count", src.count)
+                }
+                is ItemSpec.Placeholder -> {
+                    obj.addProperty("type", "placeholder")
+                    obj.addProperty("kind", src.kind)
+                    obj.addProperty("label", src.label)
+                    obj.addProperty("count", src.count)
+                }
+            }
+            return obj
+        }
+
+        override fun deserialize(json: com.google.gson.JsonElement, t: java.lang.reflect.Type, ctx: com.google.gson.JsonDeserializationContext): ItemSpec {
+            val obj = json.asJsonObject
+            return when (obj["type"].asString) {
+                "vanilla" -> ItemSpec.Vanilla(
+                    id = obj["id"].asString,
+                    count = obj["count"].asInt,
+                    nameOverride = obj["nameOverride"]?.takeIf { !it.isJsonNull }?.asString,
+                    loreLines = obj["loreLines"]?.takeIf { !it.isJsonNull }?.asJsonArray?.map { it.asString } ?: emptyList(),
+                )
+                "gacha_key" -> ItemSpec.GachaKeyRef(
+                    tier = KeyTier.fromKey(obj["tier"].asString) ?: error("unknown tier: ${obj["tier"]}"),
+                    count = obj["count"].asInt,
+                )
+                "placeholder" -> ItemSpec.Placeholder(
+                    kind = obj["kind"].asString,
+                    label = obj["label"].asString,
+                    count = obj["count"].asInt,
+                )
+                else -> error("unknown ItemSpec type: ${obj["type"]}")
+            }
+        }
     }
 
     /**

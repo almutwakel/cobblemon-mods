@@ -93,4 +93,18 @@ class LootTableLoaderTest {
         assertEquals(28.0, table.entries.sumOf { it.weightPct }, 1e-9)
         assertEquals(98.0, table.totalWeightPct, 1e-9)
     }
+
+    @Test
+    fun `parseCsv result round-trips through full gson with ItemSpec adapter`() {
+        val table = LootTableLoader.parseCsv(KeyTier.COMMON, commonCsv)
+        val json = LootTableLoader.toJson(table)
+        val rebuilt = LootTableLoader.fromJson(json)
+        assertEquals(table.entries.size, rebuilt.entries.size)
+        assertEquals(table.totalWeightPct, rebuilt.totalWeightPct, 1e-9)
+        val ball = rebuilt.entries[0].items[0] as ItemSpec.Vanilla
+        assertEquals("cobblemon:poke_ball", ball.id)
+        assertEquals(20, ball.count)
+        val key = rebuilt.entries[3].items[0] as ItemSpec.GachaKeyRef
+        assertEquals(KeyTier.RARE, key.tier)
+    }
 }
