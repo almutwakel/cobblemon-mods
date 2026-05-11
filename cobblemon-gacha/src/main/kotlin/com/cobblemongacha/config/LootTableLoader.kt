@@ -159,4 +159,70 @@ object LootTableLoader {
         log.warn("LootTableLoader: unknown item label '{}' (weight={}); using TBD placeholder", label, weight)
         return listOf(ItemSpec.Placeholder("tbd_ultra", label, 1))
     }
+
+    private object ItemSpecAdapter // placeholder; Task 6 implements
+
+    private val gson: com.google.gson.Gson by lazy {
+        com.google.gson.GsonBuilder()
+            .setPrettyPrinting()
+            .create()
+    }
+
+    /**
+     * Loads (or migrates) all three loot tables for the running mod.
+     *
+     * For each tier, prefers the on-disk JSON at `<configDir>/cobblemon-gacha/tables/<tier>.json`.
+     * If that file is missing, parses the bundled CSV from the jar's resources and writes the
+     * resulting `LootTable` to disk as JSON.
+     */
+    fun loadAll(configDir: java.nio.file.Path): Map<KeyTier, LootTable> {
+        val tablesDir = configDir.resolve("cobblemon-gacha").resolve("tables")
+        java.nio.file.Files.createDirectories(tablesDir)
+        val out = mutableMapOf<KeyTier, LootTable>()
+        for (tier in KeyTier.entries) {
+            val jsonFile = tablesDir.resolve("${tier.key}.json")
+            val table = if (java.nio.file.Files.exists(jsonFile)) {
+                loadJson(tier, jsonFile)
+            } else {
+                val csv = readBundledCsv(tier)
+                val parsed = parseCsv(tier, csv)
+                writeJson(parsed, jsonFile)
+                CobblemonGacha.logger.info("Migrated bundled {} CSV to {}", tier.key, jsonFile)
+                parsed
+            }
+            out[tier] = table
+        }
+        return out
+    }
+
+    private fun loadJson(tier: KeyTier, path: java.nio.file.Path): LootTable {
+        return try {
+            gson.fromJson(java.nio.file.Files.readString(path), LootTable::class.java)
+        } catch (e: Exception) {
+            CobblemonGacha.logger.error("Failed to read {} table json, falling back to bundled CSV", tier.key, e)
+            val csv = readBundledCsv(tier)
+            parseCsv(tier, csv)
+        }
+    }
+
+    /**
+     * NOTE: Without the `ItemSpecAdapter` registered (next task), Gson cannot deserialise the
+     * sealed `ItemSpec` hierarchy. Task 6 wires that in.
+     */
+    private fun writeJson(table: LootTable, path: java.nio.file.Path) {
+        java.nio.file.Files.writeString(path, gson.toJson(table))
+    }
+
+    private fun readBundledCsv(tier: KeyTier): String {
+        val resource = "/tables/${tier.key}.csv"
+        val stream = LootTableLoader::class.java.getResourceAsStream(resource)
+            ?: error("Bundled loot table resource not found: $resource")
+        return stream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+    }
+
+    /** Public test seam — serialises a LootTable to JSON using the configured adapter. */
+    fun toJson(table: LootTable): String = gson.toJson(table)
+
+    /** Public test seam — deserialises a LootTable from JSON using the configured adapter. */
+    fun fromJson(json: String): LootTable = gson.fromJson(json, LootTable::class.java)
 }
