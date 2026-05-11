@@ -7,6 +7,15 @@ Server install path: `/Users/almutwakel/Documents/Projects/minecraft/cobblemon-s
 
 ## Mods
 
+### 2026-05-11 — Built `Cobblemon Server-0.3.0.mrpack` for client testing
+- **Output:** `Cobblemon Server-0.3.0.mrpack` (127 MB) at repo root. Built by `/tmp/build_mrpack.py` from the previous 0.2.1 manifest.
+- **Index changes vs 0.2.1:**
+  - Removed `cobblemon_ranked-neoforge-1.4.2.jar` (Modrinth) — replaced by in-house build via `overrides/mods/`.
+  - Added 13 Modrinth entries (the 5 QOL mods + 3 gameplay mods + their 3 deps + chat_heads as client-only + cloth-config as client-only Cobbreeding dep).
+  - Added 3 in-house jars to `overrides/mods/`: `cobblemon-market-1.0.0.jar`, `cobblemon-ranked-1.0.0.jar`, `cobblemon-gacha-1.0.0.jar`.
+- **Test path:** Prism → Edit instance → Version → Reinstall from zip → pick 0.3.0 → launch → connect to local server.
+- **Note:** mrpack is not committed (the `.mrpack` extension is in `.gitignore` and the file is 127 MB). Re-build with `/tmp/build_mrpack.py` if needed (script generates manifests dynamically from Modrinth API).
+
 ### 2026-05-11 — Required-dep jars for Watut + Unchained + Cobblemon Linkie
 - **Added to `cobblemon-server/mods/`** (pure libraries, no commands of their own):
   - `coroutil-neoforge-1.21.0-1.3.8.jar` — required by Watut. https://modrinth.com/mod/coroutil/version/1.21.0-1.3.8
