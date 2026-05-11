@@ -7,6 +7,13 @@ Server install path: `/Users/almutwakel/Documents/Projects/minecraft/cobblemon-s
 
 ## Mods
 
+### 2026-05-11 — Required-dep jars for Watut + Unchained + Cobblemon Linkie
+- **Added to `cobblemon-server/mods/`** (pure libraries, no commands of their own):
+  - `coroutil-neoforge-1.21.0-1.3.8.jar` — required by Watut. https://modrinth.com/mod/coroutil/version/1.21.0-1.3.8
+  - `timcore-neoforge-1.7.3-1.32.0.jar` — required by Cobblemon Unchained and Cobblemon Linkie. https://modrinth.com/mod/cobblemon-tim-core/version/1.7.3-neoforge-1.32.0
+  - `counter-neoforge-1.7.3-1.9.0.jar` — provides modId `cobbled_counter`, required by Cobblemon Unchained. https://modrinth.com/mod/cobblemon-counter/version/1.7.3-neoforge-1.9.0
+- **Reason:** first restart after the QOL/gameplay batch crashed with ModLoadingException for each of these. They were transitive deps not surfaced by the parent mods' Modrinth listings; surfaced by the boot error. Player pack needs them too.
+
 ### 2026-05-11 — Added 3 Cobblemon gameplay mods (Cobbleworkers, Cobbreeding, Unchained)
 - **Added to `cobblemon-server/mods/`** (all `side = "BOTH"`; clients need them too):
   - `cobbleworkers-neoforge-2.0.2+1.7.0.jar` — Cobbleworkers by Accieo. Pasture blocks can give Pokémon utility jobs. https://modrinth.com/mod/cobbleworkers/version/2.0.2%2B1.7.0
