@@ -17,5 +17,8 @@ class CobblemonGacha(modBus: IEventBus, container: ModContainer) {
         const val MOD_ID = "cobblemon_gacha"
         const val PERSISTENCE_DIR_NAME = "cobblemon-gacha"
         val logger: Logger = LoggerFactory.getLogger(MOD_ID)
+        lateinit var config: com.cobblemongacha.config.GachaConfig
+        lateinit var tables: Map<com.cobblemongacha.data.KeyTier, com.cobblemongacha.data.LootTable>
+        lateinit var playerStore: com.cobblemongacha.data.PlayerGachaStore
     }
 }
