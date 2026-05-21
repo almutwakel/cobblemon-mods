@@ -1,0 +1,15 @@
+{
+  "parent": "server:reach_elo_1100",
+  "display": {
+    "title": { "text": "Contender" },
+    "description": { "text": "Reach 1200 ELO in Ranked." },
+    "icon": { "id": "cobblemon:focus_band" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "done": { "trigger": "minecraft:impossible" }
+  },
+  "rewards": { "function": "server:quests/rewards/reach_elo_1200" }
+}

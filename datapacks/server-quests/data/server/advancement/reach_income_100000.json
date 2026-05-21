@@ -1,0 +1,15 @@
+{
+  "parent": "server:reach_income_10000",
+  "display": {
+    "title": { "text": "Tycoon" },
+    "description": { "text": "Hold $100,000 in your wallet." },
+    "icon": { "id": "minecraft:emerald_block" },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": { "trigger": "minecraft:impossible" }
+  },
+  "rewards": { "function": "server:quests/rewards/reach_income_100000" }
+}

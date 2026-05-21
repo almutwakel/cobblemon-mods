@@ -1,0 +1,15 @@
+{
+  "parent": "server:reach_income_100",
+  "display": {
+    "title": { "text": "Petty Cash" },
+    "description": { "text": "Hold $1,000 in your wallet." },
+    "icon": { "id": "minecraft:emerald" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": { "trigger": "minecraft:impossible" }
+  },
+  "rewards": { "function": "server:quests/rewards/reach_income_1000" }
+}

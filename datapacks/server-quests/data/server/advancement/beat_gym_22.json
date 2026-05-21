@@ -1,0 +1,25 @@
+{
+  "parent": "server:beat_gym_21",
+  "display": {
+    "title": {
+      "text": "Elite Four #3"
+    },
+    "description": {
+      "text": "Defeat Elite Four #3: Full Stall."
+    },
+    "icon": {
+      "id": "cobblemon:master_ball"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "rewards": {
+    "function": "server:quests/rewards/beat_gym_22"
+  }
+}

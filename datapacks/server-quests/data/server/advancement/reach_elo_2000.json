@@ -1,0 +1,15 @@
+{
+  "parent": "server:reach_elo_1500",
+  "display": {
+    "title": { "text": "Master" },
+    "description": { "text": "Reach 2000 ELO in Ranked." },
+    "icon": { "id": "cobblemon:master_ball" },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": { "trigger": "minecraft:impossible" }
+  },
+  "rewards": { "function": "server:quests/rewards/reach_elo_2000" }
+}

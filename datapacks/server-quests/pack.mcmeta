@@ -1,0 +1,6 @@
+{
+  "pack": {
+    "description": "Server quests + action-bar HUD. Quests are vanilla advancements; HUD is mcfunction-driven (per-player action bar, opt-out via /trigger).",
+    "pack_format": 48
+  }
+}

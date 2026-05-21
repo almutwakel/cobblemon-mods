@@ -1,0 +1,22 @@
+{
+  "parent": "server:catch_pokemon",
+  "display": {
+    "title": { "text": "Green Thumb" },
+    "description": { "text": "Stockpile 32 carrots." },
+    "icon": { "id": "minecraft:carrot" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "stockpiled": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          { "items": ["minecraft:carrot"], "count": { "min": 32 } }
+        ]
+      }
+    }
+  },
+  "rewards": { "function": "server:quests/rewards/farm_carrots" }
+}

@@ -1,0 +1,26 @@
+{
+  "parent": "server:root",
+  "display": {
+    "title": { "text": "Catch ’em" },
+    "description": { "text": "Craft your first Poké Ball." },
+    "icon": { "id": "cobblemon:poke_ball" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "crafted": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": ["cobblemon:poke_ball"]
+          }
+        ]
+      }
+    }
+  },
+  "rewards": {
+    "function": "server:quests/rewards/craft_pokeball"
+  }
+}

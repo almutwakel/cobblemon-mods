@@ -1,0 +1,25 @@
+{
+  "parent": "server:beat_gym_6",
+  "display": {
+    "title": {
+      "text": "Gym 7: Crasher Wake"
+    },
+    "description": {
+      "text": "Defeat the Water-type gym leader."
+    },
+    "icon": {
+      "id": "cobblemon:ultra_ball"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "rewards": {
+    "function": "server:quests/rewards/beat_gym_7"
+  }
+}

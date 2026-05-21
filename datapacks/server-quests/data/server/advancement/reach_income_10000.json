@@ -1,0 +1,15 @@
+{
+  "parent": "server:reach_income_1000",
+  "display": {
+    "title": { "text": "Comfortable" },
+    "description": { "text": "Hold $10,000 in your wallet." },
+    "icon": { "id": "minecraft:emerald_block" },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "done": { "trigger": "minecraft:impossible" }
+  },
+  "rewards": { "function": "server:quests/rewards/reach_income_10000" }
+}

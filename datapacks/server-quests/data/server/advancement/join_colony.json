@@ -1,0 +1,23 @@
+{
+  "parent": "server:root",
+  "display": {
+    "title": { "text": "Find a Home" },
+    "description": { "text": "Start or join a Minecolonies town." },
+    "icon": { "id": "minecraft:bell" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "founded": {
+      "trigger": "minecolonies:place_supply"
+    },
+    "active_member": {
+      "trigger": "minecolonies:create_build_request"
+    }
+  },
+  "requirements": [
+    ["founded", "active_member"]
+  ],
+  "rewards": { "function": "server:quests/rewards/join_colony" }
+}

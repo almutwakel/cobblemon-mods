@@ -1,0 +1,19 @@
+{
+  "parent": "server:craft_pokeball",
+  "display": {
+    "title": { "text": "Gotta Catch One" },
+    "description": { "text": "Capture a wild Pokémon." },
+    "icon": { "id": "cobblemon:great_ball" },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "caught": {
+      "trigger": "cobblemon:catch_pokemon"
+    }
+  },
+  "rewards": {
+    "function": "server:quests/rewards/catch_pokemon"
+  }
+}

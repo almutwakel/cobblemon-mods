@@ -1,0 +1,14 @@
+{
+  "display": {
+    "title": { "text": "Server Progression" },
+    "description": { "text": "Welcome! Run /trigger cq_hud_toggle to silence the on-screen quest banner." },
+    "icon": { "id": "cobblemon:poke_ball" },
+    "background": "minecraft:textures/block/oak_planks.png",
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "tick": { "trigger": "minecraft:tick" }
+  }
+}

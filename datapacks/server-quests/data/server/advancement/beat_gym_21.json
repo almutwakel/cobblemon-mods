@@ -1,0 +1,25 @@
+{
+  "parent": "server:beat_gym_20",
+  "display": {
+    "title": {
+      "text": "Elite Four #2"
+    },
+    "description": {
+      "text": "Defeat Elite Four #2: Hyper Offense."
+    },
+    "icon": {
+      "id": "cobblemon:master_ball"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "rewards": {
+    "function": "server:quests/rewards/beat_gym_21"
+  }
+}
