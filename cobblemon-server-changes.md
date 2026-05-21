@@ -7,6 +7,119 @@ Server install path: `/Users/almutwakel/Documents/Projects/minecraft/cobblemon-s
 
 ## Mods
 
+### 2026-05-16 — Added `/quests` player command (cobblemon-bridge)
+- **New Brigadier command** in `commands/QuestCommand.kt`. Subcommands:
+  - `/quests` or `/quests current` — shows the player's current main-chain quest with title + description.
+  - `/quests list` — full quest tree grouped into Main / Income / Ranked Ladder / Other sections with `§a✓` / `§e▶` / `§7○` markers per quest. Titles read from each advancement's display block at runtime, so editing a quest's JSON title updates the command output automatically.
+  - `/quests hud on|off|toggle` — manages the on-screen action-bar HUD via the `cq_hud_off` tag (same tag the datapack's `/trigger cq_hud_toggle` flips, so both interfaces converge on one state).
+  - `/quests help` — subcommand list.
+- **Wired via** `RegisterCommandsEvent` listener in `CobblemonBridge.init`. Quest ID groupings are hardcoded constants in `QuestCommand.kt`; new quests added later need a one-line append.
+- **Bridge jar rebuilt + redeployed** (`cobblemon-bridge-1.0.0.jar`). Needs server restart for the new command to register.
+
+### 2026-05-16 — Cobbleloots config cleanup + Minecolonies quest unblocked
+- **Cobbleloots config** (`config/cobbleloots.json`): added 19 unused tier ids to `data_pack_disabled_loot_balls` (azure/citrine/dive/dusk/heal/lure/luxury/master/nest/net/premier/pumpkin/quick/rainbow/roseate/safari/slate/timer/verdant). Only poké/great/ultra spawn from chunk-gen + spawning + fishing now — those are the three the bridge `give_party_exp` adapter maps to 100/800/3000 party EXP.
+- **`server:join_colony`** advancement upgraded to use Minecolonies' OWN registered advancement triggers — no in-house code needed. The criteria are `minecolonies:place_supply` (player places a Supply Camp = founds a colony) OR `minecolonies:create_build_request` (player issues a build request = is an active citizen). `requirements: [["founded", "active_member"]]` makes it an OR. Verified by inspecting `com.minecolonies.api.advancements.AdvancementTriggers` bytecode — both triggers register under the `minecolonies:` namespace and accept the default `{}` condition. Pure datapack edit; no Kotlin.
+
+### 2026-05-16 — `/gacha admin giveegg` command (clean knob for quest-reward eggs)
+- **New admin command** `gacha admin giveegg <player> <pool> [shiny] [ha]` in cobblemon-gacha (`commands/GachaCommands.kt` + new private `adminGiveEgg`). Pool is `common` / `uncommon` / `rare` / `ultra_rare`. Reuses `CobblemonGacha.eggPools.pick()` and dispatches Cobbreeding's `givepokemonegg` with `min_perfect_ivs=2` baseline + optional flags. Mirrors `RewardGranter.dispatchEgg` so a quest reward egg is identical to a gacha pull egg.
+- **Usage from mcfunctions:** `gacha admin giveegg @s rare shiny` from any reward function (op-2 permission is enough). Promoting a pool's species list later means editing `egg_pools.csv` — every quest that grants from that pool benefits.
+- **Demonstrated in:** `beat_gym_1.mcfunction` (now grants a shiny rare-pool egg as a bonus) and `reach_elo_2000.mcfunction` (shiny + HA ultra-rare egg).
+
+### 2026-05-14 — Quest system fully wired (16 advancements, action-bar HUD, 3 in-house mod hooks)
+- **Datapack** at `world/datapacks/server-quests/` now has 16 advancement JSONs + 15 reward mcfunctions covering the full quest list:
+  - **Linear chain** (drives the action-bar HUD): `craft_pokeball` → `catch_pokemon` → `farm_carrots` → `beat_gym_1` → `first_pvp_win` → `reach_elo_1100`.
+  - **Side track — income** (silent in HUD, visible in L tree): `reach_income_100` → `_1000` → `_10000` → `_100000`. Current goal is `_1000` (task frame, real reward); others are `goal` / `challenge` frames with milestone-tier rewards.
+  - **Side track — ELO** (silent in HUD): `reach_elo_1100` (task, current goal) → `_1200` → `_1300` → `_1500` → `_2000` (challenge with Master Ball payout).
+  - **Side track — colony**: `join_colony` (impossible; TODO — needs Minecolonies event-bus adapter).
+- **Triggers:** vanilla `minecraft:inventory_changed` (Poké Ball, 32+ carrots), `cobblemon:catch_pokemon` (note: the actual trigger id is `catch_pokemon`, not `caught_pokemon`), `minecraft:impossible` for all in-house-awarded ones.
+- **HUD machinery (pure mcfunction):**
+  - `tick.json` registers `server:quests/hud/tick` (every tick).
+  - Throttles to ~1.5s via per-player `cq_hud_tick` scoreboard counter.
+  - `tick_player.mcfunction` cascade matches the first incomplete linear-chain quest and pushes a one-line `title @s actionbar`.
+  - Parallel side quests intentionally don't appear in the HUD — they pop toasts on grant and live in the L-key tree.
+- **Opt-out:** `/trigger cq_hud_toggle` flips a `cq_hud_off` tag; HUD tick skips tagged players. Off-players still get `tellraw` chat updates on every grant (reward function runs regardless).
+- **In-house mod awards (new code, ~80 LOC across 3 mods + 1 datapack):**
+  - **cobblemon-bridge** — added `BridgeTags.GYM_ID` (`cobblemon_bridge.gym_id.<N>`, range 1..30), `battle/GymDefeatHook.kt` (stash on `EntityInteract`, apply on `BATTLE_VICTORY` for the winning player — awards `server:beat_gym_<N>`), and `quests/QuestAdvancements.kt` helper. Stash TTL is 5min to cover long gym fights. Tests up to 15 in the bridge.
+  - **cobblemon-ranked** — in `applyMatchResult`, after ELO update, awards `server:first_pvp_win` to the winner + awards `server:reach_elo_<N>` for any thresholds the winner just crossed up. Centralized `ELO_THRESHOLDS = [1100, 1200, 1300, 1500, 2000]` constant. Skips silently when player offline (e.g. console-simulated matches) or when datapack not loaded.
+  - **cobblemon-market** — `economy/QuestRewards.kt`. After a successful sell deposit, computes balance before/after and awards `server:reach_income_<N>` for any newly-crossed threshold in `[100, 1000, 10000, 100000]`. Only deposits can cross UP, so only the sell path needs the check.
+- **All three mod jars rebuilt and redeployed.** Datapack auto-loads with `world/datapacks/server-quests/` on next `/reload` or server restart.
+
+### 2026-05-13 — Cobbleloots 2.3.0 + bridge `give_party_exp` hook (loot balls → Pokémon party EXP)
+- **Added** `cobbleloots-neoforge-2.3.0.jar` (modId `cobbleloots`, by ResistorCat). Naturally-spawning loot ball entities in newly-generated chunks. https://modrinth.com/mod/cobbleloots/version/2.3.0
+- **Side:** `BOTH` — must be in the next mrpack so vanilla clients pass registry sync (the mod registers `cobbleloots:loot_ball` entity, `cobbleloots:loot_ball` item).
+- **Datapack** at `world/datapacks/server-lootballs/`: overrides bundled `poke.json`, `great.json`, `ultra.json` so they (a) point at an empty loot table (`server:empty`, also defined in the pack) — no item drops, (b) set `xp: 0` — no vanilla XP. Only Poké/Great/Ultra are overridden; the other 19 bundled tiers (azure/citrine/dusk/etc.) still ship with their defaults. **TODO after first boot:** add the unused tier IDs to `data_pack_disabled_loot_balls` in `config/cobbleloots.json5` so only Poké/Great/Ultra spawn in the world.
+- **Extended `cobblemon-bridge` 1.0.0** (jar rebuilt, redeployed) with:
+  - **New tag hook `cobblemon_bridge.give_party_exp.<N>`** — right-click any entity carrying this tag distributes N Cobblemon Pokémon EXP equally across the player's party slots (split with remainder on slot 0), suppresses the vanilla entity interact (no loot UI, no vanilla XP), despawns the entity. `SidemodExperienceSource("cobblemon_bridge")` so the source is auditable in Cobblemon logs.
+  - **Cobbleloots adapter** — `EntityJoinLevelEvent` listener detects entities with registry id `cobbleloots:loot_ball`, reflectively calls `getLootBallDataId()` to read the tier, and stamps `cobblemon_bridge.give_party_exp.<N>` per the mapping: `poke=100` (≈ Exp Candy XS), `great=800` (≈ S), `ultra=3000` (≈ M). The other 19 tiers are intentionally unmapped — they'll spawn but won't grant party EXP until disabled via Cobbleloots config.
+  - Adapter is gated by `ModList.isLoaded("cobbleloots")` so cobblemon-bridge stays usable without Cobbleloots installed. No compile-time dep on Cobbleloots — the reflection call doesn't pull in their classes.
+- **End-to-end flow:** chunk gens → Cobbleloots spawns a `cobbleloots:loot_ball` entity → adapter sees `EntityJoinLevelEvent`, reads tier, adds `give_party_exp.100/800/3000` tag → player right-clicks → bridge `GivePartyExpHook` fires, distributes EXP across party, despawns, sound + chat confirmation → single-grab, gone for everyone.
+
+### 2026-05-13 — Added `cobblemon-bridge` 1.0.0 (tag-driven Cobblemon hooks; first hook: battle level scaling)
+- **New in-house mod** at `cobblemon-bridge/`. Built like the other in-house mods (Kotlin 2.2.20, KotlinForForge 5.11, NeoForge 21.1.227). Jar lives at `cobblemon-server/mods/cobblemon-bridge-1.0.0.jar`.
+- **Design rule:** every hook is gated by a `cobblemon_bridge:<hook>/<arg>` tag on an entity (vanilla `Tags: [String]` NBT array). The mod listens to public Cobblemon / NeoForge events and applies the hook when it sees the tag.
+- **Why tags:** `/tag` is vanilla and works without custom commands; tags persist on entities; datapack functions / loot tables can stamp tags on summon for free.
+- **First hook — `adjust_level`:** entity tag `cobblemon_bridge.adjust_level.<N>` (where `<N>` is 1-100) sets `BattleFormat.adjustLevel = N` for the battle started by interacting with that entity. Dots are used as separators because vanilla `/tag` rejects `/` and `:` (the StringReader scoreboard-tag parser only accepts `[0-9a-zA-Z_+\-.]`). Closes the gap RCT documents but doesn't actually wire (RCT 0.18.1-beta declares `BattleRules.adjustPlayerLevels` but the field is never consumed; the bridge fills in the missing hop by mutating the Cobblemon format directly).
+- **Detection flow:** `PlayerInteractEvent.EntityInteract` reads the target's tag set and stashes the desired level keyed by player UUID (5-second TTL). `CobblemonEvents.BATTLE_STARTED_PRE` consumes the stash and mutates `battle.format.adjustLevel` before Cobblemon's engine commits.
+- **Usage:** as op, point at an NPC (Cobblemon built-in, RCT, or any tagged entity), run `/tag <selector> add cobblemon_bridge:adjust_level/50`. Next time a player initiates a battle with that NPC, both teams fight at level 50; the player's stored Pokémon are unchanged.
+- **Future hooks (planned):** progression flags (`battle_unique/<id>` to mark first-defeat for a player), full heal after battle, reward grants — all gated by their own `cobblemon_bridge:*` tags. No per-mod config files; tags are the only knob.
+
+### 2026-05-12 — Added Cobblemon Fight or Flight Reborn 0.10.7 (alphas-only aggression)
+- **Added to `cobblemon-server/mods/`:** `fightorflight-neoforge-0.10.7.jar` (modId `fightorflight`, by rufia + LyquidQrystal). Makes Cobblemon Pokémon hostile under various conditions. Alpha Project does not make Alphas attack on its own — this is the mod that does. https://modrinth.com/mod/cobblemon-fight-or-flight-reborn/version/DrweIBly
+- **Deps:** MC 1.21.1, NeoForge 21.1+, Cobblemon 1.7.0+, Architectury 13.0.8+ — all satisfied. Cloth Config is bundled as a JIJ (inside the jar's `META-INF/jars/`).
+- **Side:** `BOTH` — must be in the next mrpack alongside Alpha Project; otherwise vanilla clients will fail to connect.
+- **Config (server: `config/fightorflight.json5`, generated on first boot by AutoConfig).** To get "only Alphas attack on sight, all other wild mons stay passive unless hit," after first boot edit these keys:
+  - `always_aggro_aspects = ["alpha"]` — Pokémon carrying the `alpha` aspect become unconditionally hostile. The Alpha Project mod stamps that aspect on every Alpha it spawns.
+  - `do_pokemon_attack_unprovoked = false` — non-Alpha wild mons won't initiate combat. They'll still defend themselves if hit (controlled by `do_pokemon_attack`, default true).
+  - Leave `do_pokemon_attack = true` (master toggle — required for any attacking).
+  - Leave `aggressive_pokemon_catchable = true` so players can still throw balls at angry Alphas without the mod blocking the catch.
+- **Other knobs worth knowing (defaults usually fine):**
+  - `minimum_attack_level` (default 1) — only mons at/above this level can attack.
+  - `minimum_attack_damage` / `maximum_attack_damage` — clamps the damage a wild Pokémon can deal. Useful if a level-50 Alpha is one-shotting players.
+  - `always_aggro = ["species_id", ...]` — force-aggressive species list (independent of aspect).
+  - `never_aggro = [...]` — opt-out list.
+  - `do_player_pokemon_attack_other_players` (default false) — leave off unless you want PvP-style sandbox combat.
+- **One-time setup after first boot:** stop server, open `config/fightorflight.json5`, find the `always_aggro_aspects` line (likely an empty `[]` by default) and change to `["alpha"]`, find `do_pokemon_attack_unprovoked` and set to `false`, save, restart. Or do it in-game if `/fightorflight reload` is exposed (not verified — config edit + restart is the safe path).
+
+### 2026-05-12 — Added Cobblemon Alpha Project 1.4.1
+- **Added to `cobblemon-server/mods/`:** `cobblemonalphas-1.4.1.jar` (modId `cobblemonalphas`, by Cudzer + TheEternalDragon). Adds wild-spawning Alpha Pokémon (larger, stronger, IV-loaded — Legends-Arceus-style). https://modrinth.com/mod/cobblemon-alpha-project/version/1.4.1
+- **Side:** `BOTH` — client pack MUST bundle this jar too. Add to the next mrpack or vanilla clients will fail registry sync on join.
+- **Hard deps satisfied:** NeoForge 21+, MC 1.21.1+, Architectury 13.0.8+ (already present at 13.0.8 from Cobbreeding install). Cobblemon itself is *not* a declared mod-deps entry but the mod is designed for Cobblemon 1.7.3 (which we run).
+- **Config (defaults retained — wiki link: https://github.com/Cudzer/cobblemonalphas/wiki/Configuration):**
+  - `doAlphaSpawning = true` — master switch.
+  - `alphaSpawnChance = 0.01` — 1% chance per spawn attempt.
+  - `secondsBetweenSpawns = 300` — 5-min interval between attempts.
+  - `spawnAttempts = 10` — how many tries per interval.
+  - `requiredPlayerAmount = 1` — at least 1 player online for spawning.
+  - `minimumSpawnDistance = 30`, `maximumSpawnDistance = 60` — radius from a player.
+  - `alphaSizeModifier = 2.0` — Alphas render 2× normal size.
+  - `maximumBestIvs = 3` — Alphas get up to 3 perfect IVs.
+  - `doHerdSpawning = true` — also spawns the mon's natural herd.
+  - `shinyOdds = 4096` — vanilla shiny odds for Alphas.
+  - `spawnAnnouncementMessage = "An Alpha Pokemon has spawned near somebody!"`
+  - `showCoordinatesInAnnouncement = false` — keep off so the announcement is a teaser rather than a beacon.
+- **Tuning notes (if defaults feel wrong after testing):** halve `alphaSpawnChance` to 0.005 if Alphas show up too often; bump `maximumBestIvs` to 5 and drop `shinyOdds` to 1024 if Alphas should feel like a bigger reward; flip `showCoordinatesInAnnouncement = true` to make hunting them easier.
+
+### 2026-05-12 — `cobblemon-gacha` 1.0.0 → eggs now grant HA + 2 perfect IVs; announce surfaces species
+- **Rebuilt** `cobblemon-server/mods/cobblemon-gacha-1.0.0.jar`. No version bump.
+- **PokemonProperties passed to `/givepokemonegg`:** all eggs now include `min_perfect_ivs=2` (Cobblemon picks 2 of the 6 stats randomly and sets them to 31). `shiny=true` and `ha=yes` are appended when the source `ItemSpec.CobbreedingEgg` requested them.
+- **Hidden Ability now actually grants HA:** previously the gacha pool filter only ensured we picked from HA-capable species, but no flag was passed to the egg → ability roll defaulted to vanilla odds (~all common ability). Now `ha=yes` is sent so the hatched Pokémon has the hidden ability for certain. Detected the Cobblemon property key via `HiddenAbilityPropertyType` bytecode (accepts `ha` / `hiddenability` with `yes`/`true`).
+- **Announce now reveals the rolled species + HA tag:** `RewardGranter.grant()` returns `GrantResult(stacks, labelOverride)`. When an egg is in the entry, `labelOverride` reads `§e✦ Shiny §fPikachu Egg §d(Hidden Ability)` and replaces the generic CSV label (`Shiny Egg`) in the server-wide pull message. Non-egg entries pass `null` and announce uses `entry.label` as before.
+- **Display stack tooltip** mirrors the announce label — also shows `(HA)` suffix in the inventory item name.
+
+### 2026-05-12 — `cobblemon-gacha` 1.0.0 → real egg & monument rewards (no more placeholders)
+- **Rebuilt** `cobblemon-server/mods/cobblemon-gacha-1.0.0.jar` from the local module. No version bump (still 1.0.0); jar replaced in place.
+- **What changed inside the mod:**
+  - Added `ItemSpec.CobbreedingEgg(pool, shiny, requireHiddenAbility)` — at grant time, picks a species from a 4-tier pool (Common / Uncommon / Rare / Ultra Rare) and dispatches `/givepokemonegg <player> <species> [shiny=true]` to Cobbreeding. The display stack the announcer sees is a vanilla `minecraft:egg` renamed to the species + shiny tag. The real egg is created server-side by Cobbreeding's command.
+  - Added `ItemSpec.RandomItem(ids: List<String>, count: Int)` — picks one id uniformly at random from a list at grant time. Used to map "Legendary Monument" / "Fragment" / "Voucher" labels in the loot CSV to a random pedestal block from the **LegendaryMonuments** mod (all 18 pedestal ids weighted equally per admin call).
+  - Added `EggPools` / `EggPoolLoader` — first-boot CSV→JSON migration similar to `LootTableLoader`. Bundled CSV is the same `egg_hatch_pool.csv` from Downloads (86 species, 4 tiers). Admins can edit `config/cobblemon-gacha/egg_pools.json` after first boot.
+  - Bundled resource: `src/main/resources/egg_pools.csv`.
+- **Loot-table parser routing in `LootTableLoader.parseItemLabel`:**
+  - `*egg*` labels (except "Lucky Egg" / "Bee egg" — those stay vanilla) now route through `routeEgg()`. Pool is inferred from label keywords (high-tier / larvitar / beldum / bagon → ultra_rare; mid-tier / uncommon → uncommon; rare → rare; common → common; bare "Shiny Egg" with no tier word → rare). `shiny=true` if "shiny" in label. `requireHiddenAbility=true` if "hidden ability" in label.
+  - `voucher` / `fragment` / `monument` labels route to `RandomItem(PEDESTAL_IDS, count=1)`.
+- **Server-side state delete:** removed `config/cobblemon-gacha/tables/` (backed up to `config/cobblemon-gacha/backup-pre-egg/tables-2026-05-12/`). First boot regenerates the JSONs from the bundled CSV parser; otherwise the on-disk JSONs would still carry the old `Placeholder("pokemon_egg")` entries and the new routing wouldn't take effect.
+- **Client impact:** none — gacha is still server-only (vanilla `ChestMenu` for the roll/odds GUIs, vanilla `minecraft:egg` for the display stack). No client mrpack change.
+- **Migration note for the destination server:** if the destination already has a `tables/` JSON dir from an older gacha build, it must be removed in the same way (or the schema-discriminator branches won't kick in). Egg pools auto-generate from the bundled CSV on first boot.
+
 ### 2026-05-11 — `Cobblemon Server-0.3.4.mrpack` — switched essentials from EssentialCommands to NeoEssentials
 - **Output:** `Cobblemon Server-0.3.4.mrpack` (127 MB). Supersedes 0.3.3.
 - **Swap:** removed `essentials-neoforge-1.0.0.jar` (EssentialCommands v1.0.0 by Doneon — brand-new mod, only one release). Added `neoessentials-1.0.2.5+build.1074.jar` (NeoEssentials by MrWhiteFlamesYT) — more mature (50+ commands, config-driven cooldowns/costs/limits, used on production servers). Marked as server-only in the manifest (`client = "unsupported"`); the mod authors confirm it registers no client-synced items/blocks, so vanilla clients connect cleanly. https://modrinth.com/mod/neoessentials/version/woCkFyUe

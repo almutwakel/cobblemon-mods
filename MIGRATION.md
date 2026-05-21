@@ -38,7 +38,14 @@ Everything below is the **per-install state** delta between test and destination
     `stock: Double` and `priceHistory: List<PriceTick>` — see
     `cobblemon-market/src/main/kotlin/com/cobblemonmarket/data/ItemState.kt`.
 - The ranked mod's `elo.json` schema has been stable across versions; no migration needed.
-- The gacha mod is **new** to the destination — no schema concerns.
+- The gacha mod is **new** to the destination — no schema concerns at first install, but:
+  - If you ever drop a new gacha jar onto a server that already ran an older gacha build, **delete
+    `config/cobblemon-gacha/tables/*.json` first**. Otherwise the on-disk JSONs (frozen at the
+    parser version that wrote them) keep emitting old `Placeholder("pokemon_egg")` rewards instead
+    of the new Cobbreeding egg / pedestal mappings. The mod regenerates from the bundled CSV on
+    first boot when the JSONs are missing.
+  - The egg-pool data lives at `config/cobblemon-gacha/egg_pools.json` (first-boot migrated from
+    a bundled CSV). Editable by admins to add/remove species per rarity tier.
 
 ---
 
