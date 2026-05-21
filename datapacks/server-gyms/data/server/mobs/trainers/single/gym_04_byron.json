@@ -1,0 +1,7 @@
+{
+  "type": "single",
+  "trainerId": "server:gym_04_byron",
+  "weight": 0,
+  "biomeTagWhitelist": [],
+  "biomeTagBlacklist": []
+}
