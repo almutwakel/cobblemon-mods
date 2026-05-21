@@ -1,0 +1,7 @@
+{
+  "type": "single",
+  "trainerId": "server:gym_07_crasher_wake",
+  "weight": 0,
+  "biomeTagWhitelist": [],
+  "biomeTagBlacklist": []
+}
