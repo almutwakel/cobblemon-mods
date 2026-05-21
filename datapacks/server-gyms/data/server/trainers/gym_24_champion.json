@@ -1,0 +1,202 @@
+{
+  "name": "Pok\u00e9mon Champion",
+  "identity": "Sky Conqueror",
+  "ai": {
+    "type": "rb",
+    "data": {
+      "canMega": true,
+      "canTera": true,
+      "teraTarget": "rayquaza"
+    }
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 4,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": true
+  },
+  "bag": [
+    {
+      "item": "cobblemon:full_restore",
+      "quantity": 6
+    }
+  ],
+  "team": [
+    {
+      "species": "rayquaza",
+      "level": 50,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "form": "mega",
+      "ability": "airlock",
+      "moveset": [
+        "dragonascent",
+        "earthquake",
+        "dragondance",
+        "extremespeed"
+      ]
+    },
+    {
+      "species": "rayquaza",
+      "level": 50,
+      "nature": "modest",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "form": "mega",
+      "shiny": true,
+      "ability": "airlock",
+      "moveset": [
+        "dragonascent",
+        "dracometeor",
+        "surf",
+        "thunderbolt"
+      ]
+    },
+    {
+      "species": "garchomp",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "roughskin",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "swordsdance",
+        "scaleshot",
+        "earthquake",
+        "stoneedge"
+      ]
+    },
+    {
+      "species": "salamence",
+      "level": 50,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "intimidate",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "dragondance",
+        "dragonclaw",
+        "earthquake",
+        "fireblast"
+      ]
+    },
+    {
+      "species": "latios",
+      "level": 50,
+      "nature": "modest",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "levitate",
+      "heldItem": "cobblemon:choice_specs",
+      "moveset": [
+        "dracometeor",
+        "psychic",
+        "thunderbolt",
+        "mysticalfire"
+      ]
+    },
+    {
+      "species": "dragonite",
+      "level": 50,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "multiscale",
+      "heldItem": "cobblemon:heavy_duty_boots",
+      "moveset": [
+        "extremespeed",
+        "dragondance",
+        "earthquake",
+        "outrage"
+      ]
+    }
+  ]
+}
