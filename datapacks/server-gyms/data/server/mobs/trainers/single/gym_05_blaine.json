@@ -1,0 +1,7 @@
+{
+  "type": "single",
+  "trainerId": "server:gym_05_blaine",
+  "weight": 0,
+  "biomeTagWhitelist": [],
+  "biomeTagBlacklist": []
+}
