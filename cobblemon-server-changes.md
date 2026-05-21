@@ -7,6 +7,28 @@ Server install path: `/Users/almutwakel/Documents/Projects/minecraft/cobblemon-s
 
 ## Mods
 
+### 2026-05-21 — Quest rewards overhauled: eggs and keys only, full gym/E4/champion coverage
+
+- **Stripped all item rewards** (exp candies, balls, ability patches/capsules, rare candies, master balls, bells, bone meal) from every quest mcfunction. Each quest now grants exactly one reward: an egg or a key.
+- **Egg tier assignments:**
+  - **Common:** craft_pokeball, catch_pokemon, farm_carrots, first_pvp_win, join_colony, reach_income_100.
+  - **Uncommon:** reach_elo_1100, reach_elo_1200, reach_income_1000.
+  - **Rare:** reach_elo_1300, reach_elo_1500, reach_income_10000.
+  - **Ultra Rare:** reach_elo_2000, reach_income_100000.
+  - No shiny or HA flags on any reward — HA is species-specific in the egg pool CSV, not a reward modifier.
+- **Key tier assignments (gyms/E4/champion):**
+  - **Rare Key:** Gyms 1–9, all 9 rotating gyms, Elite Four #1–3.
+  - **Ultra Key:** Gym 10 (Morty), Elite Four #4 (Dragon Boss), Champion.
+- **New gym numbering scheme** for `cobblemon_bridge.gym_id.<N>` entity tags:
+  - 1–10: main gyms (Clay, Gardenia, Korrina, Byron, Blaine, Roxie, Crasher Wake, Sabrina, Drayden, Morty).
+  - 11–19: rotating gyms (Viola, Cheren, Lt. Surge, Grant, Skyla, Brycen, Valerie, Marnie, Professor Oak).
+  - 20–23: Elite Four (#1 Weather Wars, #2 Hyper Offense, #3 Full Stall, #4 Dragon Boss).
+  - 24: Champion.
+- **23 new advancement JSONs** created for gyms 2–10, rotating gyms, E4, and Champion. Tree structure: main gyms chain sequentially (1→2→…→10); rotating gyms and E4 branch from gym 10; E4 chains sequentially to Champion.
+- **23 new reward mcfunctions** created for the same. Uses `gacha admin grant @s <rare|ultra> 1` for keys and `gacha admin giveegg @s <tier>` for eggs.
+- **Datapack now git-tracked** at `datapacks/server-quests/` (was previously only in the gitignored `cobblemon-server/world/datapacks/` directory). The tracked copy is the source of truth; deploy by copying to the server's `world/datapacks/`.
+- **Total quest count:** 38 (was 15). Breakdown: 6 early-game, 5 ELO ladder, 4 income, 1 colony, 10 main gyms, 9 rotating gyms, 4 E4, 1 champion, minus 2 that existed before (beat_gym_1, reach_elo_2000) = 23 net new.
+
 ### 2026-05-16 — Added `/quests` player command (cobblemon-bridge)
 - **New Brigadier command** in `commands/QuestCommand.kt`. Subcommands:
   - `/quests` or `/quests current` — shows the player's current main-chain quest with title + description.
