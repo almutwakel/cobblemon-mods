@@ -83,6 +83,51 @@ object GachaCommands {
                     )
                     .then(Commands.literal("reload")
                         .executes { ctx -> adminReload(ctx.source) })
+                    .then(Commands.literal("giveegg")
+                        .then(Commands.argument("player", EntityArgument.player())
+                            .then(Commands.argument("tier", StringArgumentType.string())
+                                .suggests { _, b ->
+                                    listOf("common", "uncommon", "rare", "ultra_rare").forEach { b.suggest(it) }
+                                    b.buildFuture()
+                                }
+                                .executes { ctx ->
+                                    adminGiveEgg(
+                                        ctx.source,
+                                        EntityArgument.getPlayer(ctx, "player"),
+                                        StringArgumentType.getString(ctx, "tier"),
+                                        shiny = false, requireHa = false,
+                                    )
+                                }
+                                .then(Commands.literal("shiny")
+                                    .executes { ctx ->
+                                        adminGiveEgg(
+                                            ctx.source,
+                                            EntityArgument.getPlayer(ctx, "player"),
+                                            StringArgumentType.getString(ctx, "tier"),
+                                            shiny = true, requireHa = false,
+                                        )
+                                    }
+                                    .then(Commands.literal("ha")
+                                        .executes { ctx ->
+                                            adminGiveEgg(
+                                                ctx.source,
+                                                EntityArgument.getPlayer(ctx, "player"),
+                                                StringArgumentType.getString(ctx, "tier"),
+                                                shiny = true, requireHa = true,
+                                            )
+                                        }))
+                                .then(Commands.literal("ha")
+                                    .executes { ctx ->
+                                        adminGiveEgg(
+                                            ctx.source,
+                                            EntityArgument.getPlayer(ctx, "player"),
+                                            StringArgumentType.getString(ctx, "tier"),
+                                            shiny = false, requireHa = true,
+                                        )
+                                    })
+                            )
+                        )
+                    )
                 )
         )
     }
@@ -101,6 +146,7 @@ object GachaCommands {
                 "§7  /gacha admin clearcrate <tier> §f— unbind a crate",
                 "§7  /gacha admin force <player> <tier> §f— roll without consuming a key",
                 "§7  /gacha admin reload §f— reload config + tables from disk",
+                "§7  /gacha admin giveegg <player> <pool> [shiny] [ha] §f— grant a random species egg",
             )
         }
         lines.forEach { source.sendSystemMessage(Component.literal(it)) }
@@ -163,6 +209,51 @@ object GachaCommands {
         CobblemonGacha.config = GachaConfig.load(dir)
         CobblemonGacha.tables = LootTableLoader.loadAll(dir)
         source.sendSystemMessage(Component.literal("§a[Gacha] Reloaded config + ${CobblemonGacha.tables.size} tables"))
+        return 1
+    }
+
+    /**
+     * Pick a species from the gacha's egg pool for [tierStr] (one of common/uncommon/rare/
+     * ultra_rare; underscore or space tolerated), then dispatch Cobbreeding's `givepokemonegg`
+     * with `min_perfect_ivs=2` baseline + optional `shiny=true` and `ha=yes`. Mirrors the same
+     * dispatch path used during normal gacha pulls in `RewardGranter.dispatchEgg` so a quest
+     * reward calling `gacha admin giveegg @s rare shiny ha` produces an egg indistinguishable
+     * from a rare-tier gacha pull.
+     */
+    private fun adminGiveEgg(
+        source: CommandSourceStack,
+        target: net.minecraft.server.level.ServerPlayer,
+        tierStr: String,
+        shiny: Boolean,
+        requireHa: Boolean,
+    ): Int {
+        val pools = CobblemonGacha.eggPools
+        val species = pools.pick(tierStr, requireHiddenAbility = requireHa)
+        if (species == null) {
+            source.sendSystemMessage(Component.literal(
+                "§c[Gacha] Egg pool '$tierStr' has no species" +
+                    if (requireHa) " with Hidden Ability" else "" +
+                    ". Valid tiers: common, uncommon, rare, ultra_rare"
+            ))
+            return 0
+        }
+        val args = buildList {
+            add(species)
+            add("min_perfect_ivs=2")
+            if (shiny) add("shiny=true")
+            if (requireHa) add("ha=yes")
+        }.joinToString(" ")
+        val cmd = "givepokemonegg ${target.gameProfile.name} $args"
+        val src = target.server.createCommandSourceStack().withPermission(4).withSuppressedOutput()
+        target.server.commands.performPrefixedCommand(src, cmd)
+
+        val shinyTag = if (shiny) " §e✦ Shiny" else ""
+        val haTag = if (requireHa) " §d(HA)" else ""
+        val display = "$shinyTag §f${species.replaceFirstChar { it.uppercase() }} Egg$haTag"
+        target.sendSystemMessage(Component.literal("§a[Gacha] You received a$display §a(Cobbreeding will deliver it)"))
+        source.sendSystemMessage(Component.literal(
+            "§a[Gacha] Gave ${target.name.string}: ${species} (tier=$tierStr, shiny=$shiny, ha=$requireHa)"
+        ))
         return 1
     }
 }

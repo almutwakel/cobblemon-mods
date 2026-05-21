@@ -110,8 +110,10 @@ object RollMenu {
             return
         }
         player.closeContainer()
-        RewardGranter.grant(player, state.decided)
-        PullAnnouncer.broadcast(player.server, player, state.tier, state.decided, state.cratePos)
+        val result = RewardGranter.grant(player, state.decided)
+        PullAnnouncer.broadcast(
+            player.server, player, state.tier, state.decided, state.cratePos, result.labelOverride,
+        )
     }
 
     fun onPlayerClosedContainer(player: ServerPlayer) {

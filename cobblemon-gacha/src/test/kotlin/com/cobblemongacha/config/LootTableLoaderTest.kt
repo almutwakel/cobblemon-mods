@@ -80,11 +80,50 @@ class LootTableLoaderTest {
     }
 
     @Test
-    fun `Shiny Egg label parses as pokemon_egg placeholder`() {
+    fun `Shiny Egg label parses as CobbreedingEgg shiny=true`() {
         val table = LootTableLoader.parseCsv(KeyTier.ULTRA, ultraCsv)
-        val egg = table.entries[3].items[0] as ItemSpec.Placeholder
-        assertEquals("pokemon_egg", egg.kind)
-        assertTrue(egg.label.contains("Shiny Egg"))
+        val egg = table.entries[3].items[0] as ItemSpec.CobbreedingEgg
+        assertTrue(egg.shiny)
+        // Bare "Shiny Egg" with no tier word defaults to the rare pool.
+        assertEquals("rare", egg.pool)
+    }
+
+    @Test
+    fun `High-tier egg label routes to ultra_rare pool`() {
+        val csv = """
+            Tier,Item,Chance %,Notes,
+            High,1 High-Tier Egg,2.0%,,
+        """.trimIndent()
+        val table = LootTableLoader.parseCsv(KeyTier.ULTRA, csv)
+        val egg = table.entries[0].items[0] as ItemSpec.CobbreedingEgg
+        assertEquals("ultra_rare", egg.pool)
+    }
+
+    @Test
+    fun `Monument label routes to RandomItem over pedestal ids`() {
+        val csv = """
+            Tier,Item,Chance %,Notes,
+            Jackpot,1 Legendary Monument,1.0%,,
+        """.trimIndent()
+        val table = LootTableLoader.parseCsv(KeyTier.ULTRA, csv)
+        val rand = table.entries[0].items[0] as ItemSpec.RandomItem
+        assertTrue(rand.ids.isNotEmpty())
+        assertTrue(rand.ids.all { it.startsWith("legendarymonuments:") })
+    }
+
+    @Test
+    fun `CobbreedingEgg + RandomItem round-trip through gson`() {
+        val csv = """
+            Tier,Item,Chance %,Notes,
+            Jackpot,1 Shiny Egg,1.0%,,
+            ,1 Legendary Monument,1.0%,,
+        """.trimIndent()
+        val table = LootTableLoader.parseCsv(KeyTier.ULTRA, csv)
+        val rebuilt = LootTableLoader.fromJson(LootTableLoader.toJson(table))
+        val egg = rebuilt.entries[0].items[0] as ItemSpec.CobbreedingEgg
+        assertTrue(egg.shiny)
+        val rand = rebuilt.entries[1].items[0] as ItemSpec.RandomItem
+        assertTrue(rand.ids.isNotEmpty())
     }
 
     @Test

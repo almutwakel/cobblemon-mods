@@ -1,8 +1,10 @@
 package com.cobblemongacha
 
 import com.cobblemongacha.commands.GachaCommands
+import com.cobblemongacha.config.EggPoolLoader
 import com.cobblemongacha.config.GachaConfig
 import com.cobblemongacha.config.LootTableLoader
+import com.cobblemongacha.data.EggPools
 import com.cobblemongacha.data.KeyTier
 import com.cobblemongacha.data.LootTable
 import com.cobblemongacha.data.PlayerGachaStore
@@ -33,6 +35,7 @@ class CobblemonGacha(modBus: IEventBus, container: ModContainer) {
         val configDir = FMLPaths.CONFIGDIR.get()
         config = GachaConfig.load(configDir)
         tables = LootTableLoader.loadAll(configDir)
+        eggPools = EggPoolLoader.loadAll(configDir)
         playerStore = PlayerGachaStore(configDir)
         playerStore.load()
 
@@ -79,6 +82,7 @@ class CobblemonGacha(modBus: IEventBus, container: ModContainer) {
 
         lateinit var config: GachaConfig
         lateinit var tables: Map<KeyTier, LootTable>
+        lateinit var eggPools: EggPools
         lateinit var playerStore: PlayerGachaStore
     }
 }

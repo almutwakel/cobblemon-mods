@@ -31,17 +31,21 @@ object PullAnnouncer {
         tier: KeyTier,
         entry: LootEntry,
         crateBlockPos: net.minecraft.core.BlockPos? = null,
+        labelOverride: String? = null,
     ) {
         val playerName = player.name.string
+        // `labelOverride` lets eggs surface the rolled species + HA tag in the announce instead
+        // of the generic CSV label ("Shiny Egg" → "Shiny Pikachu Egg §d(Hidden Ability)").
+        val label = labelOverride ?: entry.label
         val message = when (entry.lootTier) {
             LootTier.Floor, LootTier.Mid -> Component.literal(
-                "§7[Gacha] §a$playerName§7 opened a §f${tier.displayName} Box §7and got §f${entry.label}"
+                "§7[Gacha] §a$playerName§7 opened a §f${tier.displayName} Box §7and got §f$label"
             )
             LootTier.High -> Component.literal(
-                "§7[Gacha] §a$playerName§7 opened a §f${tier.displayName} Box §7and got §f${entry.label}§6 (HIGH)"
+                "§7[Gacha] §a$playerName§7 opened a §f${tier.displayName} Box §7and got §f$label§6 (HIGH)"
             )
             LootTier.Jackpot -> Component.literal(
-                "§e[Gacha] §6★ JACKPOT! §a$playerName§6 got §f${entry.label} §6from a ${tier.displayName} Box ★"
+                "§e[Gacha] §6★ JACKPOT! §a$playerName§6 got §f$label §6from a ${tier.displayName} Box ★"
             )
         }
         server.playerList.broadcastSystemMessage(message, false)
