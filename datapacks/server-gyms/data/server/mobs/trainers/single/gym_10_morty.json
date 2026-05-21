@@ -1,0 +1,7 @@
+{
+  "type": "single",
+  "trainerId": "server:gym_10_morty",
+  "weight": 0,
+  "biomeTagWhitelist": [],
+  "biomeTagBlacklist": []
+}
