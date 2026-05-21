@@ -101,7 +101,11 @@ object TradeOps {
         state.stock = result.finalStock
         val priceAfter = PricingEngine.sellPrice(entry.baseSellPrice, state.stock, entry.baseStock, entry.elasticity)
 
+        val balanceBefore = EconomyBridge.getBalance(player.uuid)
         EconomyBridge.deposit(player.uuid, totalProceeds)
+        val balanceAfter = EconomyBridge.getBalance(player.uuid)
+        QuestRewards.checkIncomeThresholds(player, balanceBefore, balanceAfter)
+
         val avgPrice = (totalProceeds + qty / 2) / qty
         CobblemonMarket.marketStore.recordPriceTick(
             itemId = itemId, type = "sell",

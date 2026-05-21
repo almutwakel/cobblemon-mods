@@ -336,6 +336,18 @@ object RankedBattleManager {
         store.save()
         DecayManager.recordBattle()
 
+        // Quest advancements for the winner: first_pvp_win + any newly-crossed ELO thresholds.
+        // Skips silently when the player is offline (e.g., during simulateMatch from console)
+        // or when the datapack hasn't loaded the advancement.
+        server.playerList.getPlayer(winnerUuid)?.let { winnerPlayer ->
+            awardQuest(winnerPlayer, "server:first_pvp_win")
+            for (threshold in ELO_THRESHOLDS) {
+                if (newWinnerElo >= threshold && oldWinnerElo < threshold) {
+                    awardQuest(winnerPlayer, "server:reach_elo_$threshold")
+                }
+            }
+        }
+
         val winnerDelta = newWinnerElo - oldWinnerElo
         val loserDelta = newLoserElo - oldLoserElo
         broadcast(server, "[Ranked] $winnerName defeated $loserName!")
@@ -418,5 +430,26 @@ object RankedBattleManager {
         server.playerList.players.forEach {
             it.sendSystemMessage(Component.literal(message))
         }
+    }
+
+    /**
+     * ELO thresholds that grant `server:reach_elo_<N>` advancements. Set deliberately as
+     * milestones; the current "active quest goal" is 1100 (see HUD cascade in the server-quests
+     * datapack). The remaining thresholds award silently with `goal`-framed advancements until
+     * promoted.
+     */
+    private val ELO_THRESHOLDS = listOf(1100, 1200, 1300, 1500, 2000)
+
+    /**
+     * Award `advancementId`'s default criterion to [player] if the advancement exists and the
+     * player hasn't completed it. Used to grant the quest-datapack advancements from event
+     * handlers. No-op on missing datapack (server starts up without quest pack loaded).
+     */
+    private fun awardQuest(player: ServerPlayer, advancementId: String, criterion: String = "done") {
+        val rl = ResourceLocation.parse(advancementId)
+        val holder = player.server.advancements.get(rl) ?: return
+        val progress = player.advancements.getOrStartProgress(holder)
+        if (progress.isDone) return
+        player.advancements.award(holder, criterion)
     }
 }
