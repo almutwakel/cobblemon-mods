@@ -1,0 +1,197 @@
+{
+  "name": "Gym Leader Drayden",
+  "identity": "Dragon",
+  "ai": {
+    "type": "rb",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 4,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": true
+  },
+  "bag": [
+    {
+      "item": "cobblemon:full_restore",
+      "quantity": 4
+    }
+  ],
+  "team": [
+    {
+      "species": "cyclizar",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "regenerator",
+      "heldItem": "cobblemon:choice_scarf",
+      "moveset": [
+        "shedtail",
+        "outrage",
+        "return",
+        "uturn"
+      ]
+    },
+    {
+      "species": "kommo-o",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "soundproof",
+      "heldItem": "cobblemon:throat_spray",
+      "moveset": [
+        "clangoroussoul",
+        "clangingscales",
+        "aurasphere",
+        "flashcannon"
+      ]
+    },
+    {
+      "species": "dracovish",
+      "level": 50,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 248,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 8,
+        "spe": 0
+      },
+      "ability": "strongjaw",
+      "heldItem": "cobblemon:choice_scarf",
+      "moveset": [
+        "fishiousrend",
+        "outrage",
+        "psychicfangs",
+        "crunch"
+      ]
+    },
+    {
+      "species": "dragonite",
+      "level": 50,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 248,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 8,
+        "spe": 0
+      },
+      "ability": "multiscale",
+      "heldItem": "cobblemon:heavy_duty_boots",
+      "moveset": [
+        "dragondance",
+        "dragonclaw",
+        "earthquake",
+        "icespinner"
+      ]
+    },
+    {
+      "species": "dragalge",
+      "level": 50,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 248,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 8,
+        "spe": 0
+      },
+      "ability": "adaptability",
+      "heldItem": "cobblemon:assault_vest",
+      "moveset": [
+        "dracometeor",
+        "sludgewave",
+        "focusblast",
+        "flipturn"
+      ]
+    },
+    {
+      "species": "dragapult",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "clearbody",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "dragondarts",
+        "phantomforce",
+        "fireblast",
+        "thunderbolt"
+      ]
+    }
+  ]
+}
