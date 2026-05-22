@@ -1,0 +1,34 @@
+modLoader = "kotlinforforge"
+loaderVersion = "[5,)"
+license = "All Rights Reserved"
+
+[[mods]]
+modId = "cobblemon_carrots"
+version = "${version}"
+displayName = "Cobblemon Carrots"
+description = "Carrot-based Pokémon healing. Right-click a Pokémon with a carrot to heal 60 HP, or use a Poké Healer block for full-party heal-and-revive with a confirmation prompt (consumes carrots + currency)."
+authors = "almutwakel"
+# Server-side only — listens to public Cobblemon + NeoForge events. IGNORE_ALL_VERSION skips
+# the version handshake so vanilla clients pass registry sync.
+displayTest = "IGNORE_ALL_VERSION"
+
+[[dependencies.cobblemon_carrots]]
+modId = "neoforge"
+type = "required"
+versionRange = "[21.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblemon_carrots]]
+modId = "kotlinforforge"
+type = "required"
+versionRange = "[5,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.cobblemon_carrots]]
+modId = "cobblemon"
+type = "required"
+versionRange = "[1.7.1,)"
+ordering = "AFTER"
+side = "BOTH"
