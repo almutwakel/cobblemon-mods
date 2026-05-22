@@ -1,0 +1,199 @@
+{
+  "name": "Gym Leader Brycen",
+  "identity": "Ice",
+  "ai": {
+    "type": "rb",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 4,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": true
+  },
+  "bag": [
+    {
+      "item": "cobblemon:full_restore",
+      "quantity": 4
+    }
+  ],
+  "team": [
+    {
+      "species": "ninetales",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "form": "alolan",
+      "ability": "snowwarning",
+      "heldItem": "cobblemon:light_clay",
+      "moveset": [
+        "auroraveil",
+        "blizzard",
+        "moonblast",
+        "darkpulse"
+      ]
+    },
+    {
+      "species": "mamoswine",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "thickfat",
+      "heldItem": "cobblemon:weakness_policy",
+      "moveset": [
+        "iciclecrash",
+        "earthquake",
+        "iceshard",
+        "trailblaze"
+      ],
+      "gender": "MALE"
+    },
+    {
+      "species": "lapras",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "waterabsorb",
+      "heldItem": "cobblemon:leftovers",
+      "moveset": [
+        "freezedry",
+        "snowscape",
+        "surf",
+        "psychic"
+      ]
+    },
+    {
+      "species": "crabominable",
+      "level": 50,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 248,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 8,
+        "spe": 0
+      },
+      "ability": "ironfist",
+      "heldItem": "cobblemon:assault_vest",
+      "moveset": [
+        "icehammer",
+        "drainpunch",
+        "earthquake",
+        "thunderpunch"
+      ]
+    },
+    {
+      "species": "froslass",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "snowcloak",
+      "heldItem": "cobblemon:icy_rock",
+      "moveset": [
+        "snowscape",
+        "thunderwave",
+        "hex",
+        "icebeam"
+      ]
+    },
+    {
+      "species": "cetitan",
+      "level": 50,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 248,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 8,
+        "spe": 0
+      },
+      "ability": "slushrush",
+      "heldItem": "cobblemon:sitrus_berry",
+      "moveset": [
+        "bellydrum",
+        "icespinner",
+        "earthquake",
+        "playrough"
+      ]
+    }
+  ]
+}
