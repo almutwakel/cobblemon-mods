@@ -1,0 +1,200 @@
+{
+  "name": "Gym Leader Sabrina",
+  "identity": "Psychic",
+  "ai": {
+    "type": "rb",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 4,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": true
+  },
+  "bag": [
+    {
+      "item": "cobblemon:full_restore",
+      "quantity": 4
+    }
+  ],
+  "team": [
+    {
+      "species": "indeedee",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "psychicsurge",
+      "heldItem": "cobblemon:terrain_extender",
+      "moveset": [
+        "batonpass",
+        "expandingforce",
+        "hypervoice",
+        "mysticalfire"
+      ],
+      "gender": "FEMALE"
+    },
+    {
+      "species": "meowstic",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "prankster",
+      "heldItem": "cobblemon:light_clay",
+      "moveset": [
+        "reflect",
+        "lightscreen",
+        "batonpass",
+        "expandingforce"
+      ],
+      "gender": "MALE"
+    },
+    {
+      "species": "gardevoir",
+      "level": 50,
+      "nature": "modest",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "synchronize",
+      "heldItem": "cobblemon:choice_specs",
+      "moveset": [
+        "expandingforce",
+        "moonblast",
+        "mysticalfire",
+        "trick"
+      ]
+    },
+    {
+      "species": "espeon",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "magicbounce",
+      "heldItem": "cobblemon:colbur_berry",
+      "moveset": [
+        "calmmind",
+        "psychic",
+        "shadowball",
+        "drainingkiss"
+      ]
+    },
+    {
+      "species": "gallade",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "sharpness",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "psychocut",
+        "sacredsword",
+        "nightslash",
+        "agility"
+      ],
+      "gender": "MALE"
+    },
+    {
+      "species": "sigilyph",
+      "level": 50,
+      "nature": "calm",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 4,
+        "spa": 0,
+        "spd": 252,
+        "spe": 0
+      },
+      "ability": "magicguard",
+      "heldItem": "cobblemon:toxic_orb",
+      "moveset": [
+        "cosmicpower",
+        "storedpower",
+        "roost",
+        "psychoshift"
+      ]
+    }
+  ]
+}
