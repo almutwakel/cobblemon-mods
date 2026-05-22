@@ -1,25 +1,15 @@
 {
   "parent": "server:beat_gym_10",
   "display": {
-    "title": {
-      "text": "Professor Oak"
-    },
-    "description": {
-      "text": "Defeat Professor Oak (Mixed-type, Level 60)."
-    },
-    "icon": {
-      "id": "cobblemon:ultra_ball"
-    },
-    "frame": "task",
+    "title": { "text": "Professor Oak" },
+    "description": { "text": "Defeat Professor Oak — Kanto's strongest, hand-picked." },
+    "icon": { "id": "cobblemon:master_ball" },
+    "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true
   },
   "criteria": {
-    "done": {
-      "trigger": "minecraft:impossible"
-    }
+    "done": { "trigger": "minecraft:impossible" }
   },
-  "rewards": {
-    "function": "server:quests/rewards/beat_gym_19"
-  }
+  "rewards": { "function": "server:quests/rewards/beat_gym_19" }
 }
