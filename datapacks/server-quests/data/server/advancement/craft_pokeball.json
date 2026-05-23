@@ -1,9 +1,15 @@
 {
-  "parent": "server:root",
+  "parent": "server:catch_pokemon",
   "display": {
-    "title": { "text": "Catch ’em" },
-    "description": { "text": "Craft your first Poké Ball." },
-    "icon": { "id": "cobblemon:poke_ball" },
+    "title": {
+      "text": "Catch \u2019em"
+    },
+    "description": {
+      "text": "Craft your first Pok\u00e9 Ball."
+    },
+    "icon": {
+      "id": "cobblemon:poke_ball"
+    },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true
@@ -14,7 +20,9 @@
       "conditions": {
         "items": [
           {
-            "items": ["cobblemon:poke_ball"]
+            "items": [
+              "cobblemon:poke_ball"
+            ]
           }
         ]
       }
