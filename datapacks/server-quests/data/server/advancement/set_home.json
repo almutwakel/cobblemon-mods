@@ -1,0 +1,25 @@
+{
+  "parent": "server:craft_pokeball",
+  "display": {
+    "title": {
+      "text": "A Place to Crash"
+    },
+    "description": {
+      "text": "Set a home with /sethome <name>."
+    },
+    "icon": {
+      "id": "minecraft:red_bed"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "rewards": {
+    "function": "server:quests/rewards/set_home"
+  }
+}
