@@ -1,9 +1,15 @@
 {
-  "parent": "server:craft_pokeball",
+  "parent": "server:root",
   "display": {
-    "title": { "text": "Gotta Catch One" },
-    "description": { "text": "Capture a wild Pokémon." },
-    "icon": { "id": "cobblemon:great_ball" },
+    "title": {
+      "text": "Gotta Catch One"
+    },
+    "description": {
+      "text": "Capture a wild Pok\u00e9mon."
+    },
+    "icon": {
+      "id": "cobblemon:great_ball"
+    },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true
