@@ -76,4 +76,11 @@ object CobbleloootsAdapter {
         CobblemonBridge.logger.warn("Reflective getLootBallDataId failed", e)
         null
     }
+
+    /**
+     * Public lookup so the interact handler can resolve EXP for a loot ball that didn't get
+     * tagged at spawn time (e.g. it pre-dates the bridge install, or [EntityJoinLevelEvent]
+     * didn't fire for it). Returns null when the tier isn't mapped or the reflection fails.
+     */
+    fun expFor(entity: Any): Int? = readTier(entity)?.let { EXP_BY_TIER[it] }
 }
