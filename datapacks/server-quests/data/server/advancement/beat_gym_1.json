@@ -1,15 +1,25 @@
 {
-  "parent": "server:farm_carrots",
+  "parent": "server:reach_party_level_15",
   "display": {
-    "title": { "text": "Gym 1: Misty" },
-    "description": { "text": "Defeat the first gym leader." },
-    "icon": { "id": "cobblemon:ultra_ball" },
+    "title": {
+      "text": "Gym 1: Clay"
+    },
+    "description": {
+      "text": "Defeat the Ground-type gym leader."
+    },
+    "icon": {
+      "id": "cobblemon:ultra_ball"
+    },
     "frame": "challenge",
     "show_toast": true,
     "announce_to_chat": true
   },
   "criteria": {
-    "done": { "trigger": "minecraft:impossible" }
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
   },
-  "rewards": { "function": "server:quests/rewards/beat_gym_1" }
+  "rewards": {
+    "function": "server:quests/rewards/beat_gym_1"
+  }
 }
