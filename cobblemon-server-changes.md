@@ -7,6 +7,115 @@ Server install path: `/Users/almutwakel/Documents/Projects/minecraft/cobblemon-s
 
 ## Mods
 
+### 2026-05-23 — Evolution-aware spawn clamp + randomized clamp band (0.3.12)
+- **Spawn clamp now picks a random target level** in `[cap - 2, cap + 3]` instead of a fixed `cap + 3` ceiling. Eliminates the "every wild Pokémon is exactly cap+3" uniformity. Trigger unchanged: only re-rolls when the original rolled level is strictly above `cap + 3`, so the natural in-band distribution rides through.
+- **De-evolves the species to match the clamped level**. Walks back through `Species.preEvolution` while the incoming `LevelUpEvolution`'s `LevelRequirement.minLevel` exceeds the target. A L40 Blastoise clamped to L14 becomes a L14 Squirtle (Wartortle → Blastoise needs L36, Squirtle → Wartortle needs L16, both above 14). Non-level evolutions (stone, trade, friendship) halt the walk — a wild Raichu just gets a level clamp, not a forced reversion to Pikachu. Move set is re-initialized via `pokemon.initializeMoveset(false)` so the down-evolved form learns level-appropriate moves rather than carrying its prior species' moveset.
+- `cobblemon-bridge-1.0.0.jar` rebuilt (59,957 bytes, was 58,539). Bundled into **`Cobblemon Server-0.3.12.mrpack`** (126,829,398 bytes).
+
+### 2026-05-23 — Carrots in the dynamic market, healer buys at live price (0.3.11)
+- **`minecraft:carrot` added to cobblemon-market lineup**: baseBuyPrice $6, baseSellPrice $3, baseStock 1000, elasticity 0.7, maxStockMultiplier 10×. Tuned for high-volume / low-margin — most trades barely move the price.
+- **Healer now buys from the market** instead of charging a flat `carrotPrice` config value. When a player is short carrots, the Pokéhealer confirm:
+  1. Quotes the live per-carrot buy price (computed from current stock via PricingEngine).
+  2. Checks market stock — if `stock < carrotsShort`, refuses the heal entirely with a "market is short — only X in stock" message. There's no partial-heal path because `Pokemon.heal()` is atomic.
+  3. On confirm, routes payment through `TradeOps.buyForConsumption` (new) — atomic withdraw + stock decrement + price-history tick. Items are not delivered to the inventory; the healer consumes them immediately.
+- **New `TradeOps.buyForConsumption(player, itemId, qty)`** in cobblemon-market: same flow as `buy` but skips inventory delivery and space-check (caller has already earmarked the items).
+- **`MarketBridge` (reflection)** added in cobblemon-carrots — keeps the two mods independent at compile time. Falls back to flat `carrotPrice` if cobblemon-market isn't loaded or `minecraft:carrot` isn't in its lineup.
+- **Default items.json** in the market mod's `ItemConfig.defaultItems()` now includes the carrot entry, so fresh installs auto-seed correctly. Existing servers must hand-edit `config/cobblemon-market/items.json` to add the carrot stanza — the mod only writes defaults if the file is missing.
+- Jars rebuilt: `cobblemon-market-1.0.0.jar` (82,466 bytes, was 82,232), `cobblemon-carrots-1.0.0.jar` (43,418 bytes, was 31,300). Deployed to `cobblemon-server/mods/` + bundled into **`Cobblemon Server-0.3.11.mrpack`** (126,827,981 bytes, 59 Modrinth + 12 overrides).
+
+### 2026-05-23 — Wild-balance round 3: clamp spawns, exempt legendaries, fix gym formula (0.3.10)
+- **`LevelCap.kt` rewritten with explicit gym-progression formula**: BASE=15, +5 per *mainline* gym beaten (1-10), so cap maxes at 65 after gym 10. Rotating gyms (11-18) explicitly **don't** contribute. Beating Elite Four final (`server:beat_gym_23`) returns `UNCAPPED` sentinel (`Int.MAX_VALUE`) — caller checks via `LevelCap.isUncapped(cap)` and skips the cap entirely. Replaces the old "count all `beat_gym_*` advancements" approximation.
+- **`WildSpawnLevelCapHook`**: changed from `event.cancel()` to **clamping** — sets `pokemon.level = cap + 3` instead of refusing the spawn. Preserves encounter rates for low-cap players (they were previously seeing zero high-level spawns, which compounded with biome-spawn-rarity to nerf overworld variety). Legendaries and mythicals are **exempt** — they spawn at their natural level so a pre-gym player can still stumble onto a wild Mewtwo. Players with `UNCAPPED` (E4-complete) anywhere in the 64-block scan radius disable the clamp.
+- **`WildBattleAdjustHook`**: added two exemptions. If the opposing wild mon is legendary/mythical, skip the cap entirely (you fight a legendary at full strength, win or lose). Per-player: skip if their `cap == UNCAPPED`.
+- **`TradeCapHook`**: same exemptions. Legendaries/mythicals are tradeable across cap boundaries (the whole point of trading them is helping a friend), and UNCAPPED players can receive any level. `LevelCap.isUncapped(cap)` short-circuits the violation check before the level comparison.
+- `cobblemon-bridge-1.0.0.jar` rebuilt (58,539 bytes, was 50,837), redeployed to `cobblemon-server/mods/`.
+- **`Cobblemon Server-0.3.10.mrpack` built**: 127 MB, 59 Modrinth + 12 overrides. Seeds from 0.3.9.
+
+### 2026-05-22 — Unchained streaks now per-player
+- Flipped `lockToPlayer: false → true` across all 18 booster configs under `config/unchained/` (spawn/capture/egg/fish/resurrection/snack × shiny/IV/HA). Streaks were server-wide by default — one player's grinding would inflate rewards for everyone, and conversely your captures would look weaker if someone else broke the streak. Per-player tracking is fair and roughly the same overhead (just a UUID-keyed map). Restart recommended so Cobblemon picks up the new schema cleanly.
+
+### 2026-05-22 — `cobblemon-carrots` revive mechanics + 0.3.6 mrpack refreshed
+- **Shift-right-click revive from inventory**: clicking a fainted Pokémon while sneaking with a carrot in hand consumes 4 carrots (3 revive + 1 heal-to-60) and revives the mon to 60 HP. One revive per click (no batching). Shift on a living mon passes through.
+- **Healer revive is cheaper**: 3 carrots per fainted mon (1 less than inventory). The first 60 HP of each revive is "free" — only HP above 60 counts toward the pooled heal-portion deficit, so a fainted mon with maxHp=200 costs 3 (revive) + ceil(140/60)=3 = 6 carrots, vs 4+3=7 carrots done manually from inventory.
+- **HealCalculator** signature: `faintedCount: Int` → `faintedMaxHps: List<Int>` so the calculator can subtract the free 60 from each fainted mon's max-HP when pooling. Tiny fainted mons (< 60 max HP) cost only the revive. 11 unit tests passing.
+- **Config schema**: dropped `reviveCarrotCost` (single value) and `revivalRestoresFullHP`; added `inventoryReviveCarrotCost: 4` and `healerReviveCarrotCost: 3`.
+- **Server boot verified** via RCON: mod loaded, config wrote with new schema (`{60, 4, 3, 5}`), `/cobblemoncarrots heal …` registered, gacha + quests commands still working.
+- **`Cobblemon Server-0.3.6.mrpack` rebuilt** with the updated jar (30,830 bytes — was 29,208). 127 MB total. 59 Modrinth + 12 overrides.
+
+### 2026-05-22 — `cobblemon-carrots` 1.0.0 initial (carrot healing overhaul)
+- **New in-house mod** at `cobblemon-carrots/`. Healing overhaul per user spec:
+  - **Right-click a Pokémon with a carrot** → heals 60 HP (Super Potion equivalent), consumes one carrot. Skips fainted (shows hint) and full-HP mons (passes through).
+  - **Poké Healer block** (`cobblemon:healing_machine`) now opens a chat-based cost prompt instead of free-healing. Calculates party HP deficit, computes pooled carrots needed, sums revive cost per fainted mon, subtracts carrots in inventory, charges `$5` per carrot still short. Clickable `[CONFIRM]` / `[CANCEL]` chat actions. On confirm: withdraw money via cobblemon-economy reflection bridge → consume carrots → `pokemon.heal()` on every party member.
+  - **Coexistence**: existing potions/revives still work and remain obtainable. Carrots are positioned as the cheap/farmable path.
+- **Config** at `config/cobblemon-carrots/config.json` auto-generates on first boot.
+- (See follow-up entry above for the revive-mechanics revision.)
+
+### 2026-05-22 — Re-tuned EVs/IVs/natures on the 18 wiki-sourced trainers
+- The wiki source doesn't specify EVs/natures, so the original generator defaulted every Pokémon to `252 atk / 252 spe / 4 hp / jolly`. Sub-optimal for walls (Toxapex, Chansey, etc.) and special attackers (which want SpA not Atk, and timid not jolly).
+- **Re-tuner** `/tmp/retune_trainers.py` classifies each Pokémon into one of 6 roles by inspecting wiki move categories + held item + species-specific overrides, then applies the appropriate spread + nature + IVs (special attackers get atk IV=0 to dodge Foul Play / confusion damage).
+- **Roles + defaults**:
+  - `physattacker` → jolly + `252 atk / 252 spe / 4 hp` (atk IV 31)
+  - `bulkyphys` → adamant + `248 hp / 252 atk / 8 spd` (for slow heavy hitters like Snorlax, Tyranitar)
+  - `specattacker` → timid (or modest for setup mons like Volcarona/Gardevoir) + `252 spa / 252 spe / 4 hp` (atk IV 0)
+  - `mixed` → naive + `252 atk / 252 spe / 4 hp`
+  - `physwall` → bold + `252 hp / 252 def / 4 spd` (atk IV 0)
+  - `specwall` → calm + `252 hp / 4 def / 252 spd` (atk IV 0)
+- **Species overrides**: famous walls (Chansey, Blissey, Clefable, Toxapex, Skarmory, Corviknight, etc.) force-class as walls regardless of moveset; bulky physicals (Snorlax, Tyranitar, Conkeldurr, etc.) force-class as `bulkyphys` for the +HP-investment look.
+- **Untouched**: gym 19 (Oak) and gyms 20-24 (E4 + Champion) which were built from user-provided specs with correct EVs.
+
+### 2026-05-22 — Built `Cobblemon Server-0.3.5.mrpack` for client distribution
+- **Output**: `Cobblemon Server-0.3.5.mrpack` (127 MB) at repo root. Generated by `scripts/build_mrpack.py`. Seeds from 0.3.4 + 6 new Modrinth entries + refreshed in-house overrides.
+- **New Modrinth entries (6)**: cobbleloots 2.3.0, cobblemon-alpha-project 1.4.1, cobblemon-fight-or-flight-reborn 0.10.7, rctapi 0.15.2-beta, rctmod 0.18.1-beta, cobblemon-recobbled 0.15.3-beta. All `side = BOTH`.
+- **In-house overrides (4)**: cobblemon-market, cobblemon-ranked, cobblemon-gacha (refreshed with the latest content — same filenames, same versions, new bytes), plus **cobblemon-bridge-1.0.0.jar** as a new entry.
+- **Manifest counts**: 59 Modrinth files + 11 overrides (4 in-house mods + 7 base overrides from 0.3.4 like minecolonies/blockui/structurize/etc.). Re-running the script is idempotent — if you re-extract 0.3.4 and rerun, you get the same pack.
+- **Players will get on next install/update**: Cobbleloots (loot balls), Alpha Project (alpha pokemon spawns), Fight or Flight Reborn (alphas attack on sight, configurable aggression), RCT trainer framework + Recobbled AI (for gym leaders + future trainer NPCs), cobblemon-bridge (the tag-driven hook layer), plus refreshed gacha/market/ranked with quest-award integration.
+
+### 2026-05-21 — Re-enabled Oak with Kanto-only "very difficult" team
+- **Restored** `beat_gym_19.json` advancement + `beat_gym_19.mcfunction` reward in both tracked and deployed `server-quests/`. Frame upgraded `task → challenge`. Icon upgraded `ultra_ball → master_ball`. Reward upgraded **Rare Key → Ultra Key** to match the difficulty billing.
+- **Restored** `server:beat_gym_19` to `ROTATING_GYMS` in cobblemon-bridge `QuestCommand.kt` (now `(11..19)` again). Bridge jar rebuilt + redeployed.
+- **New trainer JSON** `gym_19_oak.json` at `datapacks/server-gyms/data/server/trainers/` (tracked + deployed). All 6 mons are dex #1–151:
+  - Mewtwo (Mega Y via Mewtwonite Y + `canMega: true` AI) — Psystrike / Aura Sphere / Ice Beam / Fire Blast.
+  - Snorlax (Thick Fat / Leftovers) — Body Slam / Earthquake / Crunch / Rest.
+  - Dragonite (Multiscale / Heavy-Duty Boots) — Dragon Dance / Extreme Speed / Earthquake / Outrage.
+  - Gengar (Cursed Body / Choice Specs) — Shadow Ball / Sludge Wave / Focus Blast / Thunderbolt.
+  - Chansey (Natural Cure / Eviolite) — Soft-Boiled / Seismic Toss / Thunder Wave / Heal Bell.
+  - Gyarados (Intimidate / Life Orb) — Dragon Dance / Waterfall / Earthquake / Ice Fang.
+- **Coverage now 24/24** active gym slots have trainer JSONs (full ladder + rotating + E4 + Champion all wired).
+
+### 2026-05-21 — Disabled Dynamax server-wide + disabled Oak gym slot
+- **Mega Showdown config** (`config/mega_showdown/config.json`):
+  - `dynamax: true → false` — server-wide disable. No more Max Moves, Gigantamax, dynamax raid spots, etc.
+  - `multipleMegas: false → true` — allows multiple Mega Evolutions per battle, so Champion's two Mega Rayquaza can both Mega-Evolve mid-fight.
+- **Eternatus moveset patched** (Lance / gym 23): `dynamaxcannon` → `dragonpulse` (reliable Dragon STAB), held `power_herb` → `life_orb` (Power Herb was paired with Meteor Beam which Eternatus didn't get to use). Final moveset: dragonpulse / flamethrower / sludgebomb / recover with Life Orb. Patched in both tracked and deployed JSON.
+- **Gym 19 (Oak) disabled**:
+  - Deleted `beat_gym_19.json` advancement and `beat_gym_19.mcfunction` reward from both tracked and deployed `server-quests/`.
+  - Removed `server:beat_gym_19` from `ROTATING_GYMS` in `cobblemon-bridge/QuestCommand.kt` (now `(11..18)`). Cobblemon-bridge jar rebuilt + redeployed.
+  - Re-enable path documented in `datapacks/server-gyms/README.md` if we ever want to bring Oak back.
+
+### 2026-05-21 — `server-gyms`: Elite Four + Champion trainer JSONs (5 more)
+- **Generator**: `/tmp/gen_e4_champ.py` — separate from the wiki generator; builds the 5 custom trainers from the user-provided spec sheet.
+- **Required-mon assignments** (the 4 legendaries that "follow from monuments"):
+  - Gym 20 Lorelei (Weather Wars) ← Ho-oh in place of Mamoswine, with Heavy-Duty Boots to dodge Stealth Rock 4×.
+  - Gym 21 Cynthia (renamed from Bruno per user, Hyper Offense template) ← Lucario already in template.
+  - Gym 22 Agatha (Full Stall) ← Greninja in place of Ferrothorn (Spikes/Toxic Spikes/Dark Pulse/Surf with Protean).
+  - Gym 23 Lance (Dragon) ← Eternatus in place of Goodra (Dynamax Cannon/Flamethrower/Sludge Bomb/Recover).
+- **Gym 24 Champion** runs 2× Mega Rayquaza side by side — one normal Adamant physical (Dragon Ascent/Earthquake/Dragon Dance/Extreme Speed), one shiny Modest special (Dragon Ascent/Draco Meteor/Surf/Thunderbolt). Both carry Dragon Ascent so Cobblemon's Mega Rayquaza rule fires. `ai.data.canMega: true` permits the AI to trigger Mega Evolution mid-battle. Bag bumped to 6 Full Restores (vs the standard 4) for the final-boss feel.
+- **5 new trainer JSONs + 5 mob registrations** written to `datapacks/server-gyms/` (tracked) and `cobblemon-server/world/datapacks/server-gyms/` (deployed).
+- **Coverage**: 23 of 24 gym slots now have trainer JSONs. Only gym 19 (Professor Oak rotating slot) lacks a JSON.
+
+### 2026-05-21 — `server-gyms` datapack: 18 trainer JSONs imported from ShepskyDad's wiki
+- **Source**: `https://arynlight.fandom.com/wiki/ShepskyDad%27s_Gym_Leaders` (fetched via Fandom's MediaWiki API to bypass the page's Cloudflare gate — `/api.php?action=parse&format=json&prop=wikitext`).
+- **Generator**: `/tmp/gen_trainers.py` — one-shot bootstrap script that parses the wikitext `{{Pokémon | ... }}` templates into RCT trainer JSON. Not a recurring build step; tuning a generated JSON should be done in place.
+- **Coverage**: 18 of 24 gym slots — main gyms 1–10 + rotating 11–18 (Viola through Marnie). Slots 19 (Oak), 20–23 (E4), 24 (Champion) are NOT in the wiki and need separate handling — currently no trainer JSON, but their advancements exist (manual `/advancement grant` works as fallback).
+- **Multi-team selection**: Flying → Team #2 (Pom-Pom Oricorio per user preference, not the default Baile Fire one). Psychic → Battle #1 (singles, not doubles). Dark → trimmed to 6 (wiki listed 7).
+- **AI**: every trainer set to Recobbled's `rb` AI (`{ "type": "rb", "data": {} }`) so they play with Run & Bun gimmick handling.
+- **Battle rules**: `adjustPlayerLevels: true`, `adjustNPCLevels: false`, `healPlayers: true`, `maxItemUses: 4`. Note: `adjustPlayerLevels` flag is parsed by RCT but the actual scaling comes from the bridge's `cobblemon_bridge.adjust_level.<N>` tag on the NPC entity, set in-game after placing.
+- **Defaults applied** (wiki doesn't specify these): IVs all 31, EVs 252 atk / 252 spe / 4 hp, nature `jolly`, level 50. Tune per Pokémon role by editing the JSON directly.
+- **Mob registration**: `data/server/mobs/trainers/single/gym_NN_<leader>.json` with `weight: 0` — won't naturally spawn. Place via Trainer Spawner block or `/spawnnpc`.
+- **Bridge tag workflow** (documented in `datapacks/server-gyms/README.md`): after placing a trainer entity in the world, run `/tag @e[type=rctmod:trainer,...] add cobblemon_bridge.gym_id.<N>` so the bridge's `GymDefeatHook` awards `server:beat_gym_<N>` on defeat, plus `cobblemon_bridge.adjust_level.<N>` for the in-battle level scaling.
+- **Stale Misty placeholder** (from the May 11 scaffolding) deleted from both `trainers/` and `mobs/trainers/single/`.
+- **Tracked** at `datapacks/server-gyms/` (git source of truth), **deployed** at `cobblemon-server/world/datapacks/server-gyms/` (gitignored).
+
 ### 2026-05-21 — Quest rewards overhauled: eggs and keys only, full gym/E4/champion coverage
 
 - **Stripped all item rewards** (exp candies, balls, ability patches/capsules, rare candies, master balls, bells, bone meal) from every quest mcfunction. Each quest now grants exactly one reward: an egg or a key.
