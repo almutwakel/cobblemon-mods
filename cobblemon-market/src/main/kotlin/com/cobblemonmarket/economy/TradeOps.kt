@@ -74,6 +74,49 @@ object TradeOps {
         return TradeResult.Success(totalCost, state.stock)
     }
 
+    /**
+     * Buys [qty] units of [itemId] from the market without delivering them to the player's
+     * inventory. Money is withdrawn and stock is decremented exactly as in [buy]; the items are
+     * assumed to be consumed by the caller (e.g., cobblemon-carrots feeding them straight into
+     * a heal). Skips inventory-space checks since nothing is added.
+     *
+     * Records a `"buy"` price-history tick so the market's analytics treat this identically to
+     * a normal purchase — the average price field is the per-unit average paid.
+     */
+    fun buyForConsumption(player: ServerPlayer, itemId: String, qty: Int): TradeResult {
+        if (qty <= 0) return TradeResult.UnknownItem(itemId)
+        val entry = CobblemonMarket.items[itemId] ?: return TradeResult.UnknownItem(itemId)
+        val state = CobblemonMarket.marketStore.getOrCreate(itemId)
+
+        val available = floor(state.stock).toInt()
+        if (available < qty) return TradeResult.OutOfStock(itemId, available, qty)
+
+        val result = PricingEngine.simulateBatchBuy(
+            entry.baseBuyPrice, entry.baseStock, entry.elasticity,
+            state.stock, qty,
+        )
+        val totalCost = result.totalPrice
+
+        val balance = EconomyBridge.getBalance(player.uuid)
+        if (balance < totalCost) return TradeResult.InsufficientBalance(balance, totalCost)
+        if (!EconomyBridge.withdraw(player.uuid, totalCost)) return TradeResult.EconomyFailed
+
+        val priceBefore = PricingEngine.buyPrice(entry.baseBuyPrice, state.stock, entry.baseStock, entry.elasticity)
+        state.stock = result.finalStock
+        val priceAfter = PricingEngine.buyPrice(entry.baseBuyPrice, state.stock, entry.baseStock, entry.elasticity)
+
+        val avgPrice = (totalCost + qty / 2) / qty
+        CobblemonMarket.marketStore.recordPriceTick(
+            itemId = itemId, type = "buy",
+            playerUuid = player.uuid.toString(), playerName = player.name.string,
+            pricePerUnit = avgPrice, priceBefore = priceBefore, priceAfter = priceAfter,
+            quantity = qty,
+        )
+        CobblemonMarket.marketStore.save()
+
+        return TradeResult.Success(totalCost, state.stock)
+    }
+
     fun sell(player: ServerPlayer, itemId: String, qty: Int): TradeResult {
         if (qty <= 0) return TradeResult.UnknownItem(itemId)
         val entry = CobblemonMarket.items[itemId] ?: return TradeResult.UnknownItem(itemId)
