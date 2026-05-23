@@ -1,9 +1,15 @@
 {
-  "parent": "server:catch_pokemon",
+  "parent": "server:set_home",
   "display": {
-    "title": { "text": "Green Thumb" },
-    "description": { "text": "Stockpile 32 carrots." },
-    "icon": { "id": "minecraft:carrot" },
+    "title": {
+      "text": "Green Thumb"
+    },
+    "description": {
+      "text": "Stockpile 32 carrots."
+    },
+    "icon": {
+      "id": "minecraft:carrot"
+    },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true
@@ -13,10 +19,19 @@
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
-          { "items": ["minecraft:carrot"], "count": { "min": 32 } }
+          {
+            "items": [
+              "minecraft:carrot"
+            ],
+            "count": {
+              "min": 32
+            }
+          }
         ]
       }
     }
   },
-  "rewards": { "function": "server:quests/rewards/farm_carrots" }
+  "rewards": {
+    "function": "server:quests/rewards/farm_carrots"
+  }
 }
