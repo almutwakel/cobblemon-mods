@@ -1,15 +1,25 @@
 {
-  "parent": "server:root",
+  "parent": "server:first_pvp_win",
   "display": {
-    "title": { "text": "Pocket Change" },
-    "description": { "text": "Hold $100 in your wallet." },
-    "icon": { "id": "minecraft:emerald" },
+    "title": {
+      "text": "Pocket Change"
+    },
+    "description": {
+      "text": "Hold $100 in your wallet."
+    },
+    "icon": {
+      "id": "minecraft:emerald"
+    },
     "frame": "goal",
     "show_toast": true,
     "announce_to_chat": false
   },
   "criteria": {
-    "done": { "trigger": "minecraft:impossible" }
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
   },
-  "rewards": { "function": "server:quests/rewards/reach_income_100" }
+  "rewards": {
+    "function": "server:quests/rewards/reach_income_100"
+  }
 }
