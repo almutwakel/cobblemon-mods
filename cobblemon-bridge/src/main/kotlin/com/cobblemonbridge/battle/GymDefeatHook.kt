@@ -4,6 +4,7 @@ import com.cobblemon.mod.common.api.Priority
 import com.cobblemon.mod.common.api.events.CobblemonEvents
 import com.cobblemon.mod.common.api.events.battles.BattleVictoryEvent
 import com.cobblemon.mod.common.battles.actor.PlayerBattleActor
+import com.cobblemon.mod.common.battles.actor.TrainerBattleActor
 import com.cobblemonbridge.CobblemonBridge
 import com.cobblemonbridge.quests.QuestAdvancements
 import com.cobblemonbridge.tags.BridgeTags
@@ -48,20 +49,35 @@ object GymDefeatHook {
 
     private fun applyToVictory(event: BattleVictoryEvent) {
         val now = System.currentTimeMillis()
+        val losersIncludeTrainer = event.losers.any { it is TrainerBattleActor }
         for (winner in event.winners) {
             val playerActor = winner as? PlayerBattleActor ?: continue
             val player = playerActor.entity as? ServerPlayer ?: continue
-            val pending = pendingByPlayer.remove(player.uuid) ?: continue
-            val (gymId, capturedAt) = pending
-            if (now - capturedAt > STASH_TTL_MS) {
-                CobblemonBridge.logger.debug("gym_id stash for {} expired; skipping", player.uuid)
-                continue
+
+            // Branch 1: gym defeat via stashed gym_id tag (more specific, takes precedence).
+            val pending = pendingByPlayer.remove(player.uuid)
+            if (pending != null) {
+                val (gymId, capturedAt) = pending
+                if (now - capturedAt <= STASH_TTL_MS) {
+                    val awarded = QuestAdvancements.award(player, "server:beat_gym_$gymId", criterion = "done")
+                    if (awarded) {
+                        CobblemonBridge.logger.info(
+                            "cobblemon-bridge: awarded server:beat_gym_{} to {}", gymId, player.gameProfile.name,
+                        )
+                    }
+                    continue
+                }
             }
-            val awarded = QuestAdvancements.award(player, "server:beat_gym_$gymId", criterion = "done")
-            if (awarded) {
-                CobblemonBridge.logger.info(
-                    "cobblemon-bridge: awarded server:beat_gym_{} to {}", gymId, player.gameProfile.name,
-                )
+
+            // Branch 2: any other RCT/Cobblemon trainer NPC defeat fires the wild-trainer quest.
+            // The advancement system makes this a one-time grant per player.
+            if (losersIncludeTrainer) {
+                val awarded = QuestAdvancements.award(player, "server:beat_wild_trainer", criterion = "done")
+                if (awarded) {
+                    CobblemonBridge.logger.info(
+                        "cobblemon-bridge: awarded server:beat_wild_trainer to {}", player.gameProfile.name,
+                    )
+                }
             }
         }
     }
