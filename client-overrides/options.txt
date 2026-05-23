@@ -1,0 +1,8 @@
+version:4189
+fov:0.25
+gamma:0.8
+guiScale:5
+graphicsMode:0
+renderClouds:"fast"
+key_key.socialInteractions:key.keyboard.backslash
+key_key.cobblemon.summary:key.keyboard.p
