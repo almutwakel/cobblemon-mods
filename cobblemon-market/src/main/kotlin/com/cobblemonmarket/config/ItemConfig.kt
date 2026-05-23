@@ -60,5 +60,8 @@ object ItemConfig {
         "cobblemon:great_ball" to ItemEntry(baseBuyPrice = 300, baseSellPrice = 100, elasticity = 1.0),
         "cobblemon:poke_ball" to ItemEntry(baseBuyPrice = 90, baseSellPrice = 30, elasticity = 0.3),
         "cobblemon:revive" to ItemEntry(baseBuyPrice = 1500, baseSellPrice = 500, elasticity = 1.0),
+        // High-volume staple. cobblemon-carrots' healer buys at current price when the player
+        // is short carrots — replaces the flat `carrotPrice` config when this entry exists.
+        "minecraft:carrot" to ItemEntry(baseBuyPrice = 6, baseSellPrice = 3, baseStock = 1000, elasticity = 0.7),
     )
 }
