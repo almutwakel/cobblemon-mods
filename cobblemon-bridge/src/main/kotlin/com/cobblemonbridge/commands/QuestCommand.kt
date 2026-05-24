@@ -21,15 +21,35 @@ import net.minecraft.server.level.ServerPlayer
  */
 object QuestCommand {
 
-    /** Quests shown in order on the linear chain (the action-bar HUD's focus). */
+    /**
+     * Early-game linear chain — the action-bar HUD's focus. The full gym ladder (24 entries)
+     * lives in [MAIN_GYMS] / [ROTATING_GYMS] / [ELITE_FOUR] / [CHAMPION] and shows in the
+     * `/quests list` output but not the HUD, to avoid overwhelming new players.
+     */
     private val LINEAR_CHAIN = listOf(
-        "server:craft_pokeball",
+        "server:select_pokemon",
         "server:catch_pokemon",
+        "server:craft_pokeball",
+        "server:set_home",
         "server:farm_carrots",
+        "server:beat_wild_trainer",
+        "server:reach_party_level_15",
         "server:beat_gym_1",
         "server:first_pvp_win",
-        "server:reach_elo_1100",
+        "server:reach_income_100",
     )
+
+    /** Main gym ladder, 1–10. Sequential chain. */
+    private val MAIN_GYMS: List<String> = (1..10).map { "server:beat_gym_$it" }
+
+    /** Rotating gym slots, 11–19. Branch off gym 10. */
+    private val ROTATING_GYMS: List<String> = (11..19).map { "server:beat_gym_$it" }
+
+    /** Elite Four chambers, 20–23. Sequential after gym 10. */
+    private val ELITE_FOUR: List<String> = (20..23).map { "server:beat_gym_$it" }
+
+    /** Champion (gym 24). Final node after E4. */
+    private val CHAMPION: List<String> = listOf("server:beat_gym_24")
 
     private val INCOME_TRACK = listOf(
         "server:reach_income_100",
@@ -49,6 +69,41 @@ object QuestCommand {
     private val STANDALONE = listOf(
         "server:join_colony",
     )
+
+    /**
+     * Per-quest reward label, surfaced in `/quests` + `/quests list`. Source of truth lives in
+     * each `quests/rewards/<id>.mcfunction` (via its `cq_reward_<…>` tag) — this map mirrors
+     * those tags so the chat output matches what actually gets granted.
+     * `null` means the quest has no reward (e.g. select_pokemon — the act of picking is its own
+     * payoff).
+     */
+    private val REWARDS: Map<String, String?> = buildMap {
+        put("server:select_pokemon", null)
+        put("server:catch_pokemon",        "§f4 Apricorn Sprouts + 1 Copper Ingot")
+        put("server:craft_pokeball",       "§fSophisticated Backpack")
+        put("server:set_home",             "§f16 Carrots")
+        put("server:farm_carrots",         "§f3 Super Potions")
+        put("server:beat_wild_trainer",    "§aCommon Egg")
+        put("server:reach_party_level_15", "§9Uncommon Egg")
+        put("server:first_pvp_win",        "§f5 Great Balls")
+        put("server:reach_income_100",     "§f1 Rare Candy")
+        put("server:reach_income_1000",    "§f1 Rare Candy")
+        put("server:reach_income_10000",   "§f1 Master Ball")
+        put("server:reach_income_100000",  "§6Ultra Key")
+        put("server:reach_elo_1100",       "§fGreat Ball + Super Potion")
+        put("server:reach_elo_1200",       "§fUltra Ball + Hyper Potion")
+        put("server:reach_elo_1300",       "§f1 Rare Candy")
+        put("server:reach_elo_1500",       "§f1 Master Ball")
+        put("server:reach_elo_2000",       "§6Ultra Key")
+        put("server:join_colony",          "§f1 Rare Candy")
+        // Gyms: most Rare Key; 10/19/23/24 are Ultra Key.
+        for (i in 1..24) {
+            val tier = if (i == 10 || i == 19 || i == 23 || i == 24) "§6Ultra Key" else "§5Rare Key"
+            put("server:beat_gym_$i", tier)
+        }
+    }
+
+    private fun rewardLabel(questId: String): String? = REWARDS[questId]
 
     private const val HUD_OFF_TAG = "cq_hud_off"
 
@@ -96,6 +151,10 @@ object QuestCommand {
         if (desc.isNotEmpty()) {
             source.sendSystemMessage(Component.literal("§7   $desc"))
         }
+        val reward = rewardLabel(current.id.toString())
+        if (reward != null) {
+            source.sendSystemMessage(Component.literal("§7   Reward: $reward"))
+        }
         return 1
     }
 
@@ -109,6 +168,10 @@ object QuestCommand {
         source.sendSystemMessage(Component.literal("§8§m                 §r §e§lServer Progression §8§m                 "))
 
         emitSection(source, player, server, "Main Quests", LINEAR_CHAIN, showCurrentMarker = true)
+        emitSection(source, player, server, "Gym Ladder", MAIN_GYMS, showCurrentMarker = false)
+        emitSection(source, player, server, "Rotating Gyms", ROTATING_GYMS, showCurrentMarker = false)
+        emitSection(source, player, server, "Elite Four", ELITE_FOUR, showCurrentMarker = false)
+        emitSection(source, player, server, "Champion", CHAMPION, showCurrentMarker = false)
         emitSection(source, player, server, "Income", INCOME_TRACK, showCurrentMarker = false)
         emitSection(source, player, server, "Ranked Ladder", ELO_TRACK, showCurrentMarker = false)
         emitSection(source, player, server, "Other", STANDALONE, showCurrentMarker = false)
@@ -136,7 +199,9 @@ object QuestCommand {
                 else -> "§7○"
             }
             val titleColor = if (done) "§a" else if (marker.startsWith("§e")) "§f" else "§7"
-            source.sendSystemMessage(Component.literal("  $marker $titleColor$title"))
+            val reward = rewardLabel(id)
+            val rewardSuffix = if (reward != null && !done) " §8— $reward" else ""
+            source.sendSystemMessage(Component.literal("  $marker $titleColor$title$rewardSuffix"))
         }
     }
 
