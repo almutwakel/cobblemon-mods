@@ -6,6 +6,7 @@ import com.cobblemon.mod.common.battles.actor.PlayerBattleActor
 import com.cobblemongacha.CobblemonGacha
 import com.cobblemongacha.data.KeyTier
 import com.cobblemongacha.item.KeyItems
+import com.cobblemongacha.util.TickScheduler
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.neoforged.bus.api.SubscribeEvent
@@ -40,10 +41,14 @@ object KeyGrantHooks {
     @SubscribeEvent
     fun onLoggedIn(event: PlayerEvent.PlayerLoggedInEvent) {
         val player = event.entity as? ServerPlayer ?: return
-        tryGrantLogin(player)
+        // 10-second delay (200 ticks) so the daily key doesn't race the starter-kit grant.
+        // Starter-kit fires on first-time players and rewrites slots 0–7 a few ticks after
+        // login — without this delay the key lands in slot 0, then the kit overwrites it.
+        TickScheduler.later(200) { tryGrantLogin(player) }
     }
 
     private fun tryGrantLogin(player: ServerPlayer) {
+        if (!player.isAlive) return  // player disconnected before the delay finished
         val today = LocalDate.now().toString()
         val data = CobblemonGacha.playerStore.getOrCreate(player.uuid, player.name.string)
         if (data.lastLoginGrantDate == today) return
