@@ -3,8 +3,19 @@ package com.cobblemonbridge
 import com.cobblemonbridge.adapters.CobbleloootsAdapter
 import com.cobblemonbridge.battle.AdjustLevelHook
 import com.cobblemonbridge.battle.GivePartyExpHook
+import com.cobblemonbridge.battle.E4GauntletHook
 import com.cobblemonbridge.battle.GymDefeatHook
+import com.cobblemonbridge.battle.GymPrereqHook
+import com.cobblemonbridge.commands.CommandAliases
+import com.cobblemonbridge.commands.HomeAliases
 import com.cobblemonbridge.commands.QuestCommand
+import com.cobblemonbridge.eggs.EggDefeatHook
+import com.cobblemonbridge.quests.PartyLevelHook
+import com.cobblemonbridge.quests.SetHomeHook
+import com.cobblemonbridge.wild.TradeCapHook
+import com.cobblemonbridge.wild.WildBattleAdjustHook
+import com.cobblemonbridge.wild.WildBattleRewardHook
+import com.cobblemonbridge.wild.WildSpawnLevelCapHook
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.ModContainer
 import net.neoforged.fml.common.Mod
@@ -15,14 +26,8 @@ import org.slf4j.LoggerFactory
 
 /**
  * Tag-driven hooks that bridge Cobblemon's systems. Each hook lives in its own object and is
- * activated by a `cobblemon_bridge:<hook>/<arg>` tag on an entity. Adding a new hook means:
- *
- *   1. Adding a new tag prefix constant in `tags/BridgeTags`.
- *   2. Adding a new hook object that listens to the relevant Cobblemon or NeoForge event.
- *   3. Wiring it here in `init`.
- *
- * Hooks intentionally don't talk to each other — each one reads its own tag, applies its own
- * effect. The mod stays a thin layer of one-line bridges.
+ * activated by a `cobblemon_bridge:<hook>/<arg>` tag on an entity, a Cobblemon event, or a
+ * NeoForge event. Adding a new hook means: add the file, register it here.
  */
 @Mod(CobblemonBridge.MOD_ID)
 class CobblemonBridge(modBus: IEventBus, container: ModContainer) {
@@ -35,6 +40,19 @@ class CobblemonBridge(modBus: IEventBus, container: ModContainer) {
         NeoForge.EVENT_BUS.register(GivePartyExpHook)
         GymDefeatHook.registerEvents()
         NeoForge.EVENT_BUS.register(GymDefeatHook)
+        NeoForge.EVENT_BUS.register(GymPrereqHook)
+        E4GauntletHook.registerEvents()
+        NeoForge.EVENT_BUS.register(E4GauntletHook)
+        NeoForge.EVENT_BUS.register(SetHomeHook)
+        PartyLevelHook.registerEvents()
+        WildBattleRewardHook.registerEvents()
+        WildSpawnLevelCapHook.registerEvents()
+        // WildBattleAdjustHook intentionally NOT registered: wild battles no longer downlevel
+        // the player's team. Only gym leaders downlevel, via RCT's adjustPlayerLevels in the
+        // gym trainer JSON. (Kept the source file around in case we want to re-enable later.)
+        TradeCapHook.registerEvents()
+        EggDefeatHook.registerEvents()
+        NeoForge.EVENT_BUS.register(EggDefeatHook)
 
         val cobbleloots = CobbleloootsAdapter.isPresent()
         if (cobbleloots) {
@@ -44,13 +62,16 @@ class CobblemonBridge(modBus: IEventBus, container: ModContainer) {
         NeoForge.EVENT_BUS.addListener(::onRegisterCommands)
 
         logger.info(
-            "Cobblemon Bridge initialized — adjust_level + give_party_exp hooks active (cobbleloots adapter: {})",
+            "Cobblemon Bridge initialized — adjust_level + give_party_exp + party_level + " +
+                "set_home + home aliases active (cobbleloots adapter: {})",
             if (cobbleloots) "on" else "off",
         )
     }
 
     private fun onRegisterCommands(event: RegisterCommandsEvent) {
         QuestCommand.register(event.dispatcher)
+        HomeAliases.register(event.dispatcher)
+        CommandAliases.register(event.dispatcher)
     }
 
     companion object {
