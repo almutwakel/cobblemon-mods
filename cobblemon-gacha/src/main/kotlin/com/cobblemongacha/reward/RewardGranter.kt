@@ -5,8 +5,11 @@ import com.cobblemongacha.data.ItemSpec
 import com.cobblemongacha.data.LootEntry
 import com.cobblemongacha.item.KeyItems
 import com.cobblemongacha.item.PlaceholderItems
+import com.cobblemongacha.util.TickScheduler
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.world.item.component.CustomData
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
@@ -133,7 +136,42 @@ object RewardGranter {
             .withPermission(4)
             .withSuppressedOutput()
         player.server.commands.performPrefixedCommand(src, cmd)
+        // Cobreeding's /givepokemonegg places the egg via inventory operations that may not be
+        // synchronously visible to ItemStack.get(...). Use TickScheduler so the tag-pass runs on
+        // a *later* server tick (server.execute(...) runs on the same tick — too eager).
+        TickScheduler.later(2) { tagGrantedEggWithTier(player, spec.pool) }
         return EggOutcome(eggDisplayStack(spec, species), announceLabel(spec, species))
+    }
+
+    /**
+     * Stamps `cobblemongacha:tier` onto the just-created Cobreeding egg's `minecraft:custom_data`
+     * so cobblemon-bridge's defeat-driven hatch can look up the per-tier threshold (5/10/15/20).
+     * The egg item class FQN is `ludichat.cobbreeding.PokemonEgg`; we identify it by class name
+     * rather than item ID to stay forward-compatible with Cobreeding renames. Picks the first
+     * eligible egg (no tier tag yet) starting from the hotbar — should be the one we just
+     * granted, since `/givepokemonegg` places into the first empty slot.
+     */
+    private fun tagGrantedEggWithTier(player: ServerPlayer, tier: String) {
+        val inv = player.inventory
+        for (i in 0 until inv.containerSize) {
+            val stack = inv.getItem(i)
+            if (stack.isEmpty) continue
+            if (stack.item.javaClass.name != "ludichat.cobbreeding.PokemonEgg") continue
+            val existing = stack.get(DataComponents.CUSTOM_DATA)
+            val tag: CompoundTag = existing?.copyTag() ?: CompoundTag()
+            if (tag.contains("cobblemongacha_tier")) continue  // already tagged — keep looking
+            tag.putString("cobblemongacha_tier", tier)
+            tag.putInt("cobblemongacha_defeats_consumed", 0)
+            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
+            CobblemonGacha.logger.info(
+                "Tagged egg slot {} for {} with tier={}", i, player.gameProfile.name, tier,
+            )
+            return
+        }
+        CobblemonGacha.logger.warn(
+            "Couldn't find newly-granted egg in {}'s inventory to tag (tier={}) — inventory may be full or the egg was placed asynchronously",
+            player.gameProfile.name, tier,
+        )
     }
 
     /**
