@@ -27,8 +27,10 @@ object GymDefeatHook {
 
     private const val STASH_TTL_MS: Long = 5 * 60 * 1000L  // 5 minutes — gym fights can drag
 
-    /** playerUuid → (gymId, capturedAtMs). */
-    private val pendingByPlayer: MutableMap<UUID, Pair<Int, Long>> = ConcurrentHashMap()
+    private data class Pending(val gymId: Int, val isChallenge: Boolean, val capturedAtMs: Long)
+
+    /** playerUuid → pending stash from EntityInteract. */
+    private val pendingByPlayer: MutableMap<UUID, Pending> = ConcurrentHashMap()
 
     fun registerEvents() {
         CobblemonEvents.BATTLE_VICTORY.subscribe(Priority.NORMAL) { event ->
@@ -41,9 +43,11 @@ object GymDefeatHook {
         if (event.level.isClientSide) return
         val player = event.entity as? ServerPlayer ?: return
         val gymId = BridgeTags.findGymId(event.target.tags) ?: return
-        pendingByPlayer[player.uuid] = gymId to System.currentTimeMillis()
+        val isChallenge = BridgeTags.isGymChallenge(event.target.tags)
+        pendingByPlayer[player.uuid] = Pending(gymId, isChallenge, System.currentTimeMillis())
         CobblemonBridge.logger.debug(
-            "cobblemon-bridge: stashed gym_id={} for player {}", gymId, player.uuid,
+            "cobblemon-bridge: stashed gym_id={}{} for player {}",
+            gymId, if (isChallenge) " (challenge)" else "", player.uuid,
         )
     }
 
@@ -56,17 +60,19 @@ object GymDefeatHook {
 
             // Branch 1: gym defeat via stashed gym_id tag (more specific, takes precedence).
             val pending = pendingByPlayer.remove(player.uuid)
-            if (pending != null) {
-                val (gymId, capturedAt) = pending
-                if (now - capturedAt <= STASH_TTL_MS) {
-                    val awarded = QuestAdvancements.award(player, "server:beat_gym_$gymId", criterion = "done")
-                    if (awarded) {
-                        CobblemonBridge.logger.info(
-                            "cobblemon-bridge: awarded server:beat_gym_{} to {}", gymId, player.gameProfile.name,
-                        )
-                    }
-                    continue
+            if (pending != null && now - pending.capturedAtMs <= STASH_TTL_MS) {
+                val advancementId = if (pending.isChallenge) {
+                    "server:beat_gym_${pending.gymId}_challenge"
+                } else {
+                    "server:beat_gym_${pending.gymId}"
                 }
+                val awarded = QuestAdvancements.award(player, advancementId, criterion = "done")
+                if (awarded) {
+                    CobblemonBridge.logger.info(
+                        "cobblemon-bridge: awarded {} to {}", advancementId, player.gameProfile.name,
+                    )
+                }
+                continue
             }
 
             // Branch 2: any other RCT/Cobblemon trainer NPC defeat fires the wild-trainer quest.
@@ -84,5 +90,5 @@ object GymDefeatHook {
 
     /** Test seam. */
     internal fun clearStashForTests() = pendingByPlayer.clear()
-    internal fun stashedGymIdFor(uuid: UUID): Int? = pendingByPlayer[uuid]?.first
+    internal fun stashedGymIdFor(uuid: UUID): Int? = pendingByPlayer[uuid]?.gymId
 }
