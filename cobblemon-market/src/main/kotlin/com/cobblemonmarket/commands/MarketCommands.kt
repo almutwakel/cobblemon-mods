@@ -105,50 +105,8 @@ object MarketCommands {
                         }
                     )
                 )
-                .then(Commands.literal("buy")
-                    .then(Commands.argument("item", StringArgumentType.string())
-                        .suggests { _, builder ->
-                            CobblemonMarket.items.keys.forEach {
-                                builder.suggest(it.substringAfterLast(':'))
-                            }
-                            builder.buildFuture()
-                        }
-                        .then(Commands.argument("qty", IntegerArgumentType.integer(1, 1024))
-                            .executes { ctx ->
-                                val sp = ctx.source.playerOrException
-                                val itemId = resolveItemId(StringArgumentType.getString(ctx, "item"))
-                                val qty = IntegerArgumentType.getInteger(ctx, "qty")
-                                if (itemId == null) {
-                                    ctx.source.sendSystemMessage(Component.literal("§c[Market] Unknown item"))
-                                    return@executes 0
-                                }
-                                reportTrade(ctx.source, "BUY", sp, itemId, qty, TradeOps.buy(sp, itemId, qty))
-                            }
-                        )
-                    )
-                )
-                .then(Commands.literal("sell")
-                    .then(Commands.argument("item", StringArgumentType.string())
-                        .suggests { _, builder ->
-                            CobblemonMarket.items.keys.forEach {
-                                builder.suggest(it.substringAfterLast(':'))
-                            }
-                            builder.buildFuture()
-                        }
-                        .then(Commands.argument("qty", IntegerArgumentType.integer(1, 1024))
-                            .executes { ctx ->
-                                val sp = ctx.source.playerOrException
-                                val itemId = resolveItemId(StringArgumentType.getString(ctx, "item"))
-                                val qty = IntegerArgumentType.getInteger(ctx, "qty")
-                                if (itemId == null) {
-                                    ctx.source.sendSystemMessage(Component.literal("§c[Market] Unknown item"))
-                                    return@executes 0
-                                }
-                                reportTrade(ctx.source, "SELL", sp, itemId, qty, TradeOps.sell(sp, itemId, qty))
-                            }
-                        )
-                    )
-                )
+                // /market buy and /market sell were removed — trades happen at the
+                // shopkeeper NPC (right-click), not via chat command. Admin trades stay below.
                 .then(Commands.literal("admin")
                     .requires { it.hasPermission(4) }
                     .then(Commands.literal("trade")
@@ -256,7 +214,7 @@ object MarketCommands {
             ))
         }
         source.sendSystemMessage(Component.literal(
-            "§8  Tip: §7/market price <item>§8 for the candle chart, §7/market buy|sell <item> <qty>§8 to trade."
+            "§8  Tip: §7/market price <item>§8 for the candle chart. Trade at the §eShopkeeper §8NPC (right-click)."
         ))
     }
 
@@ -450,8 +408,7 @@ object MarketCommands {
             "§7  /market price <item> §f— candlestick chart for one item §8(/market prices <item> also works)",
             "§7  /market history <item> §f— stock + trade-volume summary for one item",
             "§7  /market leaderboard §f— top wealth (PokeDollars) across the server",
-            "§7  /market buy <item> <qty> §f— buy via command (in-game player)",
-            "§7  /market sell <item> <qty> §f— sell via command (in-game player)",
+            "§7  Trading is at the §eShopkeeper §7NPC at the spawn shop §f— right-click them.",
             "§7  /market version §f— show mod version",
         )
         if (includeAdmin) {
