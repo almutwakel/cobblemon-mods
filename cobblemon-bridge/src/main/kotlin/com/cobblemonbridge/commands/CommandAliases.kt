@@ -32,41 +32,10 @@ object CommandAliases {
     }
 
     // ─── /market shortcuts ─────────────────────────────────────────────────
+    // /buy and /sell were retired — trades now happen exclusively at the shopkeeper NPC
+    // (`/function server:market/spawn_npc`). /prices stays as a read-only alias since it
+    // doesn't transact.
     private fun registerMarketAliases(dispatcher: CommandDispatcher<CommandSourceStack>) {
-        // /buy <item> [qty]
-        dispatcher.register(
-            Commands.literal("buy")
-                .then(Commands.argument("item", StringArgumentType.string())
-                    .executes { ctx ->
-                        val item = StringArgumentType.getString(ctx, "item")
-                        forward(ctx.source, "market buy $item 1")
-                    }
-                    .then(Commands.argument("qty", IntegerArgumentType.integer(1, 1024))
-                        .executes { ctx ->
-                            val item = StringArgumentType.getString(ctx, "item")
-                            val qty = IntegerArgumentType.getInteger(ctx, "qty")
-                            forward(ctx.source, "market buy $item $qty")
-                        }
-                    )
-                )
-        )
-        // /sell <item> [qty]
-        dispatcher.register(
-            Commands.literal("sell")
-                .then(Commands.argument("item", StringArgumentType.string())
-                    .executes { ctx ->
-                        val item = StringArgumentType.getString(ctx, "item")
-                        forward(ctx.source, "market sell $item 1")
-                    }
-                    .then(Commands.argument("qty", IntegerArgumentType.integer(1, 1024))
-                        .executes { ctx ->
-                            val item = StringArgumentType.getString(ctx, "item")
-                            val qty = IntegerArgumentType.getInteger(ctx, "qty")
-                            forward(ctx.source, "market sell $item $qty")
-                        }
-                    )
-                )
-        )
         // /prices — full lineup, or one item's history
         dispatcher.register(
             Commands.literal("prices")
