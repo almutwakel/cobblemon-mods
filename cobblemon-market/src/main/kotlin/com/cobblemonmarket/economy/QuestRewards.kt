@@ -18,7 +18,11 @@ import net.minecraft.server.level.ServerPlayer
  */
 object QuestRewards {
 
-    private val INCOME_THRESHOLDS = listOf(100, 1000, 10000, 100000)
+    // Aligned with the datapack's actual advancement files
+    // (reach_income_250 / _1000 / _10000 / _100000). Any threshold here without a matching
+    // advancement file silently no-ops in awardQuest, and any advancement without a threshold
+    // here is unreachable — keep both lists in sync.
+    private val INCOME_THRESHOLDS = listOf(250, 1000, 10000, 100000)
 
     fun checkIncomeThresholds(player: ServerPlayer, balanceBefore: Int, balanceAfter: Int) {
         if (balanceAfter <= balanceBefore) return
