@@ -32,3 +32,8 @@ type = "required"
 versionRange = "[1.7.1,)"
 ordering = "AFTER"
 side = "BOTH"
+
+# Mixin config — patches RCTmod's DataPackManager.findResource so non-rctmod-namespaced
+# trainer IDs don't crash the client renderer. See DataPackManagerMixin.
+[[mixins]]
+config = "cobblemon_bridge.mixins.json"
