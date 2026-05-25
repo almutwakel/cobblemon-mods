@@ -2,8 +2,9 @@ package com.cobblemonbridge
 
 import com.cobblemonbridge.adapters.CobbleloootsAdapter
 import com.cobblemonbridge.battle.AdjustLevelHook
-import com.cobblemonbridge.battle.GivePartyExpHook
 import com.cobblemonbridge.battle.E4GauntletHook
+import com.cobblemonbridge.battle.GivePartyExpHook
+import com.cobblemonbridge.battle.GymBattleAdjustHook
 import com.cobblemonbridge.battle.GymDefeatHook
 import com.cobblemonbridge.battle.GymPrereqHook
 import com.cobblemonbridge.commands.CommandAliases
@@ -41,17 +42,20 @@ class CobblemonBridge(modBus: IEventBus, container: ModContainer) {
         GymDefeatHook.registerEvents()
         NeoForge.EVENT_BUS.register(GymDefeatHook)
         NeoForge.EVENT_BUS.register(GymPrereqHook)
+        GymBattleAdjustHook.registerEvents()
+        NeoForge.EVENT_BUS.register(GymBattleAdjustHook)
         E4GauntletHook.registerEvents()
         NeoForge.EVENT_BUS.register(E4GauntletHook)
         NeoForge.EVENT_BUS.register(SetHomeHook)
         PartyLevelHook.registerEvents()
         WildBattleRewardHook.registerEvents()
         WildSpawnLevelCapHook.registerEvents()
-        // WildBattleAdjustHook intentionally NOT registered: wild battles no longer downlevel
-        // the player's team. Only gym leaders downlevel, via RCT's adjustPlayerLevels in the
-        // gym trainer JSON. (Kept the source file around in case we want to re-enable later.)
+        // WildBattleAdjustHook intentionally NOT registered: wild battles don't downlevel the
+        // player's team. Gym battles DO downlevel — via GymBattleAdjustHook (above), not via
+        // RCT's adjustPlayerLevels (which turned out to be dead config — its BattleRules field
+        // is parsed from JSON but never consumed).
         TradeCapHook.registerEvents()
-        EggDefeatHook.registerEvents()
+        // EggDefeatHook is timer-based now; only the server-tick subscriber is needed.
         NeoForge.EVENT_BUS.register(EggDefeatHook)
 
         val cobbleloots = CobbleloootsAdapter.isPresent()
