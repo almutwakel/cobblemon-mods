@@ -143,6 +143,14 @@ object RewardGranter {
         return EggOutcome(eggDisplayStack(spec, species), announceLabel(spec, species))
     }
 
+    /** Public entry for callers outside the normal gacha-pull flow (e.g. `/gacha admin giveegg`).
+     *  Defers the tag-write by 2 ticks so the egg has time to land in inventory after
+     *  `/givepokemonegg`. Without this call, the bridge's egg-timer code skips the egg and it
+     *  falls back to Cobreeding's default ~10-minute hatch. */
+    fun scheduleTagGrantedEgg(player: ServerPlayer, tier: String) {
+        TickScheduler.later(2) { tagGrantedEggWithTier(player, tier) }
+    }
+
     /**
      * Stamps `cobblemongacha:tier` onto the just-created Cobreeding egg's `minecraft:custom_data`
      * so cobblemon-bridge's defeat-driven hatch can look up the per-tier threshold (5/10/15/20).
