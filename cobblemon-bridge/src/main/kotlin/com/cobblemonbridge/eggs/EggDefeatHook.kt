@@ -1,71 +1,70 @@
 package com.cobblemonbridge.eggs
 
-import com.cobblemon.mod.common.api.Priority
-import com.cobblemon.mod.common.api.events.CobblemonEvents
-import com.cobblemon.mod.common.api.events.battles.BattleVictoryEvent
-import com.cobblemon.mod.common.battles.actor.PlayerBattleActor
-import com.cobblemon.mod.common.battles.actor.PokemonBattleActor
-import com.cobblemon.mod.common.battles.actor.TrainerBattleActor
 import com.cobblemonbridge.CobblemonBridge
+import com.cobblemonbridge.util.AfkBridge
 import net.minecraft.core.component.DataComponents
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.component.CustomData
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.neoforge.event.tick.ServerTickEvent
 
 /**
- * Defeat-driven egg hatching. Replaces Cobreeding's playtime-based tick with a counter that
- * advances when the holder defeats a wild Pokémon. Threshold per tier:
- *   common = 5, uncommon = 10, rare = 15, ultra / ultra_rare = 20.
+ * Timer-based egg hatching, gated on non-AFK playtime. Replaces the earlier defeat-counter
+ * implementation (which was flaky around what counted as a "wild defeat" in concurrent battles).
  *
- * Two responsibilities:
- *   1. **Initialization** — every 20 server ticks (1s), scan online players' inventories for
- *      cobblemon-gacha tagged eggs (`cobblemongacha_tier` in `minecraft:custom_data`) whose
- *      `cobblemongacha_bridge_initialized` flag is missing. Bump Cobreeding's `TIMER` to a
- *      huge value so the natural playtime decrement never finishes the hatch on its own.
- *      Set the flag so we don't repeat the bump.
- *   2. **Defeat hook** — on wild [BattleVictoryEvent], find the **leftmost** tagged egg in the
- *      winner's inventory (hotbar 0–8 first, then main 9–35). Increment its
- *      `cobblemongacha_defeats_consumed` counter, send a chat message naming the egg's species
- *      + current progress, and on threshold reach set Cobreeding's `TIMER` to 1 so the next
- *      Cobreeding inventoryTick hatches it.
+ * Per-tier duration of active play required:
+ *   common = 1h, uncommon = 2h, rare = 4h, ultra / ultra_rare = 8h.
+ *
+ * Mechanism:
+ *   1. **Initialization** (per-second scan of online players' inventories) — when a gacha-tagged
+ *      egg appears that we haven't seen before, stamp `cobblemongacha_seconds_remaining` with
+ *      the tier's full duration, pin Cobreeding's `TIMER` component to a near-infinite value so
+ *      Cobreeding's own playtime tick never finishes the hatch on its own, and DM the player
+ *      the expected play time.
+ *   2. **Tick** (per second, only for non-AFK online players) — decrement
+ *      `seconds_remaining` by 1 for every gacha-tagged egg in the player's inventory. When a
+ *      counter reaches 0, flip Cobreeding's `TIMER` to 1 so its next inventory tick hatches
+ *      the egg, and chat the player that it's ready.
+ *
+ * The class name is preserved (legacy) to minimize churn in [com.cobblemonbridge.CobblemonBridge]
+ * — the BATTLE_VICTORY subscription is gone; only the server-tick subscriber remains.
  */
 object EggDefeatHook {
 
-    private val THRESHOLDS = mapOf(
-        "common" to 5,
-        "uncommon" to 10,
-        "rare" to 15,
-        "ultra" to 20,
-        "ultra_rare" to 20,
+    private val TIER_SECONDS = mapOf(
+        "common" to 3600,        // 1h
+        "uncommon" to 7200,      // 2h
+        "rare" to 14400,         // 4h
+        "ultra" to 28800,        // 8h
+        "ultra_rare" to 28800,   // 8h
     )
-    private const val NEVER_HATCH_TIMER = 999_999_999
-    private const val HATCH_NOW_TIMER = 1
-    private const val INIT_SCAN_INTERVAL_TICKS = 20  // 1 second
+    /** Default duration for eggs without a gacha tier tag — i.e. Cobreeding daycare bred eggs. */
+    private const val BRED_DEFAULT_SECONDS = 1800  // 30m
+    private const val BRED_LABEL = "bred"
+    private const val TICKS_PER_SECOND = 20
 
     private const val NBT_TIER = "cobblemongacha_tier"
-    private const val NBT_DEFEATS = "cobblemongacha_defeats_consumed"
     private const val NBT_INITIALIZED = "cobblemongacha_bridge_initialized"
+    private const val NBT_SECONDS_REMAINING = "cobblemongacha_seconds_remaining"
+    private const val NBT_HATCH_READY = "cobblemongacha_hatch_ready"
 
-    private var tickCounter = 0
-
-    fun registerEvents() {
-        CobblemonEvents.BATTLE_VICTORY.subscribe(Priority.NORMAL) { event ->
-            handleWildDefeat(event)
-        }
-    }
+    private var subTickCounter = 0
 
     @SubscribeEvent
     fun onServerTickPost(event: ServerTickEvent.Post) {
-        tickCounter++
-        if (tickCounter < INIT_SCAN_INTERVAL_TICKS) return
-        tickCounter = 0
+        subTickCounter++
+        if (subTickCounter < TICKS_PER_SECOND) return
+        subTickCounter = 0
         if (!CobreedingBridge.available()) return
         for (player in event.server.playerList.players) {
             initializeNewEggs(player)
+            // Always sync TIMER from our counter (overwrites Cobreeding's own decrement so the
+            // tooltip stays accurate AND AFK time doesn't slip through). Only DECREMENT the
+            // counter when the player isn't AFK.
+            tickActiveEggs(player, decrementCounter = !AfkBridge.isAfk(player.uuid))
         }
     }
 
@@ -76,37 +75,87 @@ object EggDefeatHook {
             val stack = inv.getItem(i)
             if (stack.isEmpty) continue
             if (!CobreedingBridge.isPokemonEgg(stack)) continue
-            val data = stack.get(DataComponents.CUSTOM_DATA) ?: continue
-            val tag = data.copyTag()
-            if (!tag.contains(NBT_TIER)) continue  // not one of ours
-            if (tag.getBoolean(NBT_INITIALIZED)) continue  // already done
-            val priorTimer = CobreedingBridge.getTimer(stack)
-            CobreedingBridge.setTimer(stack, NEVER_HATCH_TIMER)
+            // Fast path: skip eggs we've already stamped.
+            val existing = stack.get(DataComponents.CUSTOM_DATA)
+            if (existing != null && existing.copyTag().getBoolean(NBT_INITIALIZED)) continue
+
+            val tag = existing?.copyTag() ?: net.minecraft.nbt.CompoundTag()
+            val gachaTier = tag.getString(NBT_TIER).takeIf { it.isNotEmpty() }
+            val (label, durationSeconds) = if (gachaTier != null) {
+                val seconds = TIER_SECONDS[gachaTier] ?: continue
+                gachaTier to seconds
+            } else {
+                // Cobreeding daycare-bred (or any other untagged source) — 30-min default.
+                BRED_LABEL to BRED_DEFAULT_SECONDS
+            }
+
+            // Sync Cobreeding TIMER to our duration (in cobreeding ticks, 20/sec). The per-second
+            // tick re-syncs from seconds_remaining, so Cobreeding's tooltip stays accurate AND
+            // its natural per-tick decrement gets continuously overwritten — that's how AFK
+            // pause works (during AFK we don't decrement seconds_remaining, so the sync rewinds
+            // Cobreeding's decrement back to where it was).
+            CobreedingBridge.setTimer(stack, durationSeconds * TICKS_PER_SECOND)
             tag.putBoolean(NBT_INITIALIZED, true)
+            tag.putInt(NBT_SECONDS_REMAINING, durationSeconds)
             stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
+            // Force a slot broadcast so the client picks up the new TIMER immediately —
+            // Cobreeding's tooltip reads TIMER directly off the client-side ItemStack, and
+            // without an explicit slot packet the client keeps showing the egg's original
+            // 10-minute timer until next relog.
+            forceSlotSync(player, i, stack)
+
+            val durationLabel = formatDuration(durationSeconds)
+            player.sendSystemMessage(Component.literal(
+                "§e✦ §fNew §a${label.replaceFirstChar { it.uppercase() }}§f egg detected. " +
+                    "§7Will hatch after §f$durationLabel§7 of active (non-AFK) play."
+            ))
             CobblemonBridge.logger.info(
-                "Initialized egg slot {} for {} (tier {}, TIMER {} → {})",
-                i, player.gameProfile.name, tag.getString(NBT_TIER), priorTimer, NEVER_HATCH_TIMER,
+                "Initialized egg slot {} for {} (label {}, {}s remaining)",
+                i, player.gameProfile.name, label, durationSeconds,
             )
         }
     }
 
-    // ─── Defeat hook ───────────────────────────────────────────────────────
-    private fun handleWildDefeat(event: BattleVictoryEvent) {
-        val isWildBattle = event.losers.isNotEmpty() &&
-            event.losers.all { it is PokemonBattleActor } &&
-            event.losers.none { it is TrainerBattleActor }
-        if (!isWildBattle) return
-
-        for (winner in event.winners) {
-            val playerActor = winner as? PlayerBattleActor ?: continue
-            val player = playerActor.entity as? ServerPlayer ?: continue
-            advanceLeftmostEgg(player)
-        }
+    /**
+     * Push a slot update to the player's client. Required because writing a DataComponent
+     * (Cobreeding's TIMER) in-place on the server-side ItemStack doesn't automatically trigger
+     * an inventory sync packet — the client keeps showing whatever TIMER it cached when the
+     * stack last entered the inventory. Without this, the tooltip lies about hatch time until
+     * the player relogs.
+     *
+     * The packet uses the player's inventory container ID (0) and the inventory slot index
+     * remapped through [Inventory.findSlotMatchingItem]'s vanilla convention. For the player
+     * inventory: hotbar slots 0-8 map to container slots 36-44, main inventory slots 9-35 map
+     * to 9-35. We mirror that mapping here.
+     */
+    private fun forceSlotSync(player: ServerPlayer, invSlot: Int, stack: ItemStack) {
+        // Vanilla mapping: main inventory slots 9-35 are container slots 9-35;
+        // hotbar slots 0-8 are container slots 36-44.
+        val containerSlot = if (invSlot in 0..8) invSlot + 36 else invSlot
+        player.connection.send(
+            ClientboundContainerSetSlotPacket(
+                player.inventoryMenu.containerId,
+                player.inventoryMenu.incrementStateId(),
+                containerSlot,
+                stack,
+            )
+        )
     }
 
-    private fun advanceLeftmostEgg(player: ServerPlayer) {
-        if (!CobreedingBridge.available()) return
+    private fun formatDuration(seconds: Int): String = when {
+        seconds >= 3600 -> {
+            val h = seconds / 3600
+            if (h == 1) "1 hour" else "$h hours"
+        }
+        seconds >= 60 -> {
+            val m = seconds / 60
+            if (m == 1) "1 minute" else "$m minutes"
+        }
+        else -> "$seconds seconds"
+    }
+
+    // ─── Per-second tick (non-AFK players only) ────────────────────────────
+    private fun tickActiveEggs(player: ServerPlayer, decrementCounter: Boolean) {
         val inv = player.inventory
         for (i in 0 until inv.containerSize) {
             val stack = inv.getItem(i)
@@ -114,47 +163,36 @@ object EggDefeatHook {
             if (!CobreedingBridge.isPokemonEgg(stack)) continue
             val data = stack.get(DataComponents.CUSTOM_DATA) ?: continue
             val tag = data.copyTag()
-            val tier = tag.getString(NBT_TIER).takeIf { it.isNotEmpty() } ?: continue
-            val threshold = THRESHOLDS[tier] ?: continue
+            if (!tag.getBoolean(NBT_INITIALIZED)) continue
+            if (tag.getBoolean(NBT_HATCH_READY)) continue  // counter already at 0, Cobreeding hatches naturally next tick
+            // Label: gacha tier if present, otherwise "bred" (cobreeding daycare egg).
+            val label = tag.getString(NBT_TIER).takeIf { it.isNotEmpty() } ?: BRED_LABEL
 
-            val current = tag.getInt(NBT_DEFEATS)
-            val next = current + 1
-            tag.putInt(NBT_DEFEATS, next)
-            // Re-pack custom_data with the bumped counter.
-            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
+            val remaining = tag.getInt(NBT_SECONDS_REMAINING)
+            val next = if (decrementCounter) (remaining - 1).coerceAtLeast(0) else remaining
+            if (next != remaining) tag.putInt(NBT_SECONDS_REMAINING, next)
 
-            val species = extractSpeciesName(stack)
-            val displayName = if (species != null) "§a$species§7" else "§a${tier.replaceFirstChar { it.uppercase() }}§7"
+            // ALWAYS sync Cobreeding TIMER from our seconds counter — this overwrites Cobreeding's
+            // own per-second decrement (so AFK time, during which we don't decrement, doesn't
+            // slip through) AND keeps the Cobreeding tooltip showing a sensible countdown.
+            CobreedingBridge.setTimer(stack, next * TICKS_PER_SECOND)
+            // Force-broadcast the slot so the client's cached TIMER updates in real time
+            // (Cobreeding's tooltip reads off the client-side ItemStack).
+            forceSlotSync(player, i, stack)
 
-            if (next >= threshold) {
-                CobreedingBridge.setTimer(stack, HATCH_NOW_TIMER)
+            if (next == 0) {
+                tag.putBoolean(NBT_HATCH_READY, true)
+                stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
                 player.sendSystemMessage(Component.literal(
-                    "§e✦ §fYour $displayName§f egg is ready to hatch! §7(${next}/${threshold} defeats)"
+                    "§e✦ §fYour §a${label.replaceFirstChar { it.uppercase() }}§f egg is ready to hatch!"
                 ))
                 CobblemonBridge.logger.info(
-                    "Egg ready to hatch for {}: slot {} tier {} ({} defeats)",
-                    player.gameProfile.name, i, tier, next,
+                    "Egg ready to hatch for {}: slot {} label {}",
+                    player.gameProfile.name, i, label,
                 )
-            } else {
-                player.sendSystemMessage(Component.literal(
-                    "§7Egg progress: §f${next}§7/§f${threshold}§7 defeats toward your $displayName§7 egg"
-                ))
+            } else if (next != remaining) {
+                stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
             }
-            return  // only the leftmost egg progresses
         }
-    }
-
-    /**
-     * Tries to extract a friendly species name from Cobreeding's encrypted POKEMON_PROPERTIES
-     * payload. Decryption proper would require Cobreeding's `EggUtilities.decrypt` — for the
-     * chat hint we'd rather not pay that round-trip every battle, so we read the egg's display
-     * name (which Cobreeding sets to e.g. "Pikachu Egg"). Returns null if we can't extract.
-     */
-    private fun extractSpeciesName(stack: ItemStack): String? {
-        val name = stack.get(DataComponents.CUSTOM_NAME)?.string
-            ?: stack.get(DataComponents.ITEM_NAME)?.string
-        if (name.isNullOrBlank()) return null
-        // Cobreeding's auto-named eggs end in " Egg"; strip that for the chat hint.
-        return name.removeSuffix(" Egg").trim().ifEmpty { null }
     }
 }
