@@ -32,11 +32,10 @@ import java.util.concurrent.ConcurrentHashMap
  *   - gym 21-23: allowed only if [unlocked][uuid] == gymId. Otherwise the interact is cancelled
  *     with a chat message.
  *
- * Auto-chain:
- *   - On winning gym N (20..22), find a `cobblemon_bridge.gym_id.<N+1>` entity in the same level,
- *     teleport it next to the player, and call [RctTrainerBridge.startBattleWith] to kick off
- *     the next fight. If no such entity is loaded (chunk unloaded / mob not present), fall back
- *     to a chat instruction.
+ * Auto-chain (currently disabled):
+ *   - On winning gym N (20..22), the player is told to challenge gym N+1 manually. The
+ *     teleport-and-auto-start chain that used to fire here is parked until we revisit the
+ *     gauntlet design.
  *   - On winning gym 23: clear gauntlet state and chat congrats (Champion at gym 24 is gated
  *     elsewhere on beat_gym_23, so the player walks to that one normally).
  */
@@ -44,7 +43,6 @@ object E4GauntletHook {
 
     private const val E4_FIRST: Int = 20
     private const val E4_LAST: Int = 23
-    private const val TELEPORT_OFFSET: Double = 2.0
 
     /** Next allowed gym in the gauntlet. Null = not in gauntlet (only gym 20 is fightable). */
     private val unlocked: MutableMap<UUID, Int> = ConcurrentHashMap()
@@ -67,6 +65,14 @@ object E4GauntletHook {
     fun lockedReason(gymId: Int): String = when {
         gymId == E4_FIRST -> ""  // gym 20 is never locked by us
         else -> "§c[Elite Four] §fYou must beat E4 ${gymId - E4_FIRST}§f first — start at §eE4 1 (Gym ${E4_FIRST})§f."
+    }
+
+    /** External entry — used by [GymBattleGate] to mark a player as currently fighting [gymId]
+     *  when the battle starts via the force-battle path (which skips EntityInteract). */
+    fun stashActive(uuid: java.util.UUID, gymId: Int) {
+        if (gymId !in E4_FIRST..E4_LAST) return
+        active[uuid] = gymId
+        if (gymId == E4_FIRST) unlocked[uuid] = E4_FIRST
     }
 
     // ─── Stash on interact ─────────────────────────────────────────────────
@@ -93,10 +99,12 @@ object E4GauntletHook {
             if (gym < E4_LAST) {
                 val next = gym + 1
                 unlocked[player.uuid] = next
+                // Auto-teleport + auto-battle disabled. Player walks to the next trainer manually
+                // and right-clicks them to continue; the gating ([canChallenge]) still enforces
+                // order, and a loss/flee still resets the gauntlet.
                 player.sendSystemMessage(Component.literal(
-                    "§6[Elite Four] §fNext: §eE4 ${next - E4_FIRST + 1}§f — finding next trainer…"
+                    "§6[Elite Four] §fNext: §eE4 ${next - E4_FIRST + 1} (Gym $next)§f — challenge them next."
                 ))
-                tryAutoStartNext(player, next)
             } else {
                 // Won gym 23 — gauntlet complete.
                 unlocked.remove(player.uuid)
@@ -144,42 +152,4 @@ object E4GauntletHook {
         }
     }
 
-    // ─── Auto-start the next fight ─────────────────────────────────────────
-    private fun tryAutoStartNext(player: ServerPlayer, nextGymId: Int) {
-        if (!RctTrainerBridge.available()) {
-            player.sendSystemMessage(Component.literal(
-                "§7(Auto-chain unavailable — challenge §eGym ${nextGymId}§7 manually.)"
-            ))
-            return
-        }
-        val level = player.serverLevel()
-        // Iterate loaded entities in the player's dimension and pick one with the matching gym_id.
-        // E4 trainers are persistent + spawn-tagged so they should be in the same chunks as the
-        // player after winning the previous E4.
-        val target = level.allEntities.firstOrNull { e ->
-            BridgeTags.findGymId(e.tags) == nextGymId && RctTrainerBridge.isTrainerMob(e)
-        }
-        if (target == null) {
-            player.sendSystemMessage(Component.literal(
-                "§7(Couldn't find §eGym ${nextGymId}§7 trainer nearby — challenge them manually.)"
-            ))
-            CobblemonBridge.logger.warn(
-                "E4 auto-chain: no TrainerMob with gym_id={} loaded in {}'s dimension",
-                nextGymId, player.gameProfile.name,
-            )
-            return
-        }
-        target.teleportTo(player.x + TELEPORT_OFFSET, player.y, player.z + TELEPORT_OFFSET)
-        active[player.uuid] = nextGymId  // pre-stash since we're skipping the interact path
-        if (RctTrainerBridge.startBattleWith(target, player)) {
-            CobblemonBridge.logger.info(
-                "E4 auto-chained {} into gym {}", player.gameProfile.name, nextGymId,
-            )
-        } else {
-            active.remove(player.uuid)
-            player.sendSystemMessage(Component.literal(
-                "§c[Elite Four] §fAuto-start failed — right-click §eGym ${nextGymId}§f to continue."
-            ))
-        }
-    }
 }
