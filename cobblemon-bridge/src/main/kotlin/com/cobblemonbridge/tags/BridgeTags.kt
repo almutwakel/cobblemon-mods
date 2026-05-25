@@ -95,4 +95,16 @@ object BridgeTags {
 
     fun findGymId(tags: Iterable<String>): Int? =
         tags.firstNotNullOfOrNull { parseGymId(it) }
+
+    /**
+     * Tag marking a gym leader as the **challenge variant**. Carried in addition to
+     * `cobblemon_bridge.gym_id.<N>`, NOT as a replacement — so [GymBattleAdjustHook] still sees
+     * the shared gym_id and downlevels the player to the gym's cap, while [GymDefeatHook]
+     * routes the victory to `beat_gym_<N>_challenge` and [GymPrereqHook] gates the interact on
+     * the player having beaten the corresponding mainline gym.
+     */
+    const val GYM_CHALLENGE: String = "$NAMESPACE.gym_challenge"
+
+    fun isGymChallenge(tags: Iterable<String>): Boolean =
+        tags.any { it == GYM_CHALLENGE }
 }
