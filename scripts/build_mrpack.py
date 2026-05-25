@@ -8,9 +8,9 @@ import json, os, shutil, subprocess, urllib.request
 from pathlib import Path
 
 WORK = Path('/tmp/mrpack-work')
-SRC_PACK = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.22.mrpack')
-OUT_VERSION = '0.3.23'
-OUT_PATH = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.23.mrpack')
+SRC_PACK = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.29.mrpack')
+OUT_VERSION = '0.3.30'
+OUT_PATH = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.30.mrpack')
 SERVER_MODS = Path('/Users/almutwakel/Documents/Projects/minecraft/cobblemon-server/mods')
 
 # No new Modrinth entries in 0.3.6. (When bumping a future version that adds Modrinth mods,
@@ -116,6 +116,16 @@ SERVER_PATHS = [
     'config/cobblemon-carrots/config.json',
     'config/cobblemonalphas/config.json',
     'config/cobbreeding/main.json',
+    # cobblemon main.json holds our tuned defaultFaintTimer (auto-revive disabled) and other
+    # gameplay tuning — must ship with fresh server installs.
+    'config/cobblemon/main.json',
+    # rctmod-server.toml: allowOverLeveling=true (XP gain past cap so our policy-driven cap
+    # only affects spawns + gym downlevel, not candy/XP), initialLevelCap=20 (matches LevelCap.BASE).
+    'config/rctmod-server.toml',
+    # cobblemon-economy config zeros out battleVictoryReward + capture_event_base_reward so
+    # our bridge $2 wild bounty is the only income from wild encounters. Lives under world/
+    # because cobblemon-economy stores per-world config.
+    'world/config/cobblemon-economy/config.json',
     'server.properties',
 ]
 # Whole-tree copies (entire directory structure shipped)
