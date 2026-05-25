@@ -2,6 +2,7 @@ package com.cobblemonmarket
 
 import com.cobblemonmarket.commands.MarketCommands
 import com.cobblemonmarket.config.ItemConfig
+import com.cobblemonmarket.gui.MarketNpcHook
 import com.cobblemonmarket.config.ItemEntry
 import com.cobblemonmarket.config.MarketConfig
 import com.cobblemonmarket.data.MarketStore
@@ -36,6 +37,7 @@ class CobblemonMarket(modBus: IEventBus, container: ModContainer) {
 
         NeoForge.EVENT_BUS.addListener(::onRegisterCommands)
         NeoForge.EVENT_BUS.addListener(::onServerTickPost)
+        NeoForge.EVENT_BUS.register(MarketNpcHook)
 
         logger.info("Cobblemon Market initialized! ${items.size} items, market state loaded.")
     }
