@@ -39,6 +39,18 @@ dependencies {
     implementation("thedarkcolour:kotlinforforge-neoforge:${project.property("kotlin_for_forge_version")}")
     implementation("com.cobblemon:neoforge:${project.property("cobblemon_version")}")
 
+    // Mixin annotation API — runtime is provided by NeoForge. We deliberately DO NOT use the
+    // Mixin AP (annotation processor) because our DataPackManagerMixin targets a class from
+    // RCTmod (not on our compile classpath). The AP can't verify the target and refuses to
+    // build. With remap=false the Mixin is applied directly at runtime; AP-generated refmaps
+    // aren't needed for cross-mod NeoForge targets that already use Mojmap names.
+    compileOnly("org.spongepowered:mixin:0.8.7")
+    // MixinExtras — bundled by NeoForge at runtime. We need it at compile-time for the
+    // `@ModifyExpressionValue` annotation, which lets us modify a method-invoke return value
+    // without declaring the receiver type. Useful when the target class (TrainerManager) isn't
+    // on our compile classpath — plain `@Redirect` requires the exact type at index 0.
+    compileOnly("io.github.llamalad7:mixinextras-common:0.4.1")
+
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
     testImplementation("org.slf4j:slf4j-api:2.0.9")
