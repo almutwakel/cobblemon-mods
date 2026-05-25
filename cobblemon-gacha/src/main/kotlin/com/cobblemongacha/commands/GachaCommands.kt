@@ -246,6 +246,9 @@ object GachaCommands {
         val cmd = "givepokemonegg ${target.gameProfile.name} $args"
         val src = target.server.createCommandSourceStack().withPermission(4).withSuppressedOutput()
         target.server.commands.performPrefixedCommand(src, cmd)
+        // Stamp the tier tag so cobblemon-bridge's timer hook picks the egg up. Without this
+        // call, the egg falls back to Cobreeding's default ~10-minute hatch.
+        RewardGranter.scheduleTagGrantedEgg(target, tierStr)
 
         val shinyTag = if (shiny) " §e✦ Shiny" else ""
         val haTag = if (requireHa) " §d(HA)" else ""
