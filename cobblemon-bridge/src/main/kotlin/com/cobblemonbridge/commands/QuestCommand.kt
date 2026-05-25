@@ -28,15 +28,15 @@ object QuestCommand {
      */
     private val LINEAR_CHAIN = listOf(
         "server:select_pokemon",
-        "server:catch_pokemon",
-        "server:craft_pokeball",
         "server:set_home",
+        "server:craft_pokeball",
+        "server:catch_pokemon",
         "server:farm_carrots",
         "server:beat_wild_trainer",
-        "server:reach_party_level_15",
+        "server:reach_party_level_20",
         "server:beat_gym_1",
+        "server:reach_income_250",
         "server:first_pvp_win",
-        "server:reach_income_100",
     )
 
     /** Main gym ladder, 1–10. Sequential chain. */
@@ -52,7 +52,7 @@ object QuestCommand {
     private val CHAMPION: List<String> = listOf("server:beat_gym_24")
 
     private val INCOME_TRACK = listOf(
-        "server:reach_income_100",
+        "server:reach_income_250",
         "server:reach_income_1000",
         "server:reach_income_10000",
         "server:reach_income_100000",
@@ -78,16 +78,16 @@ object QuestCommand {
      * payoff).
      */
     private val REWARDS: Map<String, String?> = buildMap {
-        put("server:select_pokemon", null)
-        put("server:catch_pokemon",        "§f4 Apricorn Sprouts + 1 Copper Ingot")
-        put("server:craft_pokeball",       "§fSophisticated Backpack")
-        put("server:set_home",             "§f16 Carrots")
-        put("server:farm_carrots",         "§f3 Super Potions")
-        put("server:beat_wild_trainer",    "§aCommon Egg")
-        put("server:reach_party_level_15", "§9Uncommon Egg")
-        put("server:first_pvp_win",        "§f5 Great Balls")
-        put("server:reach_income_100",     "§f1 Rare Candy")
-        put("server:reach_income_1000",    "§f1 Rare Candy")
+        put("server:select_pokemon",       "§f10 Poké Balls")
+        put("server:set_home",             "§f3 Red Apricorn Sprouts")
+        put("server:craft_pokeball",       "§fIron Pickaxe")
+        put("server:catch_pokemon",        "§f3 Carrots")
+        put("server:farm_carrots",         "§f3 Blue Apricorn Sprouts")
+        put("server:beat_wild_trainer",    "§fSophisticated Backpack")
+        put("server:reach_party_level_20", "§aCommon Egg")
+        put("server:reach_income_250",     "§fPasture Block")
+        put("server:first_pvp_win",        "§aCommon Egg")
+        put("server:reach_income_1000",    "§fMinecolonies Supply Camp")
         put("server:reach_income_10000",   "§f1 Master Ball")
         put("server:reach_income_100000",  "§6Ultra Key")
         put("server:reach_elo_1100",       "§fGreat Ball + Super Potion")
@@ -95,7 +95,7 @@ object QuestCommand {
         put("server:reach_elo_1300",       "§f1 Rare Candy")
         put("server:reach_elo_1500",       "§f1 Master Ball")
         put("server:reach_elo_2000",       "§6Ultra Key")
-        put("server:join_colony",          "§f1 Rare Candy")
+        put("server:join_colony",          "§fPoké Healer")
         // Gyms: most Rare Key; 10/19/23/24 are Ultra Key.
         for (i in 1..24) {
             val tier = if (i == 10 || i == 19 || i == 23 || i == 24) "§6Ultra Key" else "§5Rare Key"
