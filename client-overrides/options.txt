@@ -6,3 +6,6 @@ graphicsMode:0
 renderClouds:"fast"
 key_key.socialInteractions:key.keyboard.backslash
 key_key.cobblemon.summary:key.keyboard.p
+key_key.cobblenav.open_pokenav:key.keyboard.o
+key_key.cobblenav.open_location:key.keyboard.apostrophe
+key_key.xaero_create_waypoint:key.keyboard.semicolon
