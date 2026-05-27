@@ -10,7 +10,9 @@ import com.cobblemonbridge.battle.GymPrereqHook
 import com.cobblemonbridge.commands.CommandAliases
 import com.cobblemonbridge.commands.HomeAliases
 import com.cobblemonbridge.commands.QuestCommand
+import com.cobblemonbridge.commands.WildCommand
 import com.cobblemonbridge.eggs.EggDefeatHook
+import com.cobblemonbridge.quests.HealQuestHook
 import com.cobblemonbridge.quests.PartyLevelHook
 import com.cobblemonbridge.quests.SetHomeHook
 import com.cobblemonbridge.wild.TradeCapHook
@@ -47,6 +49,7 @@ class CobblemonBridge(modBus: IEventBus, container: ModContainer) {
         E4GauntletHook.registerEvents()
         NeoForge.EVENT_BUS.register(E4GauntletHook)
         NeoForge.EVENT_BUS.register(SetHomeHook)
+        NeoForge.EVENT_BUS.register(HealQuestHook)
         PartyLevelHook.registerEvents()
         WildBattleRewardHook.registerEvents()
         WildSpawnLevelCapHook.registerEvents()
@@ -76,6 +79,7 @@ class CobblemonBridge(modBus: IEventBus, container: ModContainer) {
         QuestCommand.register(event.dispatcher)
         HomeAliases.register(event.dispatcher)
         CommandAliases.register(event.dispatcher)
+        WildCommand.register(event.dispatcher)
     }
 
     companion object {
