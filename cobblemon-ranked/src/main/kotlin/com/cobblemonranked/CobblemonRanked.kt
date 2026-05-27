@@ -7,7 +7,6 @@ import com.cobblemonranked.config.RankedConfig
 import com.cobblemonranked.data.EloStore
 import com.cobblemonranked.data.TeamStore
 import com.cobblemonranked.decay.DecayManager
-import com.cobblemonranked.gui.MenuRegistry
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.ModContainer
 import net.neoforged.fml.common.Mod
@@ -32,8 +31,6 @@ class CobblemonRanked(modBus: IEventBus, container: ModContainer) {
         teamStore = TeamStore(configDir)
 
         RankedBattleManager.registerEvents()
-
-        MenuRegistry.MENUS.register(modBus)
 
         NeoForge.EVENT_BUS.addListener(::onRegisterCommands)
         NeoForge.EVENT_BUS.addListener(::onServerTickPost)

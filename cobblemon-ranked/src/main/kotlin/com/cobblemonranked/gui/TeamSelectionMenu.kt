@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Inventory
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.inventory.AbstractContainerMenu
 import net.minecraft.world.inventory.ClickType
+import net.minecraft.world.inventory.MenuType
 import net.minecraft.world.inventory.Slot
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -22,16 +23,16 @@ import net.minecraft.world.item.Items
 /**
  * 6-row chest menu for picking up to 6 Pokemon from the player's PC + party.
  *
+ * Uses vanilla [MenuType.GENERIC_9x6] so clients without this mod can render the GUI
+ * as a standard 6-row chest. All logic is server-side; the client just displays the
+ * slot contents broadcast from the server.
+ *
  * Layout:
  *  rows 0-1 (slots 0-17)  — current PC box (18 pokemon)
  *  row  2   (slots 18-26) — PC navigation: prev arrow, box label, next arrow + filler
  *  row  3   (slots 27-32) — party (6 pokemon); slot 33 PC/Party divider label
  *  row  4   (slots 36-44) — selection counter
  *  row  5   (slots 45-50) — selected team display (click to remove); 52 = confirm, 53 = cancel
- *
- * Click dispatch is server-side only. The client-side stub menu has no party/PC state and
- * never receives interactive logic — the client just renders the slot ItemStacks broadcast
- * from the server.
  */
 class TeamSelectionMenu private constructor(
     containerId: Int,
@@ -40,17 +41,29 @@ class TeamSelectionMenu private constructor(
     private val maxLegendaries: Int,
     private val onConfirm: ((List<Pokemon>) -> Unit)?,
     private val onCancel: (() -> Unit)?,
-) : AbstractContainerMenu(MenuRegistry.TEAM_SELECTION.get(), containerId) {
+) : AbstractContainerMenu(MenuType.GENERIC_9x6, containerId) {
 
     private val display = SimpleContainer(SLOT_COUNT)
     private val selected = mutableListOf<Pokemon>()
     private var currentBox: Int = 0
+    private var confirmed = false
+    private var cancelled = false
     private val party: PartyStore? = player?.let { Cobblemon.storage.getParty(it) }
     private val pc: PCStore? = player?.let { Cobblemon.storage.getPC(it) }
 
     init {
+        // 54 display slots (6 rows of 9) — matches vanilla 6-row chest layout
         for (row in 0 until ROWS) for (col in 0 until COLS) {
             addSlot(DisplaySlot(display, row * COLS + col, 8 + col * 18, 18 + row * 18))
+        }
+        // Player inventory + hotbar (36 slots) — required so slot count matches the
+        // vanilla ChestMenu the client creates. Locked to prevent interaction.
+        val yOffset = (ROWS - 4) * 18
+        for (row in 0 until 3) for (col in 0 until 9) {
+            addSlot(LockedSlot(playerInventory, col + row * 9 + 9, 8 + col * 18, 103 + row * 18 + yOffset))
+        }
+        for (col in 0 until 9) {
+            addSlot(LockedSlot(playerInventory, col, 8 + col * 18, 161 + yOffset))
         }
         repaint()
     }
@@ -173,10 +186,12 @@ class TeamSelectionMenu private constructor(
                     sp.sendSystemMessage(Component.literal("§c[Ranked] You must select at least 1 Pokemon!"))
                     return
                 }
+                confirmed = true
                 sp.closeContainer()
                 onConfirm?.invoke(selected.toList())
             }
             53 -> {
+                cancelled = true
                 sp.closeContainer()
                 onCancel?.invoke()
             }
@@ -195,7 +210,25 @@ class TeamSelectionMenu private constructor(
 
     override fun quickMoveStack(player: Player, index: Int): ItemStack = ItemStack.EMPTY
 
+    /**
+     * Called when the menu is closed (Escape, disconnect, or programmatic close).
+     * If the player hasn't confirmed or explicitly cancelled, treat it as a cancel
+     * so the opponent isn't stuck waiting.
+     */
+    override fun removed(player: Player) {
+        super.removed(player)
+        if (!confirmed && !cancelled) {
+            cancelled = true
+            onCancel?.invoke()
+        }
+    }
+
     private class DisplaySlot(c: SimpleContainer, slot: Int, x: Int, y: Int) : Slot(c, slot, x, y) {
+        override fun mayPlace(stack: ItemStack) = false
+        override fun mayPickup(player: Player) = false
+    }
+
+    private class LockedSlot(inv: Inventory, slot: Int, x: Int, y: Int) : Slot(inv, slot, x, y) {
         override fun mayPlace(stack: ItemStack) = false
         override fun mayPickup(player: Player) = false
     }
@@ -214,10 +247,6 @@ class TeamSelectionMenu private constructor(
             onConfirm: (List<Pokemon>) -> Unit,
             onCancel: () -> Unit,
         ): TeamSelectionMenu = TeamSelectionMenu(containerId, playerInventory, player, maxLegendaries, onConfirm, onCancel)
-
-        /** Client-side stub factory used by the registered MenuType factory. */
-        fun clientStub(containerId: Int, playerInventory: Inventory): TeamSelectionMenu =
-            TeamSelectionMenu(containerId, playerInventory, null, 0, null, null)
     }
 }
 
