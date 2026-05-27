@@ -8,15 +8,22 @@ import json, os, shutil, subprocess, urllib.request
 from pathlib import Path
 
 WORK = Path('/tmp/mrpack-work')
-SRC_PACK = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.29.mrpack')
-OUT_VERSION = '0.3.30'
-OUT_PATH = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.30.mrpack')
+SRC_PACK = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.31.mrpack')
+OUT_VERSION = '0.3.32'
+OUT_PATH = Path('/Users/almutwakel/Documents/Projects/minecraft/Cobblemon Server-0.3.32.mrpack')
 SERVER_MODS = Path('/Users/almutwakel/Documents/Projects/minecraft/cobblemon-server/mods')
 
 # No new Modrinth entries in 0.3.6. (When bumping a future version that adds Modrinth mods,
 # append entries here; the script asserts they aren't already in the seed pack.)
 # (slug, version_id, env_client, env_server, expected_filename)
-NEW_MODRINTH = []
+NEW_MODRINTH = [
+    ('cobblemon-pokenav', 'yCSofpNb', 'required', 'required', 'cobblenav-neoforge-2.3.3.jar'),
+]
+
+# Mods to strip from the seed pack manifest (removed from server).
+REMOVE_MODRINTH = [
+    'cobbleloots-neoforge-2.3.0.jar',
+]
 
 # In-house jars to copy into overrides/mods/. cobblemon-carrots is new in 0.3.6; the others
 # refresh in place (same filename, updated content).
@@ -26,6 +33,7 @@ IN_HOUSE_JARS = [
     ('cobblemon-gacha-1.0.0.jar',    SERVER_MODS / 'cobblemon-gacha-1.0.0.jar'),
     ('cobblemon-bridge-1.0.0.jar',   SERVER_MODS / 'cobblemon-bridge-1.0.0.jar'),
     ('cobblemon-carrots-1.0.0.jar',  SERVER_MODS / 'cobblemon-carrots-1.0.0.jar'),
+    ('flan-1.21.1-1.12.5-neoforge.jar', SERVER_MODS / 'flan-1.21.1-1.12.5-neoforge.jar'),
 ]
 
 # ── Helpers ──────────────────────────────────────────────────────────────
@@ -72,6 +80,14 @@ for slug, vid, ec, es, expected_fn in NEW_MODRINTH:
         raise RuntimeError(f'{slug} expected {expected_fn} got {primary["filename"]}')
     print(f'  + {primary["filename"]:60s} sha1={primary["hashes"]["sha1"][:8]}…')
     manifest['files'].append(file_entry(primary['filename'], primary, ec, es))
+
+# Strip removed mods from the seed manifest
+remove_set = set(REMOVE_MODRINTH)
+before = len(manifest['files'])
+manifest['files'] = [f for f in manifest['files'] if f['path'].split('/')[-1] not in remove_set]
+removed = before - len(manifest['files'])
+if removed:
+    print(f'  Removed {removed} mod(s) from manifest: {", ".join(remove_set)}')
 
 manifest['files'].sort(key=lambda f: f['path'].lower())
 json.dump(manifest, open(manifest_path, 'w'), indent=4)
