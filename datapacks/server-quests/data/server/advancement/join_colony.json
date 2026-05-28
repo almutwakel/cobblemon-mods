@@ -1,9 +1,15 @@
 {
-  "parent": "server:root",
+  "parent": "server:reach_income_1000",
   "display": {
-    "title": { "text": "Find a Home" },
-    "description": { "text": "Start or join a Minecolonies town." },
-    "icon": { "id": "minecraft:bell" },
+    "title": {
+      "text": "Find a Home"
+    },
+    "description": {
+      "text": "Start or join a Minecolonies town."
+    },
+    "icon": {
+      "id": "minecraft:bell"
+    },
     "frame": "task",
     "show_toast": true,
     "announce_to_chat": true
@@ -17,7 +23,12 @@
     }
   },
   "requirements": [
-    ["founded", "active_member"]
+    [
+      "founded",
+      "active_member"
+    ]
   ],
-  "rewards": { "function": "server:quests/rewards/join_colony" }
+  "rewards": {
+    "function": "server:quests/rewards/join_colony"
+  }
 }

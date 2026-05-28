@@ -1,11 +1,11 @@
 {
-  "parent": "server:catch_pokemon",
+  "parent": "server:set_home",
   "display": {
     "title": {
       "text": "Catch \u2019em"
     },
     "description": {
-      "text": "Craft your first Pok\u00e9 Ball."
+      "text": "Craft a Pok\u00e9 Ball."
     },
     "icon": {
       "id": "cobblemon:poke_ball"
@@ -16,15 +16,9 @@
   },
   "criteria": {
     "crafted": {
-      "trigger": "minecraft:inventory_changed",
+      "trigger": "minecraft:recipe_crafted",
       "conditions": {
-        "items": [
-          {
-            "items": [
-              "cobblemon:poke_ball"
-            ]
-          }
-        ]
+        "recipe_id": "cobblemon:poke_ball"
       }
     }
   },

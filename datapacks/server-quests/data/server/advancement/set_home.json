@@ -1,5 +1,5 @@
 {
-  "parent": "server:craft_pokeball",
+  "parent": "server:use_wild",
   "display": {
     "title": {
       "text": "A Place to Crash"

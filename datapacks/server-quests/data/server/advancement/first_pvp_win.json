@@ -1,5 +1,5 @@
 {
-  "parent": "server:beat_gym_1",
+  "parent": "server:reach_income_250",
   "display": {
     "title": {
       "text": "First Blood"

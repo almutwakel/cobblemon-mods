@@ -1,5 +1,5 @@
 {
-  "parent": "server:farm_carrots",
+  "parent": "server:heal_pokemon",
   "display": {
     "title": {
       "text": "First Trainer Down"
@@ -15,8 +15,13 @@
     "announce_to_chat": true
   },
   "criteria": {
-    "done": {
-      "trigger": "minecraft:impossible"
+    "defeat_any": {
+      "trigger": "rctmod:defeat_count",
+      "conditions": {
+        "count": 1,
+        "trainer_ids": [],
+        "trainer_type": null
+      }
     }
   },
   "rewards": {

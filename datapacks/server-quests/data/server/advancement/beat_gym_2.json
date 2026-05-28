@@ -1,5 +1,5 @@
 {
-  "parent": "server:reach_income_100",
+  "parent": "server:first_pvp_win",
   "display": {
     "title": {
       "text": "Gym 2: Gardenia"

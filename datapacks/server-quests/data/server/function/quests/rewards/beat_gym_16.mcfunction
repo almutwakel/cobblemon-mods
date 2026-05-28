@@ -1,6 +1,5 @@
-# Awarded by cobblemon-bridge GymDefeatHook for rotating gym_id=16.
-gacha admin grant @s rare 1
-
+# Auto-generated. Awarded by cobblemon-bridge GymDefeatHook for gym_id=16.
 playsound minecraft:ui.toast.challenge_complete master @s ~ ~ ~ 1.0 1.0
-
-tellraw @s [{"text": "\n§6§l[Gym Defeated] ", "bold": true}, {"text": "Brycen — Ice", "color": "white", "bold": true}, {"text": "\n§7Reward: §fRare Key", "bold": false}, {"text": "\n"}]
+tellraw @s [{"text":"\n§6§l[Gym Defeated] ","bold":true},{"text":"Gym 16: Brycen — Ice","color":"white","bold":true},{"text":"\n§7Reward: §fRare Key","bold":false},{"text":"\n§e► Next: ","bold":false},{"text":"Another rotating gym or the Elite Four\n","color":"white","bold":false}]
+tag @s add cq_reward_key_rare_1
+schedule function server:quests/rewards/_finalize 20t append

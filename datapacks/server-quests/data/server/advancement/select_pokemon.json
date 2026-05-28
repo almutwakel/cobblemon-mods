@@ -1,0 +1,25 @@
+{
+  "parent": "server:root",
+  "display": {
+    "title": {
+      "text": "Pick a Starter"
+    },
+    "description": {
+      "text": "Select your first Pokémon from the starter list."
+    },
+    "icon": {
+      "id": "cobblemon:poke_ball"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "picked": {
+      "trigger": "cobblemon:pick_starter"
+    }
+  },
+  "rewards": {
+    "function": "server:quests/rewards/select_pokemon"
+  }
+}

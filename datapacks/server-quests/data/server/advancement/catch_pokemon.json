@@ -1,5 +1,5 @@
 {
-  "parent": "server:root",
+  "parent": "server:craft_pokeball",
   "display": {
     "title": {
       "text": "Gotta Catch One"

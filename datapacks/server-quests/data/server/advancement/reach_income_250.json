@@ -1,11 +1,11 @@
 {
-  "parent": "server:first_pvp_win",
+  "parent": "server:beat_gym_1",
   "display": {
     "title": {
       "text": "Pocket Change"
     },
     "description": {
-      "text": "Hold $100 in your wallet."
+      "text": "Sell enough items to reach $250."
     },
     "icon": {
       "id": "minecraft:emerald"
@@ -20,6 +20,6 @@
     }
   },
   "rewards": {
-    "function": "server:quests/rewards/reach_income_100"
+    "function": "server:quests/rewards/reach_income_250"
   }
 }

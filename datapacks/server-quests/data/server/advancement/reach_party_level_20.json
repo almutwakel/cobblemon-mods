@@ -2,10 +2,10 @@
   "parent": "server:beat_wild_trainer",
   "display": {
     "title": {
-      "text": "Level 15 Trainer"
+      "text": "Trained Up"
     },
     "description": {
-      "text": "Raise any party Pok\u00e9mon to level 15."
+      "text": "Train any party Pokémon to level 20 (your starting level cap)."
     },
     "icon": {
       "id": "cobblemon:rare_candy"
@@ -20,6 +20,6 @@
     }
   },
   "rewards": {
-    "function": "server:quests/rewards/reach_party_level_15"
+    "function": "server:quests/rewards/reach_party_level_20"
   }
 }

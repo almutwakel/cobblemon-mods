@@ -1,5 +1,5 @@
 {
-  "parent": "server:set_home",
+  "parent": "server:catch_pokemon",
   "display": {
     "title": {
       "text": "Green Thumb"

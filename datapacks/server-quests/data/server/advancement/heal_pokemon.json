@@ -1,0 +1,25 @@
+{
+  "parent": "server:farm_carrots",
+  "display": {
+    "title": {
+      "text": "Nurse Joy"
+    },
+    "description": {
+      "text": "Heal a Pokémon with carrots or a Poké Healer."
+    },
+    "icon": {
+      "id": "minecraft:carrot"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "rewards": {
+    "function": "server:quests/rewards/heal_pokemon"
+  }
+}

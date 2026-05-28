@@ -11,5 +11,8 @@
 scoreboard objectives add cq_hud_toggle trigger
 scoreboard objectives add cq_hud_tick dummy
 
+# Enforce keepInventory on every world load — re-asserts even if an op flipped it off.
+gamerule keepInventory true
+
 # Make the trigger visible-and-usable for everyone already online.
 scoreboard players enable @a cq_hud_toggle

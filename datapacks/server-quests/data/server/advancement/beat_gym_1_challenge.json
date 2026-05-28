@@ -1,0 +1,25 @@
+{
+  "parent": "server:beat_gym_1",
+  "display": {
+    "title": {
+      "text": "Gym 1: Clay — Challenge"
+    },
+    "description": {
+      "text": "Defeat the challenge variant of Gym 1."
+    },
+    "icon": {
+      "id": "cobblemon:ultra_ball"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "rewards": {
+    "function": "server:quests/rewards/beat_gym_1_challenge"
+  }
+}

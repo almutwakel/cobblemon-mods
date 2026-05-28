@@ -1,5 +1,5 @@
 {
-  "parent": "server:reach_income_100",
+  "parent": "server:reach_income_250",
   "display": {
     "title": {
       "text": "Climbing"
