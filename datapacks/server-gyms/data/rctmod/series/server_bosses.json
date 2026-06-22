@@ -1,0 +1,11 @@
+{
+  "title": {
+    "literal": "Server Bosses"
+  },
+  "description": {
+    "literal": "Gym Leaders, the Battle Tower, and the Elite Four."
+  },
+  "difficulty": 8,
+  "requiredSeries": [],
+  "initialLevelCap": 15
+}

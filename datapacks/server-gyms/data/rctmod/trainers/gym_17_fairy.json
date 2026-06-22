@@ -1,0 +1,196 @@
+{
+  "name": "Flora",
+  "identity": "Fairy",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "klefki",
+      "level": 60,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "prankster",
+      "heldItem": "cobblemon:sticky_barb",
+      "moveset": [
+        "switcheroo",
+        "thunderwave",
+        "spikes",
+        "drainingkiss"
+      ]
+    },
+    {
+      "species": "sylveon",
+      "level": 60,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "pixilate",
+      "heldItem": "cobblemon:choice_specs",
+      "moveset": [
+        "hypervoice",
+        "mysticalfire",
+        "shadowball",
+        "psychic"
+      ]
+    },
+    {
+      "species": "weezing",
+      "aspects": ["galarian"],
+      "level": 60,
+      "nature": "bold",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 252,
+        "spa": 0,
+        "spd": 4,
+        "spe": 0
+      },
+      "form": "galarian",
+      "ability": "levitate",
+      "heldItem": "cobblemon:rocky_helmet",
+      "moveset": [
+        "strangesteam",
+        "sludgebomb",
+        "flamethrower",
+        "willowisp"
+      ]
+    },
+    {
+      "species": "florges",
+      "level": 60,
+      "nature": "bold",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 252,
+        "spa": 0,
+        "spd": 4,
+        "spe": 0
+      },
+      "form": "blue",
+      "ability": "flowerveil",
+      "heldItem": "cobblemon:leftovers",
+      "moveset": [
+        "calmmind",
+        "moonblast",
+        "psychic",
+        "synthesis"
+      ]
+    },
+    {
+      "species": "azumarill",
+      "level": 60,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 248,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 8,
+        "spe": 0
+      },
+      "ability": "hugepower",
+      "heldItem": "cobblemon:choice_band",
+      "moveset": [
+        "playrough",
+        "liquidation",
+        "aquajet",
+        "icespinner"
+      ]
+    },
+    {
+      "species": "clefable",
+      "level": 60,
+      "nature": "calm",
+      "ivs": {
+        "hp": 31,
+        "atk": 0,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 4,
+        "spa": 0,
+        "spd": 252,
+        "spe": 0
+      },
+      "ability": "magicguard",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "moonblast",
+        "flamethrower",
+        "thunderbolt",
+        "moonlight"
+      ]
+    }
+  ],
+  "textureResource": "rctmod:textures/trainers/single/type_fairy.png"
+}

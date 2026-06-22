@@ -1,0 +1,193 @@
+{
+  "name": "Caesar",
+  "identity": "Rock",
+  "ai": {
+    "type": "rb",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "kleavor",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "sharpness",
+      "moveset": [
+        "stoneaxe",
+        "xscissor",
+        "aerialace",
+        "closecombat"
+      ],
+      "heldItem": "cobblemon:focus_sash"
+    },
+    {
+      "species": "glimmora",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "toxicdebris",
+      "moveset": [
+        "powergem",
+        "sludgewave",
+        "earthpower",
+        "rockpolish"
+      ],
+      "heldItem": "cobblemon:life_orb"
+    },
+    {
+      "species": "garganacl",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "purifyingsalt",
+      "moveset": [
+        "saltcure",
+        "bodypress",
+        "recover",
+        "curse"
+      ],
+      "heldItem": "cobblemon:leftovers"
+    },
+    {
+      "species": "cradily",
+      "level": 50,
+      "nature": "bold",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 128,
+        "spa": 0,
+        "spd": 128,
+        "spe": 0
+      },
+      "ability": "stormdrain",
+      "moveset": [
+        "ancientpower",
+        "leechseed",
+        "recover",
+        "gigadrain"
+      ],
+      "heldItem": "cobblemon:leftovers"
+    },
+    {
+      "species": "tyranitar",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "sandstream",
+      "moveset": [
+        "stoneedge",
+        "crunch",
+        "earthquake",
+        "icepunch"
+      ],
+      "heldItem": "cobblemon:assault_vest"
+    },
+    {
+      "species": "lycanroc",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "sandrush",
+      "moveset": [
+        "stoneedge",
+        "closecombat",
+        "playrough",
+        "accelerock"
+      ],
+      "heldItem": "cobblemon:choice_band"
+    }
+  ],
+  "textureResource": "rctmod:textures/trainers/single/type_rock.png"
+}

@@ -1,0 +1,201 @@
+{
+  "name": "Zuko",
+  "identity": "Fire",
+  "textureResource": "rctmod:textures/trainers/single/type_fire.png",
+  "ai": {
+    "type": "pe",
+    "data": {
+      "temperature": 0.5
+    }
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "torkoal",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "drought",
+      "moveset": [
+        "lavaplume",
+        "rapidspin",
+        "solarbeam",
+        "explosion"
+      ],
+      "heldItem": "cobblemon:heat_rock"
+    },
+    {
+      "species": "scovillain",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "chlorophyll",
+      "moveset": [
+        "growth",
+        "fireblast",
+        "solarbeam",
+        "stompingtantrum"
+      ],
+      "heldItem": "cobblemon:life_orb"
+    },
+    {
+      "species": "chandelure",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "flamebody",
+      "moveset": [
+        "fireblast",
+        "shadowball",
+        "energyball",
+        "psychic"
+      ],
+      "heldItem": "cobblemon:choice_specs"
+    },
+    {
+      "species": "rotom",
+      "aspects": [
+        "heat-appliance"
+      ],
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "levitate",
+      "moveset": [
+        "overheat",
+        "voltswitch",
+        "willowisp",
+        "sunnyday"
+      ],
+      "heldItem": "cobblemon:heavy_duty_boots"
+    },
+    {
+      "species": "arcanine",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "rockhead",
+      "moveset": [
+        "flareblitz",
+        "headsmash",
+        "closecombat",
+        "extremespeed"
+      ],
+      "heldItem": "cobblemon:life_orb",
+      "aspects": [
+        "hisuian"
+      ]
+    },
+    {
+      "species": "blaziken",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "speedboost",
+      "moveset": [
+        "swordsdance",
+        "blazekick",
+        "closecombat",
+        "earthquake"
+      ],
+      "heldItem": "cobblemon:focus_sash"
+    }
+  ]
+}

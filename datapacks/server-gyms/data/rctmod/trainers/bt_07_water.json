@@ -1,0 +1,193 @@
+{
+  "name": "Kai",
+  "identity": "Water",
+  "textureResource": "rctmod:textures/trainers/single/type_water.png",
+  "ai": {
+    "type": "rb",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "pelipper",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "drizzle",
+      "moveset": [
+        "weatherball",
+        "hurricane",
+        "uturn",
+        "roost"
+      ],
+      "heldItem": "cobblemon:damp_rock"
+    },
+    {
+      "species": "palafin",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "zerotohero",
+      "moveset": [
+        "flipturn",
+        "wavecrash",
+        "jetpunch",
+        "icepunch"
+      ],
+      "heldItem": "cobblemon:choice_band"
+    },
+    {
+      "species": "basculegion",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "swiftswim",
+      "moveset": [
+        "liquidation",
+        "flipturn",
+        "lastrespects",
+        "psychicfangs"
+      ],
+      "heldItem": "cobblemon:assault_vest"
+    },
+    {
+      "species": "lanturn",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "voltabsorb",
+      "moveset": [
+        "voltswitch",
+        "scald",
+        "thunder",
+        "raindance"
+      ],
+      "heldItem": "cobblemon:leftovers"
+    },
+    {
+      "species": "kingdra",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "swiftswim",
+      "moveset": [
+        "hydropump",
+        "dragonpulse",
+        "icebeam",
+        "surf"
+      ],
+      "heldItem": "cobblemon:life_orb"
+    },
+    {
+      "species": "primarina",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "torrent",
+      "moveset": [
+        "calmmind",
+        "surf",
+        "moonblast",
+        "energyball"
+      ],
+      "heldItem": "cobblemon:leftovers"
+    }
+  ]
+}

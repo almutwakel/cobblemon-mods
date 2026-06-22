@@ -1,0 +1,198 @@
+{
+  "name": "Jarvis",
+  "identity": "Steel",
+  "textureResource": "rctmod:textures/trainers/single/type_steel.png",
+  "ai": {
+    "type": "pe",
+    "data": {
+      "temperature": 0.5
+    }
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "skarmory",
+      "level": 50,
+      "nature": "bold",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 128,
+        "spa": 0,
+        "spd": 128,
+        "spe": 0
+      },
+      "ability": "sturdy",
+      "moveset": [
+        "spikes",
+        "roost",
+        "whirlwind",
+        "bodypress"
+      ],
+      "heldItem": "cobblemon:rocky_helmet"
+    },
+    {
+      "species": "aegislash",
+      "level": 50,
+      "nature": "bold",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 128,
+        "spa": 0,
+        "spd": 128,
+        "spe": 0
+      },
+      "ability": "stancechange",
+      "moveset": [
+        "kingsshield",
+        "swordsdance",
+        "ironhead",
+        "shadowsneak"
+      ],
+      "heldItem": "cobblemon:weakness_policy"
+    },
+    {
+      "species": "bronzong",
+      "level": 50,
+      "nature": "naive",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 128,
+        "def": 0,
+        "spa": 128,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "levitate",
+      "moveset": [
+        "gyroball",
+        "psychicnoise",
+        "toxic",
+        "protect"
+      ],
+      "heldItem": "cobblemon:leftovers"
+    },
+    {
+      "species": "goodra",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "shellarmor",
+      "moveset": [
+        "heavyslam",
+        "dragontail",
+        "surf",
+        "flamethrower"
+      ],
+      "heldItem": "cobblemon:assault_vest",
+      "aspects": [
+        "hisuian"
+      ]
+    },
+    {
+      "species": "gholdengo",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "goodasgold",
+      "moveset": [
+        "makeitrain",
+        "shadowball",
+        "dazzlinggleam",
+        "powergem"
+      ],
+      "heldItem": "cobblemon:choice_scarf"
+    },
+    {
+      "species": "archaludon",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "stamina",
+      "moveset": [
+        "flashcannon",
+        "dragonpulse",
+        "earthquake",
+        "bodypress"
+      ],
+      "heldItem": "cobblemon:assault_vest"
+    }
+  ]
+}

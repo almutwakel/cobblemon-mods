@@ -1,0 +1,194 @@
+{
+  "name": "Alder",
+  "identity": "Unova Champion",
+  "textureResource": "rctmod:textures/trainers/single/gym_20_alder.png",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "hooh",
+      "level": 65,
+      "nature": "careful",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 4,
+        "spa": 0,
+        "spd": 252,
+        "spe": 0
+      },
+      "ability": "regenerator",
+      "heldItem": "cobblemon:heavy_duty_boots",
+      "moveset": [
+        "sacredfire",
+        "bravebird",
+        "earthquake",
+        "recover"
+      ]
+    },
+    {
+      "species": "slowking",
+      "level": 65,
+      "nature": "calm",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 4,
+        "spa": 0,
+        "spd": 252,
+        "spe": 0
+      },
+      "form": "galarian",
+      "ability": "regenerator",
+      "heldItem": "cobblemon:heavy_duty_boots",
+      "moveset": [
+        "futuresight",
+        "sludgebomb",
+        "chillyreception",
+        "slackoff"
+      ]
+    },
+    {
+      "species": "garchomp",
+      "level": 65,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "roughskin",
+      "heldItem": "cobblemon:rocky_helmet",
+      "moveset": [
+        "stealthrock",
+        "earthquake",
+        "scaleshot",
+        "firefang"
+      ]
+    },
+    {
+      "species": "kingambit",
+      "level": 65,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 252,
+        "def": 4,
+        "spa": 0,
+        "spd": 0,
+        "spe": 0
+      },
+      "ability": "supremeoverlord",
+      "heldItem": "cobblemon:leftovers",
+      "moveset": [
+        "swordsdance",
+        "kowtowcleave",
+        "ironhead",
+        "suckerpunch"
+      ]
+    },
+    {
+      "species": "cinderace",
+      "level": 65,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "libero",
+      "heldItem": "cobblemon:heavy_duty_boots",
+      "moveset": [
+        "pyroball",
+        "highjumpkick",
+        "uturn",
+        "courtchange"
+      ]
+    },
+    {
+      "species": "volcarona",
+      "level": 65,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "flamebody",
+      "heldItem": "cobblemon:heavy_duty_boots",
+      "moveset": [
+        "quiverdance",
+        "fierydance",
+        "bugbuzz",
+        "gigadrain"
+      ]
+    }
+  ]
+}

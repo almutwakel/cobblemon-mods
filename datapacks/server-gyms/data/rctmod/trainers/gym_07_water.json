@@ -1,0 +1,193 @@
+{
+  "name": "Kai",
+  "identity": "Water",
+  "textureResource": "rctmod:textures/trainers/single/type_water.png",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "pelipper",
+      "level": 45,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "drizzle",
+      "heldItem": "cobblemon:damp_rock",
+      "moveset": [
+        "scald",
+        "uturn",
+        "roost",
+        "defog"
+      ]
+    },
+    {
+      "species": "kingdra",
+      "level": 45,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "swiftswim",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "hydropump",
+        "dracometeor",
+        "hurricane",
+        "flashcannon"
+      ]
+    },
+    {
+      "species": "barraskewda",
+      "level": 45,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "swiftswim",
+      "heldItem": "cobblemon:choice_band",
+      "moveset": [
+        "liquidation",
+        "closecombat",
+        "poisonjab",
+        "aquajet"
+      ]
+    },
+    {
+      "species": "kabutops",
+      "level": 45,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "swiftswim",
+      "heldItem": "",
+      "moveset": [
+        "swordsdance",
+        "waterfall",
+        "stoneedge",
+        "aquajet"
+      ]
+    },
+    {
+      "species": "swampert",
+      "level": 45,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "torrent",
+      "heldItem": "",
+      "moveset": [
+        "stealthrock",
+        "earthquake",
+        "icepunch",
+        "flipturn"
+      ]
+    },
+    {
+      "species": "gastrodon",
+      "level": 45,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "stormdrain",
+      "heldItem": "",
+      "moveset": [
+        "scald",
+        "earthpower",
+        "recover",
+        "toxic"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+{
+  "name": "Hobie",
+  "identity": "Dark",
+  "ai": {
+    "type": "rb",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "grimmsnarl",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "prankster",
+      "moveset": [
+        "partingshot",
+        "darkestlariat",
+        "spiritbreak",
+        "taunt"
+      ],
+      "heldItem": "cobblemon:leftovers"
+    },
+    {
+      "species": "muk",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "poisontouch",
+      "moveset": [
+        "crunch",
+        "poisonjab",
+        "drainpunch",
+        "pursuit"
+      ],
+      "heldItem": "cobblemon:black_sludge",
+      "aspects": [
+        "alolan"
+      ]
+    },
+    {
+      "species": "weavile",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "pickpocket",
+      "moveset": [
+        "knockoff",
+        "tripleaxel",
+        "poisonjab",
+        "lowkick"
+      ],
+      "heldItem": "cobblemon:choice_band"
+    },
+    {
+      "species": "zoroark",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "illusion",
+      "moveset": [
+        "nastyplot",
+        "nightdaze",
+        "psychic",
+        "encore"
+      ],
+      "heldItem": "cobblemon:life_orb"
+    },
+    {
+      "species": "hydreigon",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "levitate",
+      "moveset": [
+        "darkpulse",
+        "dracometeor",
+        "flamethrower",
+        "earthpower"
+      ],
+      "heldItem": "cobblemon:expert_belt"
+    },
+    {
+      "species": "kingambit",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "supremeoverlord",
+      "moveset": [
+        "swordsdance",
+        "kowtowcleave",
+        "ironhead",
+        "suckerpunch"
+      ],
+      "heldItem": "cobblemon:chople_berry"
+    }
+  ],
+  "textureResource": "rctmod:textures/trainers/single/type_dark.png"
+}

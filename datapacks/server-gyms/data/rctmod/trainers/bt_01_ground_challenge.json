@@ -1,0 +1,195 @@
+{
+  "name": "Dusty",
+  "identity": "Ground",
+  "ai": {
+    "type": "pe",
+    "data": {
+      "temperature": 0.5
+    }
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "gliscor",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "poisonheal",
+      "moveset": [
+        "spikes",
+        "earthquake",
+        "dualwingbeat",
+        "roost"
+      ],
+      "heldItem": "cobblemon:toxic_orb"
+    },
+    {
+      "species": "mudsdale",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "stamina",
+      "moveset": [
+        "earthquake",
+        "stoneedge",
+        "bodypress",
+        "heavyslam"
+      ],
+      "heldItem": "cobblemon:assault_vest"
+    },
+    {
+      "species": "gastrodon",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "stormdrain",
+      "moveset": [
+        "scald",
+        "earthpower",
+        "icebeam",
+        "recover"
+      ],
+      "heldItem": "cobblemon:leftovers"
+    },
+    {
+      "species": "excadrill",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "moldbreaker",
+      "moveset": [
+        "earthquake",
+        "ironhead",
+        "rockslide",
+        "xscissor"
+      ],
+      "heldItem": "cobblemon:choice_band"
+    },
+    {
+      "species": "krookodile",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "moxie",
+      "moveset": [
+        "earthquake",
+        "darkestlariat",
+        "closecombat",
+        "gunkshot"
+      ],
+      "heldItem": "cobblemon:choice_scarf"
+    },
+    {
+      "species": "garchomp",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "roughskin",
+      "moveset": [
+        "scaleshot",
+        "earthquake",
+        "ironhead",
+        "swordsdance"
+      ],
+      "heldItem": "cobblemon:loaded_dice"
+    }
+  ],
+  "textureResource": "rctmod:textures/trainers/single/type_ground.png"
+}

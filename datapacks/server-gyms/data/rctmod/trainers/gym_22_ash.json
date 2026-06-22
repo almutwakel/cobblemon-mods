@@ -1,0 +1,193 @@
+{
+  "name": "Ash",
+  "identity": "Pok\u00e9mon Trainer",
+  "textureResource": "rctmod:textures/trainers/single/gym_22_ash.png",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "pikachu",
+      "level": 65,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "static",
+      "heldItem": "cobblemon:light_ball",
+      "moveset": [
+        "volttackle",
+        "knockoff",
+        "surf",
+        "fakeout"
+      ]
+    },
+    {
+      "species": "greninja",
+      "level": 65,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "battlebond",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "hydropump",
+        "watershuriken",
+        "darkpulse",
+        "icebeam"
+      ]
+    },
+    {
+      "species": "talonflame",
+      "level": 65,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "galewings",
+      "heldItem": "cobblemon:heavy_duty_boots",
+      "moveset": [
+        "bravebird",
+        "flareblitz",
+        "uturn",
+        "roost"
+      ]
+    },
+    {
+      "species": "hawlucha",
+      "level": 65,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "unburden",
+      "heldItem": "cobblemon:sitrus_berry",
+      "moveset": [
+        "swordsdance",
+        "closecombat",
+        "acrobatics",
+        "stoneedge"
+      ]
+    },
+    {
+      "species": "noivern",
+      "level": 65,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "infiltrator",
+      "heldItem": "cobblemon:choice_specs",
+      "moveset": [
+        "dracometeor",
+        "hurricane",
+        "flamethrower",
+        "uturn"
+      ]
+    },
+    {
+      "species": "goodra",
+      "level": 65,
+      "nature": "modest",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 4,
+        "spa": 252,
+        "spd": 0,
+        "spe": 0
+      },
+      "ability": "sapsipper",
+      "heldItem": "cobblemon:assault_vest",
+      "moveset": [
+        "dracometeor",
+        "fireblast",
+        "thunderbolt",
+        "sludgewave"
+      ]
+    }
+  ]
+}

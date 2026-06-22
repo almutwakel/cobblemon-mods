@@ -1,0 +1,31 @@
+{
+  "battleCooldownTicks": 240,
+  "biomeTagBlacklist": [
+    "is_void",
+    "is_nether",
+    "is_end",
+    "is_water",
+    "is_underground"
+  ],
+  "biomeTagWhitelist": [
+    "is_peak",
+    "is_hill",
+    "is_mountain"
+  ],
+  "maxTrainerDefeats": 1,
+  "maxTrainerWins": -1,
+  "optional": false,
+  "requiredDefeats": [
+    [
+      "pokemon_trainer_cedric_0445",
+      "pokemon_trainer_cedric_0446",
+      "pokemon_trainer_cedric_0447"
+    ]
+  ],
+  "series": [
+    "bdsp"
+  ],
+  "signatureItem": "cobblemon:black_belt",
+  "spawnWeightFactor": 0.0,
+  "type": "leader"
+}

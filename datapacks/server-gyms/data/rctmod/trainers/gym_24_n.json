@@ -1,0 +1,194 @@
+{
+  "name": "N",
+  "identity": "Team Plasma King",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "zekrom",
+      "level": 70,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "teravolt",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "dragondance",
+        "boltstrike",
+        "outrage",
+        "roost"
+      ]
+    },
+    {
+      "species": "heatran",
+      "level": 70,
+      "nature": "calm",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 4,
+        "spa": 0,
+        "spd": 252,
+        "spe": 0
+      },
+      "ability": "flashfire",
+      "heldItem": "cobblemon:leftovers",
+      "moveset": [
+        "magmastorm",
+        "earthpower",
+        "stealthrock",
+        "taunt"
+      ]
+    },
+    {
+      "species": "landorus",
+      "level": 70,
+      "nature": "impish",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 252,
+        "spa": 0,
+        "spd": 4,
+        "spe": 0
+      },
+      "form": "therian",
+      "ability": "intimidate",
+      "heldItem": "cobblemon:leftovers",
+      "moveset": [
+        "earthquake",
+        "uturn",
+        "stoneedge",
+        "defog"
+      ]
+    },
+    {
+      "species": "tapukoko",
+      "level": 70,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "electricsurge",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "thunderbolt",
+        "dazzlinggleam",
+        "uturn",
+        "roost"
+      ]
+    },
+    {
+      "species": "zoroark",
+      "level": 70,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "illusion",
+      "heldItem": "cobblemon:choice_specs",
+      "moveset": [
+        "darkpulse",
+        "flamethrower",
+        "focusblast",
+        "sludgebomb"
+      ]
+    },
+    {
+      "species": "rayquaza",
+      "level": 70,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "form": "mega",
+      "ability": "airlock",
+      "moveset": [
+        "dragonascent",
+        "dragondance",
+        "earthquake",
+        "extremespeed"
+      ]
+    }
+  ],
+  "textureResource": "rctmod:textures/trainers/single/gym_24_n.png"
+}

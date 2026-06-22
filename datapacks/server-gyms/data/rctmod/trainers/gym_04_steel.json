@@ -1,0 +1,164 @@
+{
+  "name": "Jarvis",
+  "identity": "Steel",
+  "textureResource": "rctmod:textures/trainers/single/type_steel.png",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "skarmory",
+      "level": 30,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "sturdy",
+      "heldItem": "cobblemon:leftovers",
+      "moveset": [
+        "spikes",
+        "whirlwind",
+        "roost",
+        "bravebird"
+      ]
+    },
+    {
+      "species": "ferroseed",
+      "level": 30,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "ironbarbs",
+      "heldItem": "cobblemon:eviolite",
+      "moveset": [
+        "stealthrock",
+        "leechseed",
+        "thunderwave",
+        "gyroball"
+      ]
+    },
+    {
+      "species": "scizor",
+      "level": 30,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "technician",
+      "heldItem": "",
+      "moveset": [
+        "bulletpunch",
+        "uturn",
+        "superpower",
+        "pursuit"
+      ]
+    },
+    {
+      "species": "metang",
+      "level": 30,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "clearbody",
+      "heldItem": "",
+      "moveset": [
+        "meteormash",
+        "zenheadbutt",
+        "bulletpunch",
+        "icepunch"
+      ]
+    },
+    {
+      "species": "lairon",
+      "level": 30,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "rockhead",
+      "heldItem": "",
+      "moveset": [
+        "ironhead",
+        "rockslide",
+        "earthquake",
+        "stealthrock"
+      ]
+    }
+  ]
+}

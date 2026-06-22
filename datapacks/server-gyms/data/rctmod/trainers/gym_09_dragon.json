@@ -1,0 +1,193 @@
+{
+  "name": "Quinn",
+  "identity": "Dragon",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "garchomp",
+      "level": 55,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "roughskin",
+      "heldItem": "cobblemon:rocky_helmet",
+      "moveset": [
+        "stealthrock",
+        "swordsdance",
+        "earthquake",
+        "scaleshot"
+      ]
+    },
+    {
+      "species": "salamence",
+      "level": 55,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "moxie",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "dragondance",
+        "dualwingbeat",
+        "earthquake",
+        "dragonclaw"
+      ]
+    },
+    {
+      "species": "haxorus",
+      "level": 55,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "moldbreaker",
+      "heldItem": "cobblemon:choice_scarf",
+      "moveset": [
+        "outrage",
+        "closecombat",
+        "earthquake",
+        "firstimpression"
+      ]
+    },
+    {
+      "species": "kommoo",
+      "level": 55,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "bulletproof",
+      "heldItem": "",
+      "moveset": [
+        "stealthrock",
+        "bodypress",
+        "dragontail",
+        "toxic"
+      ]
+    },
+    {
+      "species": "goodra",
+      "level": 55,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "sapsipper",
+      "heldItem": "",
+      "moveset": [
+        "dracometeor",
+        "sludgebomb",
+        "flamethrower",
+        "thunderbolt"
+      ]
+    },
+    {
+      "species": "kingdra",
+      "level": 55,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "sniper",
+      "heldItem": "",
+      "moveset": [
+        "focusenergy",
+        "dracometeor",
+        "hydropump",
+        "icebeam"
+      ]
+    }
+  ],
+  "textureResource": "rctmod:textures/trainers/single/type_dragon.png"
+}

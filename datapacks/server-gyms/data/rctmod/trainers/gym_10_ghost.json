@@ -1,0 +1,193 @@
+{
+  "name": "Grimm",
+  "identity": "Ghost",
+  "textureResource": "rctmod:textures/trainers/single/type_ghost.png",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "sableye",
+      "level": 60,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "prankster",
+      "heldItem": "cobblemon:leftovers",
+      "moveset": [
+        "willowisp",
+        "recover",
+        "knockoff",
+        "taunt"
+      ]
+    },
+    {
+      "species": "gengar",
+      "level": 60,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "cursedbody",
+      "heldItem": "cobblemon:black_sludge",
+      "moveset": [
+        "substitute",
+        "disable",
+        "shadowball",
+        "focusblast"
+      ]
+    },
+    {
+      "species": "aegislash",
+      "level": 60,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "stancechange",
+      "heldItem": "cobblemon:weakness_policy",
+      "moveset": [
+        "kingsshield",
+        "swordsdance",
+        "shadowsneak",
+        "sacredsword"
+      ]
+    },
+    {
+      "species": "dusclops",
+      "level": 60,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "pressure",
+      "heldItem": "",
+      "moveset": [
+        "willowisp",
+        "seismictoss",
+        "painsplit",
+        "nightshade"
+      ]
+    },
+    {
+      "species": "mimikyu",
+      "level": 60,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "disguise",
+      "heldItem": "",
+      "moveset": [
+        "swordsdance",
+        "shadowsneak",
+        "playrough",
+        "shadowclaw"
+      ]
+    },
+    {
+      "species": "annihilape",
+      "level": 60,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "defiant",
+      "heldItem": "",
+      "moveset": [
+        "bulkup",
+        "drainpunch",
+        "ragefist",
+        "shadowclaw"
+      ]
+    }
+  ]
+}

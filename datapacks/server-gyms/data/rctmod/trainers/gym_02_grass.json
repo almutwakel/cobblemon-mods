@@ -1,0 +1,106 @@
+{
+  "name": "Gardenia",
+  "identity": "Grass",
+  "textureResource": "rctmod:textures/trainers/single/type_grass.png",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "cottonee",
+      "level": 20,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "prankster",
+      "heldItem": "cobblemon:eviolite",
+      "moveset": [
+        "leechseed",
+        "encore",
+        "stunspore",
+        "gigadrain"
+      ]
+    },
+    {
+      "species": "servine",
+      "level": 20,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "contrary",
+      "heldItem": "",
+      "moveset": [
+        "leafstorm",
+        "glare",
+        "gigadrain",
+        "hiddenpower"
+      ]
+    },
+    {
+      "species": "shroomish",
+      "level": 20,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "effectspore",
+      "heldItem": "",
+      "moveset": [
+        "spore",
+        "bulletseed",
+        "drainpunch",
+        "rocktomb"
+      ]
+    }
+  ]
+}

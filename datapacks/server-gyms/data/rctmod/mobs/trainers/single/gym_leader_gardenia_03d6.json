@@ -1,0 +1,26 @@
+{
+  "battleCooldownTicks": 240,
+  "biomeTagBlacklist": [
+    "is_void",
+    "is_nether",
+    "is_end"
+  ],
+  "biomeTagWhitelist": [
+    "is_dense_vegetation",
+    "is_lush"
+  ],
+  "maxTrainerDefeats": 1,
+  "maxTrainerWins": -1,
+  "optional": false,
+  "requiredDefeats": [
+    [
+      "commander_jupiter_041d"
+    ]
+  ],
+  "series": [
+    "bdsp"
+  ],
+  "signatureItem": "minecraft:sunflower",
+  "spawnWeightFactor": 0.0,
+  "type": "leader"
+}

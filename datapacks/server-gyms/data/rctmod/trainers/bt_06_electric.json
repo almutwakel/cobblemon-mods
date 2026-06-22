@@ -1,0 +1,199 @@
+{
+  "name": "Stan",
+  "identity": "Electric",
+  "textureResource": "rctmod:textures/trainers/single/type_electric.png",
+  "ai": {
+    "type": "rb",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "galvantula",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "compoundeyes",
+      "moveset": [
+        "stickyweb",
+        "thunder",
+        "bugbuzz",
+        "energyball"
+      ],
+      "heldItem": "cobblemon:focus_sash"
+    },
+    {
+      "species": "electrode",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "static",
+      "moveset": [
+        "voltswitch",
+        "gigadrain",
+        "leafstorm",
+        "electroball"
+      ],
+      "heldItem": "cobblemon:life_orb",
+      "aspects": [
+        "hisuian"
+      ]
+    },
+    {
+      "species": "rotom",
+      "aspects": [
+        "wash-appliance"
+      ],
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "levitate",
+      "moveset": [
+        "hydropump",
+        "voltswitch",
+        "thunderwave",
+        "painsplit"
+      ],
+      "heldItem": "cobblemon:leftovers"
+    },
+    {
+      "species": "eelektross",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "levitate",
+      "moveset": [
+        "coil",
+        "supercellslam",
+        "drainpunch",
+        "dragonclaw"
+      ],
+      "heldItem": "cobblemon:leftovers"
+    },
+    {
+      "species": "magnezone",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "analytic",
+      "moveset": [
+        "thunderbolt",
+        "flashcannon",
+        "voltswitch",
+        "bodypress"
+      ],
+      "heldItem": "cobblemon:assault_vest"
+    },
+    {
+      "species": "pikachu",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "lightningrod",
+      "moveset": [
+        "thunderbolt",
+        "surf",
+        "alluringvoice",
+        "volttackle"
+      ],
+      "heldItem": "cobblemon:light_ball"
+    }
+  ]
+}

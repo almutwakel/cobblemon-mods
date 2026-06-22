@@ -1,0 +1,193 @@
+{
+  "name": "Juniper",
+  "identity": "Psychic",
+  "textureResource": "rctmod:textures/trainers/single/type_psychic.png",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "slowbro",
+      "level": 50,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "regenerator",
+      "heldItem": "cobblemon:heavy_duty_boots",
+      "moveset": [
+        "futuresight",
+        "teleport",
+        "scald",
+        "slackoff"
+      ]
+    },
+    {
+      "species": "reuniclus",
+      "level": 50,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "magicguard",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "trickroom",
+        "psyshock",
+        "focusblast",
+        "shadowball"
+      ]
+    },
+    {
+      "species": "hatterene",
+      "level": 50,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "magicbounce",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "trickroom",
+        "psychic",
+        "dazzlinggleam",
+        "mysticalfire"
+      ]
+    },
+    {
+      "species": "alakazam",
+      "level": 50,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "magicguard",
+      "heldItem": "",
+      "moveset": [
+        "nastyplot",
+        "psychic",
+        "shadowball",
+        "focusblast"
+      ]
+    },
+    {
+      "species": "bronzong",
+      "level": 50,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "levitate",
+      "heldItem": "",
+      "moveset": [
+        "stealthrock",
+        "trickroom",
+        "gyroball",
+        "toxic"
+      ]
+    },
+    {
+      "species": "medicham",
+      "level": 50,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "purepower",
+      "heldItem": "",
+      "moveset": [
+        "highjumpkick",
+        "zenheadbutt",
+        "icepunch",
+        "bulletpunch"
+      ]
+    }
+  ]
+}

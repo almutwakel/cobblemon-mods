@@ -1,0 +1,193 @@
+{
+  "name": "Flik",
+  "identity": "Bug",
+  "ai": {
+    "type": "rb",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "araquanid",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "waterbubble",
+      "moveset": [
+        "liquidation",
+        "leechlife",
+        "mirrorcoat",
+        "stickyweb"
+      ],
+      "heldItem": "cobblemon:mystic_water"
+    },
+    {
+      "species": "shedinja",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "wonderguard",
+      "moveset": [
+        "swordsdance",
+        "xscissor",
+        "shadowclaw",
+        "suckerpunch"
+      ],
+      "heldItem": "cobblemon:focus_sash"
+    },
+    {
+      "species": "scizor",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "technician",
+      "moveset": [
+        "uturn",
+        "bulletpunch",
+        "closecombat",
+        "dualwingbeat"
+      ],
+      "heldItem": "cobblemon:choice_band"
+    },
+    {
+      "species": "vikavolt",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "levitate",
+      "moveset": [
+        "thunderbolt",
+        "bugbuzz",
+        "energyball",
+        "voltswitch"
+      ],
+      "heldItem": "cobblemon:choice_specs"
+    },
+    {
+      "species": "heracross",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "guts",
+      "moveset": [
+        "megahorn",
+        "closecombat",
+        "rockslide",
+        "earthquake"
+      ],
+      "heldItem": "cobblemon:flame_orb"
+    },
+    {
+      "species": "volcarona",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "flamebody",
+      "moveset": [
+        "quiverdance",
+        "bugbuzz",
+        "fierydance",
+        "psychic"
+      ],
+      "heldItem": "cobblemon:heavy_duty_boots"
+    }
+  ],
+  "textureResource": "rctmod:textures/trainers/single/type_bug.png"
+}

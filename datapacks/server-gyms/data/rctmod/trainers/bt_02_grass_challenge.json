@@ -1,0 +1,198 @@
+{
+  "name": "Gardenia",
+  "identity": "Grass",
+  "textureResource": "rctmod:textures/trainers/single/type_grass.png",
+  "ai": {
+    "type": "pe",
+    "data": {
+      "temperature": 0.5
+    }
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "rillaboom",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "grassysurge",
+      "moveset": [
+        "drumbeating",
+        "highhorsepower",
+        "uturn",
+        "grassyglide"
+      ],
+      "heldItem": "cobblemon:assault_vest"
+    },
+    {
+      "species": "amoonguss",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "regenerator",
+      "moveset": [
+        "spore",
+        "gigadrain",
+        "sludgebomb",
+        "hex"
+      ],
+      "heldItem": "cobblemon:black_sludge"
+    },
+    {
+      "species": "ferrothorn",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "ironbarbs",
+      "moveset": [
+        "powerwhip",
+        "gyroball",
+        "bodypress",
+        "leechseed"
+      ],
+      "heldItem": "cobblemon:rocky_helmet"
+    },
+    {
+      "species": "sinistcha",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "heatproof",
+      "moveset": [
+        "matchagotcha",
+        "strengthsap",
+        "shadowball",
+        "scald"
+      ],
+      "heldItem": "cobblemon:leftovers"
+    },
+    {
+      "species": "arboliva",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "harvest",
+      "moveset": [
+        "energyball",
+        "hypervoice",
+        "earthpower",
+        "substitute"
+      ],
+      "heldItem": "cobblemon:sitrus_berry"
+    },
+    {
+      "species": "rotom",
+      "aspects": [
+        "mow-appliance"
+      ],
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "levitate",
+      "moveset": [
+        "thunderbolt",
+        "leafstorm",
+        "voltswitch",
+        "trick"
+      ],
+      "heldItem": "cobblemon:choice_scarf"
+    }
+  ]
+}

@@ -1,0 +1,193 @@
+{
+  "name": "Zuko",
+  "identity": "Fire",
+  "textureResource": "rctmod:textures/trainers/single/type_fire.png",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "ninetales",
+      "level": 35,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "drought",
+      "heldItem": "cobblemon:heat_rock",
+      "moveset": [
+        "fireblast",
+        "solarbeam",
+        "willowisp",
+        "nastyplot"
+      ]
+    },
+    {
+      "species": "arcanine",
+      "level": 35,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "intimidate",
+      "heldItem": "cobblemon:choice_band",
+      "moveset": [
+        "flareblitz",
+        "extremespeed",
+        "wildcharge",
+        "closecombat"
+      ]
+    },
+    {
+      "species": "charmeleon",
+      "level": 35,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "solarpower",
+      "heldItem": "cobblemon:eviolite",
+      "moveset": [
+        "fireblast",
+        "dragonpulse",
+        "solarbeam",
+        "focusblast"
+      ]
+    },
+    {
+      "species": "houndoom",
+      "level": 35,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "flashfire",
+      "heldItem": "",
+      "moveset": [
+        "nastyplot",
+        "darkpulse",
+        "fireblast",
+        "solarbeam"
+      ]
+    },
+    {
+      "species": "centiskorch",
+      "level": 35,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "flashfire",
+      "heldItem": "",
+      "moveset": [
+        "firelash",
+        "leechlife",
+        "coil",
+        "powerwhip"
+      ]
+    },
+    {
+      "species": "torkoal",
+      "level": 35,
+      "nature": "hardy",
+      "ivs": {
+        "hp": 15,
+        "atk": 15,
+        "def": 15,
+        "spa": 15,
+        "spd": 15,
+        "spe": 15
+      },
+      "evs": {
+        "hp": 85,
+        "atk": 85,
+        "def": 85,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      },
+      "ability": "drought",
+      "heldItem": "",
+      "moveset": [
+        "rapidspin",
+        "lavaplume",
+        "yawn",
+        "stealthrock"
+      ]
+    }
+  ]
+}

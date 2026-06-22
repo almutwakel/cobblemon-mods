@@ -1,0 +1,195 @@
+{
+  "name": "Quinn",
+  "identity": "Dragon",
+  "ai": {
+    "type": "pe",
+    "data": {
+      "temperature": 0.5
+    }
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "cyclizar",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "regenerator",
+      "moveset": [
+        "shedtail",
+        "outrage",
+        "return",
+        "uturn"
+      ],
+      "heldItem": "cobblemon:choice_scarf"
+    },
+    {
+      "species": "kommoo",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "soundproof",
+      "moveset": [
+        "clangoroussoul",
+        "clangingscales",
+        "aurasphere",
+        "flashcannon"
+      ],
+      "heldItem": "cobblemon:throat_spray"
+    },
+    {
+      "species": "dracovish",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "strongjaw",
+      "moveset": [
+        "fishiousrend",
+        "outrage",
+        "psychicfangs",
+        "crunch"
+      ],
+      "heldItem": "cobblemon:choice_scarf"
+    },
+    {
+      "species": "dragonite",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "multiscale",
+      "moveset": [
+        "dragondance",
+        "dragonclaw",
+        "earthquake",
+        "icespinner"
+      ],
+      "heldItem": "cobblemon:heavy_duty_boots"
+    },
+    {
+      "species": "dragalge",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "adaptability",
+      "moveset": [
+        "dracometeor",
+        "sludgewave",
+        "focusblast",
+        "flipturn"
+      ],
+      "heldItem": "cobblemon:assault_vest"
+    },
+    {
+      "species": "dragapult",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "clearbody",
+      "moveset": [
+        "dragondarts",
+        "phantomforce",
+        "fireblast",
+        "thunderbolt"
+      ],
+      "heldItem": "cobblemon:life_orb"
+    }
+  ],
+  "textureResource": "rctmod:textures/trainers/single/type_dragon.png"
+}

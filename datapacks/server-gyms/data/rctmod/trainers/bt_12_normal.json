@@ -1,0 +1,196 @@
+{
+  "name": "Penny",
+  "identity": "Normal",
+  "ai": {
+    "type": "rb",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "smeargle",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "owntempo",
+      "moveset": [
+        "spore",
+        "ceaselessedge",
+        "stoneaxe",
+        "memento"
+      ],
+      "heldItem": "cobblemon:focus_sash"
+    },
+    {
+      "species": "zoroark",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "illusion",
+      "moveset": [
+        "nastyplot",
+        "bittermalice",
+        "hypervoice",
+        "psychic"
+      ],
+      "heldItem": "cobblemon:life_orb",
+      "aspects": [
+        "hisuian"
+      ]
+    },
+    {
+      "species": "ursaluna",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "guts",
+      "moveset": [
+        "facade",
+        "earthquake",
+        "playrough",
+        "seedbomb"
+      ],
+      "heldItem": "cobblemon:flame_orb"
+    },
+    {
+      "species": "farigiraf",
+      "level": 50,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "cudchew",
+      "moveset": [
+        "twinbeam",
+        "dazzlinggleam",
+        "thunderbolt",
+        "earthquake"
+      ],
+      "heldItem": "cobblemon:sitrus_berry"
+    },
+    {
+      "species": "staraptor",
+      "level": 50,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 0,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 4,
+        "spe": 252
+      },
+      "ability": "intimidate",
+      "moveset": [
+        "acrobatics",
+        "closecombat",
+        "quickattack",
+        "roost"
+      ],
+      "heldItem": "cobblemon:flying_gem"
+    },
+    {
+      "species": "snorlax",
+      "level": 50,
+      "nature": "bold",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 252,
+        "atk": 0,
+        "def": 128,
+        "spa": 0,
+        "spd": 128,
+        "spe": 0
+      },
+      "ability": "thickfat",
+      "moveset": [
+        "return",
+        "curse",
+        "rest",
+        "sleeptalk"
+      ],
+      "heldItem": "cobblemon:leftovers"
+    }
+  ],
+  "textureResource": "rctmod:textures/trainers/single/type_normal.png"
+}

@@ -1,0 +1,193 @@
+{
+  "name": "Elite Four Lance",
+  "identity": "Dragon Boss",
+  "textureResource": "rctmod:textures/trainers/single/gym_23_lance.png",
+  "ai": {
+    "type": "pe",
+    "data": {}
+  },
+  "battleFormat": "GEN_9_SINGLES",
+  "battleRules": {
+    "maxItemUses": 999,
+    "adjustPlayerLevels": true,
+    "adjustNPCLevels": false,
+    "healPlayers": false
+  },
+  "bag": [],
+  "team": [
+    {
+      "species": "dragapult",
+      "level": 65,
+      "nature": "timid",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "infiltrator",
+      "heldItem": "cobblemon:choice_specs",
+      "moveset": [
+        "shadowball",
+        "dracometeor",
+        "fireblast",
+        "uturn"
+      ]
+    },
+    {
+      "species": "dragonite",
+      "level": 65,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "multiscale",
+      "heldItem": "cobblemon:weakness_policy",
+      "moveset": [
+        "dragondance",
+        "extremespeed",
+        "earthquake",
+        "outrage"
+      ]
+    },
+    {
+      "species": "garchomp",
+      "level": 65,
+      "nature": "jolly",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "roughskin",
+      "heldItem": "cobblemon:rocky_helmet",
+      "moveset": [
+        "swordsdance",
+        "scaleshot",
+        "earthquake",
+        "stoneedge"
+      ]
+    },
+    {
+      "species": "hydreigon",
+      "level": 65,
+      "nature": "modest",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "levitate",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "nastyplot",
+        "darkpulse",
+        "dracometeor",
+        "fireblast"
+      ]
+    },
+    {
+      "species": "haxorus",
+      "level": 65,
+      "nature": "adamant",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 252,
+        "def": 0,
+        "spa": 0,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "moldbreaker",
+      "heldItem": "cobblemon:choice_scarf",
+      "moveset": [
+        "outrage",
+        "closecombat",
+        "earthquake",
+        "firstimpression"
+      ]
+    },
+    {
+      "species": "eternatus",
+      "level": 65,
+      "nature": "modest",
+      "ivs": {
+        "hp": 31,
+        "atk": 31,
+        "def": 31,
+        "spa": 31,
+        "spd": 31,
+        "spe": 31
+      },
+      "evs": {
+        "hp": 4,
+        "atk": 0,
+        "def": 0,
+        "spa": 252,
+        "spd": 0,
+        "spe": 252
+      },
+      "ability": "pressure",
+      "heldItem": "cobblemon:life_orb",
+      "moveset": [
+        "dragonpulse",
+        "flamethrower",
+        "sludgebomb",
+        "recover"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "textureResource": "rctmod:textures/trainers/single/type_fairy.png",
+  "type": "leader",
+  "spawnWeightFactor": 0.0,
+  "battleCooldownTicks": 240,
+  "maxTrainerDefeats": 1,
+  "maxTrainerWins": -1,
+  "optional": false,
+  "biomeTagWhitelist": [],
+  "biomeTagBlacklist": []
+}
